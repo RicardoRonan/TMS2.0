@@ -19,7 +19,7 @@
       <div class="container mx-auto px-4">
         <div class="max-w-6xl mx-auto">
           <!-- Stats -->
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
             <HIGCard>
               <div class="p-6 text-center">
                 <div class="text-3xl font-bold text-primary-500 mb-2">{{ stats.blogs }}</div>
@@ -48,12 +48,13 @@
 
           <!-- Tabs -->
           <div class="mb-8">
-            <div class="flex space-x-4 border-b border-border-primary overflow-x-auto">
+            <div class="flex space-x-2 md:space-x-4 border-b border-border-primary overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
               <button
                 v-for="tab in tabs"
                 :key="tab.id"
                 :class="tabButtonClasses(tab.id)"
                 @click="activeTab = tab.id"
+                class="whitespace-nowrap px-3 md:px-4 py-2 text-sm md:text-base"
               >
                 {{ tab.label }}
               </button>
@@ -64,13 +65,13 @@
           <div>
             <!-- Tutorials Management -->
             <div v-if="activeTab === 'tutorials'" class="space-y-6">
-              <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-text-primary">Tutorials Management</h2>
-                <div class="flex space-x-2">
-                  <HIGButton variant="secondary" @click="openCreateCategoryModal">
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                <h2 class="text-xl sm:text-2xl font-bold text-text-primary">Tutorials Management</h2>
+                <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  <HIGButton variant="secondary" @click="openCreateCategoryModal" class="w-full sm:w-auto">
                     + New Category
                   </HIGButton>
-                  <HIGButton variant="primary" @click="openCreatePageModal">
+                  <HIGButton variant="primary" @click="openCreatePageModal" class="w-full sm:w-auto">
                     + New Page
                   </HIGButton>
                 </div>
@@ -127,14 +128,14 @@
                 </div>
                 <div v-else-if="pages.length > 0" class="space-y-4">
                   <HIGCard v-for="page in pages" :key="page.id" class="hover:shadow-hig-lg transition-shadow">
-                    <div class="p-6">
-                      <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                          <div class="flex items-center space-x-3 mb-2">
-                            <h4 class="text-lg font-semibold text-text-primary">{{ page.title }}</h4>
+                    <div class="p-4 md:p-6">
+                      <div class="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4">
+                        <div class="flex-1 min-w-0">
+                          <div class="flex flex-wrap items-center gap-2 mb-2">
+                            <h4 class="text-base sm:text-lg font-semibold text-text-primary break-words">{{ page.title }}</h4>
                             <span 
                               :class="[
-                                'px-2 py-1 rounded text-xs font-medium',
+                                'px-2 py-1 rounded text-xs font-medium whitespace-nowrap',
                                 page.published 
                                   ? 'bg-success-500/20 text-success-500' 
                                   : 'bg-warning-500/20 text-warning-500'
@@ -143,7 +144,7 @@
                               {{ page.published ? 'Published' : 'Draft' }}
                             </span>
                           </div>
-                          <div class="flex items-center space-x-2 text-sm text-text-tertiary mb-2">
+                          <div class="flex flex-wrap items-center gap-2 text-sm text-text-tertiary mb-2">
                             <span>Category: {{ getCategoryName(page.category_id) }}</span>
                             <span>•</span>
                             <span>Order: {{ page.page_order }}</span>
@@ -151,11 +152,11 @@
                             <span>{{ formatDate(page.created_at) }}</span>
                           </div>
                         </div>
-                        <div class="flex items-center space-x-2 ml-4">
-                          <HIGButton variant="tertiary" size="sm" @click="editPage(page)">
+                        <div class="flex items-center space-x-2 sm:ml-4 w-full sm:w-auto">
+                          <HIGButton variant="tertiary" size="sm" @click="editPage(page)" class="flex-1 sm:flex-none">
                             Edit
                           </HIGButton>
-                          <HIGButton variant="danger" size="sm" @click="confirmDeletePage(page)">
+                          <HIGButton variant="danger" size="sm" @click="confirmDeletePage(page)" class="flex-1 sm:flex-none">
                             Delete
                           </HIGButton>
                         </div>
@@ -173,9 +174,9 @@
 
             <!-- Blog Management -->
             <div v-if="activeTab === 'blog'" class="space-y-6">
-              <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-text-primary">Blog Posts</h2>
-                <HIGButton variant="primary" @click="openCreateModal">
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                <h2 class="text-xl sm:text-2xl font-bold text-text-primary">Blog Posts</h2>
+                <HIGButton variant="primary" @click="openCreateModal" class="w-full sm:w-auto">
                   + New Post
                 </HIGButton>
               </div>
@@ -213,14 +214,14 @@
               <!-- Blog List -->
               <div v-else-if="filteredBlogs.length > 0" class="space-y-4">
                 <HIGCard v-for="blog in filteredBlogs" :key="blog.id" class="hover:shadow-hig-lg transition-shadow">
-                  <div class="p-6">
-                    <div class="flex items-start justify-between">
-                      <div class="flex-1">
-                        <div class="flex items-center space-x-3 mb-2">
-                          <h3 class="text-xl font-semibold text-text-primary">{{ blog.title }}</h3>
+                  <div class="p-4 md:p-6">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4">
+                      <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                          <h3 class="text-lg sm:text-xl font-semibold text-text-primary break-words">{{ blog.title }}</h3>
                           <span 
                             :class="[
-                              'px-2 py-1 rounded text-xs font-medium',
+                              'px-2 py-1 rounded text-xs font-medium whitespace-nowrap',
                               blog.published 
                                 ? 'bg-success-500/20 text-success-500' 
                                 : 'bg-warning-500/20 text-warning-500'
@@ -230,7 +231,7 @@
                           </span>
                         </div>
                         <p class="text-text-secondary mb-3 line-clamp-2">{{ blog.excerpt || 'No excerpt' }}</p>
-                        <div class="flex items-center space-x-4 text-sm text-text-tertiary">
+                        <div class="flex flex-wrap items-center gap-2 text-sm text-text-tertiary">
                           <span>{{ blog.category || 'Uncategorized' }}</span>
                           <span>•</span>
                           <span>{{ formatDate(blog.created_at) }}</span>
@@ -238,11 +239,11 @@
                           <span v-if="blog.read_time">{{ blog.read_time }} min read</span>
                         </div>
                       </div>
-                      <div class="flex items-center space-x-2 ml-4">
-                        <HIGButton variant="tertiary" size="sm" @click="editBlog(blog)">
+                      <div class="flex items-center space-x-2 sm:ml-4 w-full sm:w-auto">
+                        <HIGButton variant="tertiary" size="sm" @click="editBlog(blog)" class="flex-1 sm:flex-none">
                           Edit
                         </HIGButton>
-                        <HIGButton variant="danger" size="sm" @click="confirmDelete(blog)">
+                        <HIGButton variant="danger" size="sm" @click="confirmDelete(blog)" class="flex-1 sm:flex-none">
                           Delete
                         </HIGButton>
                       </div>
@@ -264,11 +265,11 @@
               </HIGCard>
             </div>
 
-            <!-- Tools Management -->
-            <div v-if="activeTab === 'tools'" class="space-y-6">
-              <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-text-primary">Tools</h2>
-                <HIGButton variant="primary" @click="openCreateToolModal">
+              <!-- Tools Management -->
+              <div v-if="activeTab === 'tools'" class="space-y-6">
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                <h2 class="text-xl sm:text-2xl font-bold text-text-primary">Tools</h2>
+                <HIGButton variant="primary" @click="openCreateToolModal" class="w-full sm:w-auto">
                   + New Tool
                 </HIGButton>
               </div>
@@ -303,28 +304,28 @@
 
               <div v-else-if="filteredTools.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <HIGCard v-for="tool in filteredTools" :key="tool.id" class="hover:shadow-hig-lg transition-shadow">
-                  <div class="p-6">
+                  <div class="p-4 md:p-6">
                     <div class="flex items-start justify-between mb-3">
-                      <div class="flex-1">
-                        <div class="flex items-center space-x-2 mb-2">
-                          <h4 class="text-lg font-semibold text-text-primary">{{ tool.name }}</h4>
-                          <span v-if="tool.is_featured" class="px-2 py-1 rounded text-xs font-medium bg-primary-500/20 text-primary-500">
+                      <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                          <h4 class="text-base sm:text-lg font-semibold text-text-primary break-words">{{ tool.name }}</h4>
+                          <span v-if="tool.is_featured" class="px-2 py-1 rounded text-xs font-medium bg-primary-500/20 text-primary-500 whitespace-nowrap">
                             Featured
                           </span>
                         </div>
                         <p class="text-text-secondary text-sm line-clamp-2 mb-2">{{ tool.description || 'No description' }}</p>
-                        <div class="flex items-center space-x-2 text-xs text-text-tertiary">
+                        <div class="flex flex-wrap items-center gap-2 text-xs text-text-tertiary">
                           <span>{{ tool.category || 'Uncategorized' }}</span>
                           <span>•</span>
-                          <a :href="tool.url" target="_blank" class="text-primary-500 hover:text-primary-600">Visit</a>
+                          <a :href="tool.url" target="_blank" class="text-primary-500 hover:text-primary-600 break-all">Visit</a>
                         </div>
                       </div>
                     </div>
                     <div class="flex items-center space-x-2 mt-4 pt-4 border-t border-border-primary">
-                      <HIGButton variant="tertiary" size="sm" @click="editTool(tool)">
+                      <HIGButton variant="tertiary" size="sm" @click="editTool(tool)" class="flex-1 sm:flex-none">
                         Edit
                       </HIGButton>
-                      <HIGButton variant="danger" size="sm" @click="confirmDeleteTool(tool)">
+                      <HIGButton variant="danger" size="sm" @click="confirmDeleteTool(tool)" class="flex-1 sm:flex-none">
                         Delete
                       </HIGButton>
                     </div>
@@ -339,10 +340,10 @@
               </HIGCard>
             </div>
 
-            <!-- Users Management -->
+              <!-- Users Management -->
             <div v-if="activeTab === 'users'" class="space-y-6">
-              <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-text-primary">Users</h2>
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                <h2 class="text-xl sm:text-2xl font-bold text-text-primary">Users</h2>
               </div>
 
               <!-- Search -->
@@ -361,32 +362,32 @@
 
               <div v-else-if="filteredUsers.length > 0" class="space-y-4">
                 <HIGCard v-for="user in filteredUsers" :key="user.id" class="hover:shadow-hig-lg transition-shadow">
-                  <div class="p-6">
-                    <div class="flex items-start justify-between">
-                      <div class="flex items-start space-x-4 flex-1">
-                        <div v-if="user.photo_url" class="w-12 h-12 rounded-full overflow-hidden bg-bg-tertiary">
+                  <div class="p-4 md:p-6">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4">
+                      <div class="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
+                        <div v-if="user.photo_url" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-bg-tertiary flex-shrink-0">
                           <img :src="user.photo_url" :alt="user.display_name" class="w-full h-full object-cover">
                         </div>
-                        <div v-else class="w-12 h-12 rounded-full bg-bg-tertiary flex items-center justify-center text-text-tertiary">
+                        <div v-else class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-bg-tertiary flex items-center justify-center text-text-tertiary flex-shrink-0">
                           {{ (user.display_name || user.email || 'U')[0].toUpperCase() }}
                         </div>
-                        <div class="flex-1">
-                          <div class="flex items-center space-x-2 mb-1">
-                            <h4 class="text-lg font-semibold text-text-primary">{{ user.display_name || 'No name' }}</h4>
-                            <span v-if="user.is_admin" class="px-2 py-1 rounded text-xs font-medium bg-primary-500/20 text-primary-500">
+                        <div class="flex-1 min-w-0">
+                          <div class="flex flex-wrap items-center gap-2 mb-1">
+                            <h4 class="text-base sm:text-lg font-semibold text-text-primary break-words">{{ user.display_name || 'No name' }}</h4>
+                            <span v-if="user.is_admin" class="px-2 py-1 rounded text-xs font-medium bg-primary-500/20 text-primary-500 whitespace-nowrap">
                               Admin
                             </span>
                           </div>
-                          <p class="text-text-secondary text-sm mb-2">{{ user.email }}</p>
-                          <div class="flex items-center space-x-4 text-xs text-text-tertiary">
+                          <p class="text-text-secondary text-sm mb-2 break-words">{{ user.email }}</p>
+                          <div class="flex flex-wrap items-center gap-2 text-xs text-text-tertiary">
                             <span>Joined: {{ formatDate(user.created_at) }}</span>
                             <span v-if="user.last_login_at">•</span>
                             <span v-if="user.last_login_at">Last login: {{ formatDate(user.last_login_at) }}</span>
                           </div>
                         </div>
                       </div>
-                      <div class="flex items-center space-x-2 ml-4">
-                        <HIGButton variant="tertiary" size="sm" @click="editUser(user)">
+                      <div class="flex items-center space-x-2 sm:ml-4 w-full sm:w-auto">
+                        <HIGButton variant="tertiary" size="sm" @click="editUser(user)" class="flex-1 sm:flex-none">
                           Edit
                         </HIGButton>
                       </div>
@@ -476,7 +477,7 @@
             </div>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <HIGInput
             v-model.number="blogForm.read_time"
             label="Read Time (minutes)"
@@ -495,11 +496,11 @@
             </label>
           </div>
         </div>
-        <div class="flex justify-end space-x-3 pt-4 border-t border-border-primary">
-          <HIGButton variant="tertiary" type="button" @click="closeBlogModal">
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
+          <HIGButton variant="tertiary" type="button" @click="closeBlogModal" class="w-full sm:w-auto">
             Cancel
           </HIGButton>
-          <HIGButton variant="primary" type="submit" :disabled="submitting">
+          <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
             {{ submitting ? 'Saving...' : (editingBlog ? 'Update' : 'Create') }}
           </HIGButton>
         </div>
@@ -516,11 +517,11 @@
         <p class="text-text-primary">
           Are you sure you want to delete "<strong>{{ blogToDelete?.title }}</strong>"? This action cannot be undone.
         </p>
-        <div class="flex justify-end space-x-3 pt-4">
-          <HIGButton variant="tertiary" @click="showDeleteModal = false">
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
+          <HIGButton variant="tertiary" @click="showDeleteModal = false" class="w-full sm:w-auto">
             Cancel
           </HIGButton>
-          <HIGButton variant="danger" @click="handleDeleteBlog" :disabled="deleting">
+          <HIGButton variant="danger" @click="handleDeleteBlog" :disabled="deleting" class="w-full sm:w-auto">
             {{ deleting ? 'Deleting...' : 'Delete' }}
           </HIGButton>
         </div>
@@ -551,7 +552,7 @@
           label="Description"
           placeholder="Brief description"
         />
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-text-primary mb-2">Level</label>
             <select
@@ -586,11 +587,11 @@
             Publish immediately
           </label>
         </div>
-        <div class="flex justify-end space-x-3 pt-4 border-t border-border-primary">
-          <HIGButton variant="tertiary" type="button" @click="closeCategoryModal">
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
+          <HIGButton variant="tertiary" type="button" @click="closeCategoryModal" class="w-full sm:w-auto">
             Cancel
           </HIGButton>
-          <HIGButton variant="primary" type="submit" :disabled="submitting">
+          <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
             {{ submitting ? 'Saving...' : (editingCategory ? 'Update' : 'Create') }}
           </HIGButton>
         </div>
@@ -653,11 +654,11 @@
             Publish immediately
           </label>
         </div>
-        <div class="flex justify-end space-x-3 pt-4 border-t border-border-primary">
-          <HIGButton variant="tertiary" type="button" @click="closePageModal">
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
+          <HIGButton variant="tertiary" type="button" @click="closePageModal" class="w-full sm:w-auto">
             Cancel
           </HIGButton>
-          <HIGButton variant="primary" type="submit" :disabled="submitting">
+          <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
             {{ submitting ? 'Saving...' : (editingPage ? 'Update' : 'Create') }}
           </HIGButton>
         </div>
@@ -735,11 +736,11 @@
             Featured tool
           </label>
         </div>
-        <div class="flex justify-end space-x-3 pt-4 border-t border-border-primary">
-          <HIGButton variant="tertiary" type="button" @click="closeToolModal">
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
+          <HIGButton variant="tertiary" type="button" @click="closeToolModal" class="w-full sm:w-auto">
             Cancel
           </HIGButton>
-          <HIGButton variant="primary" type="submit" :disabled="submitting">
+          <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
             {{ submitting ? 'Saving...' : (editingTool ? 'Update' : 'Create') }}
           </HIGButton>
         </div>
@@ -805,11 +806,11 @@
             Admin privileges
           </label>
         </div>
-        <div class="flex justify-end space-x-3 pt-4 border-t border-border-primary">
-          <HIGButton variant="tertiary" type="button" @click="closeUserModal">
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
+          <HIGButton variant="tertiary" type="button" @click="closeUserModal" class="w-full sm:w-auto">
             Cancel
           </HIGButton>
-          <HIGButton variant="primary" type="submit" :disabled="submitting">
+          <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
             {{ submitting ? 'Saving...' : 'Update' }}
           </HIGButton>
         </div>
@@ -826,11 +827,11 @@
         <p class="text-text-primary">
           Are you sure you want to delete "<strong>{{ categoryToDelete?.title }}</strong>"? This will also delete all pages in this category. This action cannot be undone.
         </p>
-        <div class="flex justify-end space-x-3 pt-4">
-          <HIGButton variant="tertiary" @click="showDeleteCategoryModal = false">
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
+          <HIGButton variant="tertiary" @click="showDeleteCategoryModal = false" class="w-full sm:w-auto">
             Cancel
           </HIGButton>
-          <HIGButton variant="danger" @click="handleDeleteCategory" :disabled="deleting">
+          <HIGButton variant="danger" @click="handleDeleteCategory" :disabled="deleting" class="w-full sm:w-auto">
             {{ deleting ? 'Deleting...' : 'Delete' }}
           </HIGButton>
         </div>
@@ -846,11 +847,11 @@
         <p class="text-text-primary">
           Are you sure you want to delete "<strong>{{ pageToDelete?.title }}</strong>"? This action cannot be undone.
         </p>
-        <div class="flex justify-end space-x-3 pt-4">
-          <HIGButton variant="tertiary" @click="showDeletePageModal = false">
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
+          <HIGButton variant="tertiary" @click="showDeletePageModal = false" class="w-full sm:w-auto">
             Cancel
           </HIGButton>
-          <HIGButton variant="danger" @click="handleDeletePage" :disabled="deleting">
+          <HIGButton variant="danger" @click="handleDeletePage" :disabled="deleting" class="w-full sm:w-auto">
             {{ deleting ? 'Deleting...' : 'Delete' }}
           </HIGButton>
         </div>
@@ -866,11 +867,11 @@
         <p class="text-text-primary">
           Are you sure you want to delete "<strong>{{ toolToDelete?.name }}</strong>"? This action cannot be undone.
         </p>
-        <div class="flex justify-end space-x-3 pt-4">
-          <HIGButton variant="tertiary" @click="showDeleteToolModal = false">
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
+          <HIGButton variant="tertiary" @click="showDeleteToolModal = false" class="w-full sm:w-auto">
             Cancel
           </HIGButton>
-          <HIGButton variant="danger" @click="handleDeleteTool" :disabled="deleting">
+          <HIGButton variant="danger" @click="handleDeleteTool" :disabled="deleting" class="w-full sm:w-auto">
             {{ deleting ? 'Deleting...' : 'Delete' }}
           </HIGButton>
         </div>

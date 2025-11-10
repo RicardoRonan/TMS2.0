@@ -234,30 +234,27 @@ const values = ref([
 const team = ref([
   {
     id: 1,
-    name: 'Alex Chen',
-    role: 'Founder & CEO',
-    bio: 'Full-stack developer with 10+ years of experience building scalable web applications.',
-    twitter: 'https://twitter.com/alexchen',
-    linkedin: 'https://linkedin.com/in/alexchen',
-    github: 'https://github.com/alexchen'
+    name: 'Ricardo Moses',
+    role: 'Co-Founder and Full-Stack Developer',
+    bio: 'Full-stack developer with 3+ years of experience building scalable web applications.',
+    linkedin: 'https://www.linkedin.com/in/the-dev-ricardo/',
+    github: 'https://github.com/RicardoRonan'
   },
   {
     id: 2,
-    name: 'Sarah Johnson',
-    role: 'Head of Design',
-    bio: 'UI/UX designer passionate about creating intuitive and beautiful user experiences.',
-    twitter: 'https://twitter.com/sarahjohnson',
-    linkedin: 'https://linkedin.com/in/sarahjohnson',
-    github: 'https://github.com/sarahjohnson'
+    name: 'Jesse Spence',
+    role: 'Co-Founder and Seo Specialist',
+    bio: 'Seo specialist with 3+ years of experience optimizing websites for search engines.',
+    linkedin: 'https://www.linkedin.com/in/jesse-spence-83606b210/',
+    github: 'https://github.com/JesseSpence'
   },
   {
     id: 3,
-    name: 'Mike Rodriguez',
-    role: 'Lead Developer',
-    bio: 'Backend specialist focused on performance, security, and developer experience.',
-    twitter: 'https://twitter.com/mikerodriguez',
-    linkedin: 'https://linkedin.com/in/mikerodriguez',
-    github: 'https://github.com/mikerodriguez'
+    name: 'Abdus-Samad Charles',
+    role: 'Co-Founder and Seo specialist',
+    bio: 'Seo specialist with 3+ years of experience optimizing websites for search engines.',
+    linkedin: 'https://www.linkedin.com/in/abdus-samad-charles-75036b210/',
+    github: 'https://github.com/Abdus-Samad-Charles'
   }
 ])
 
