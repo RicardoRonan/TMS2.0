@@ -89,10 +89,7 @@
                     <div class="p-6">
                       <div class="flex items-start justify-between mb-3">
                         <div class="flex-1">
-                          <div class="flex items-center space-x-2 mb-2">
-                            <span class="text-2xl">{{ category.icon || '📚' }}</span>
-                            <h4 class="text-lg font-semibold text-text-primary">{{ category.title }}</h4>
-                          </div>
+                          <h4 class="text-lg font-semibold text-text-primary mb-2">{{ category.title }}</h4>
                           <p class="text-text-secondary text-sm line-clamp-2">{{ category.description || 'No description' }}</p>
                           <div class="flex items-center space-x-2 mt-2 text-xs text-text-tertiary">
                             <span>{{ category.level }}</span>
@@ -571,11 +568,6 @@
             placeholder="30"
           />
         </div>
-        <HIGInput
-          v-model="categoryForm.icon"
-          label="Icon (emoji)"
-          placeholder="📚"
-        />
         <div class="flex items-center space-x-2">
           <input
             id="categoryPublished"
@@ -965,7 +957,6 @@ const categoryForm = ref({
   description: '',
   level: 'Beginner',
   duration: 30,
-  icon: '',
   published: false
 })
 
@@ -1578,7 +1569,6 @@ const openCreateCategoryModal = () => {
     description: '',
     level: 'Beginner',
     duration: 30,
-    icon: '',
     published: false
   }
   showCategoryModal.value = true
@@ -1592,7 +1582,6 @@ const editCategory = (category: any) => {
     description: category.description || '',
     level: category.level || 'Beginner',
     duration: category.duration || 30,
-    icon: category.icon || '',
     published: category.published || false
   }
   showCategoryModal.value = true

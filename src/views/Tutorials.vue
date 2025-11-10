@@ -29,18 +29,15 @@
         <div v-else class="space-y-12">
           <div v-for="category in categories" :key="category.category_id" class="mb-12">
             <!-- Category Header -->
-            <div class="flex items-center space-x-3 mb-6">
-              <span class="text-3xl">{{ category.icon || '📚' }}</span>
-              <div>
-                <h2 class="text-2xl font-bold text-text-primary">{{ category.title }}</h2>
-                <p class="text-text-secondary">{{ category.description }}</p>
-                <div class="flex items-center space-x-4 mt-2 text-sm text-text-tertiary">
-                  <span>{{ category.level }}</span>
-                  <span>•</span>
-                  <span>{{ category.duration }} min</span>
-                </div>
+            <div class="mb-6">
+              <h2 class="text-2xl font-bold text-text-primary">{{ category.title }}</h2>
+              <p class="text-text-secondary">{{ category.description }}</p>
+              <div class="flex items-center space-x-4 mt-2 text-sm text-text-tertiary">
+                <span>{{ category.level }}</span>
+                <span>•</span>
+                <span>{{ category.duration }} min</span>
               </div>
-                </div>
+            </div>
 
             <!-- Pages Card -->
             <div v-if="getCategoryPages(category.category_id).length > 0" class="tutorial-card-container">

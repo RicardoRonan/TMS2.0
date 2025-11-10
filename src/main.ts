@@ -62,7 +62,13 @@ import {
   faPhone,
   faLocationDot,
   faSun,
-  faMoon
+  faMoon,
+  faCodeBranch,
+  faUsers,
+  faAward,
+  faLightbulb,
+  faHeart,
+  faBook
 } from '@fortawesome/free-solid-svg-icons'
 
 import {
@@ -130,6 +136,12 @@ library.add(
   faLocationDot,
   faSun,
   faMoon,
+  faCodeBranch,
+  faUsers,
+  faAward,
+  faLightbulb,
+  faHeart,
+  faBook,
   faTwitter,
   faGithub,
   faLinkedin,

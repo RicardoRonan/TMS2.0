@@ -46,13 +46,10 @@
 
         <!-- Header -->
         <header class="mb-12">
-          <div v-if="category" class="flex items-center space-x-3 mb-4">
-            <span class="text-3xl">{{ category.icon || '📚' }}</span>
-            <div>
-              <div class="flex items-center space-x-4 text-sm text-text-secondary">
-                <span class="badge badge-secondary">{{ category.level }}</span>
-                <span>{{ category.duration }} min</span>
-              </div>
+          <div v-if="category" class="mb-4">
+            <div class="flex items-center space-x-4 text-sm text-text-secondary">
+              <span class="badge badge-secondary">{{ category.level }}</span>
+              <span>{{ category.duration }} min</span>
             </div>
           </div>
           
