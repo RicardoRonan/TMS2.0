@@ -346,12 +346,35 @@ export function useAuth() {
       // Silently fail - session check is not critical
     })
 
-    // Listen for auth changes
+    // Listen for auth changes - handle all events properly
     authListener = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        await loadUserData(session.user)
-      } else {
-        store.dispatch('setUser', null)
+      console.log('Auth state change in useAuth:', event)
+      
+      switch (event) {
+        case 'SIGNED_IN':
+        case 'TOKEN_REFRESHED':
+          if (session?.user) {
+            await loadUserData(session.user)
+          }
+          break
+        
+        case 'SIGNED_OUT':
+          store.dispatch('setUser', null)
+          break
+        
+        case 'USER_UPDATED':
+          if (session?.user) {
+            await loadUserData(session.user)
+          }
+          break
+        
+        default:
+          // For other events, check if we have a session
+          if (session?.user) {
+            await loadUserData(session.user)
+          } else {
+            store.dispatch('setUser', null)
+          }
       }
     })
   })
@@ -413,9 +436,8 @@ export function useAuth() {
       'Password should be at least 6 characters': 'Password should be at least 6 characters long.',
       'Invalid email': 'Please enter a valid email address.',
       'User not found': 'No account found with this email address.',
-      'Email rate limit exceeded': 'Too many requests. Please try again later.',
-      'Network request failed': 'Network error. Please check your connection.',
-      'Email rate limit exceeded': 'Too many password reset requests. Please try again later.'
+      'Email rate limit exceeded': 'Too many password reset requests. Please try again later.',
+      'Network request failed': 'Network error. Please check your connection.'
     }
 
     // Check for exact matches first

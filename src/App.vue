@@ -39,6 +39,7 @@ const isLoading = computed(() => store.getters.isLoading)
 
 // Set up global auth state change listener
 let authListener: { data: { subscription: any } } | null = null
+let visibilityChangeHandler: (() => void) | null = null
 
 async function loadUserData(supabaseUser: User) {
   try {
@@ -84,21 +85,85 @@ onMounted(() => {
   // Apply theme to document
   document.documentElement.setAttribute('data-theme', savedTheme)
 
+  // Safety: Ensure body overflow is reset on mount (in case of previous crash)
+  document.body.style.overflow = ''
+  
+  // Safety: Reset loading state if it's stuck
+  if (store.getters.isLoading) {
+    console.warn('Loading state was stuck, resetting...')
+    store.dispatch('setLoading', false)
+  }
+
   // Set up auth state change listener to keep user state in sync
   authListener = supabase.auth.onAuthStateChange(async (event, session) => {
     console.log('Auth state changed:', event, session?.user?.email)
-    if (session?.user) {
-      await loadUserData(session.user)
-    } else {
-      store.dispatch('setUser', null)
+    
+    // Handle different auth events
+    switch (event) {
+      case 'SIGNED_IN':
+      case 'TOKEN_REFRESHED':
+        if (session?.user) {
+          await loadUserData(session.user)
+        }
+        break
+      
+      case 'SIGNED_OUT':
+        store.dispatch('setUser', null)
+        break
+      
+      case 'USER_UPDATED':
+        if (session?.user) {
+          await loadUserData(session.user)
+        }
+        break
+      
+      default:
+        // For other events, check if we have a session
+        if (session?.user) {
+          await loadUserData(session.user)
+        } else {
+          store.dispatch('setUser', null)
+        }
     }
   })
+  
+  // Add visibility change handler to refresh session when tab becomes active
+  visibilityChangeHandler = async () => {
+    if (!document.hidden) {
+      // Tab became visible, check and refresh session if needed
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        if (error) {
+          console.error('Error getting session on visibility change:', error)
+          store.dispatch('setUser', null)
+        } else if (!session) {
+          store.dispatch('setUser', null)
+        } else {
+          // Session exists, ensure user data is loaded
+          await loadUserData(session.user)
+        }
+      } catch (err) {
+        console.error('Error checking session on visibility change:', err)
+      }
+    }
+  }
+  
+  document.addEventListener('visibilitychange', visibilityChangeHandler)
 })
 
 onUnmounted(() => {
   if (authListener?.data?.subscription) {
     authListener.data.subscription.unsubscribe()
   }
+  if (visibilityChangeHandler) {
+    document.removeEventListener('visibilitychange', visibilityChangeHandler)
+  }
+  
+  // Safety: Reset body overflow on unmount
+  document.body.style.overflow = ''
+  
+  // Safety: Reset loading state
+  store.dispatch('setLoading', false)
 })
 </script>
 

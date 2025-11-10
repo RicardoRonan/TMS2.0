@@ -195,6 +195,33 @@ CREATE TABLE IF NOT EXISTS public.blogs (
 -- Enable Row Level Security for blogs (idempotent)
 ALTER TABLE public.blogs ENABLE ROW LEVEL SECURITY;
 
+-- Add author_id column if it doesn't exist (for existing tables)
+-- This handles cases where the blogs table was created without author_id
+-- Step 1: Add column without constraint (IF NOT EXISTS works here)
+ALTER TABLE public.blogs 
+ADD COLUMN IF NOT EXISTS author_id UUID;
+
+-- Step 2: Add foreign key constraint if it doesn't exist
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 
+    FROM information_schema.table_constraints tc
+    JOIN information_schema.constraint_column_usage ccu 
+      ON tc.constraint_name = ccu.constraint_name
+    WHERE tc.table_schema = 'public' 
+      AND tc.table_name = 'blogs'
+      AND tc.constraint_type = 'FOREIGN KEY'
+      AND ccu.column_name = 'author_id'
+  ) THEN
+    ALTER TABLE public.blogs 
+    ADD CONSTRAINT blogs_author_id_fkey 
+    FOREIGN KEY (author_id) 
+    REFERENCES public.users(id) 
+    ON DELETE SET NULL;
+  END IF;
+END $$;
+
 -- Drop existing policies if they exist (failsafe)
 DROP POLICY IF EXISTS "Anyone can read published blogs" ON public.blogs;
 DROP POLICY IF EXISTS "Admins can read all blogs" ON public.blogs;
@@ -268,6 +295,68 @@ CREATE INDEX IF NOT EXISTS idx_blogs_slug ON public.blogs(slug);
 CREATE INDEX IF NOT EXISTS idx_blogs_published ON public.blogs(published);
 CREATE INDEX IF NOT EXISTS idx_blogs_category ON public.blogs(category);
 CREATE INDEX IF NOT EXISTS idx_blogs_created_at ON public.blogs(created_at DESC);
+
+-- Create author_id index only if the column exists
+DO $$ 
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'blogs' 
+    AND column_name = 'author_id'
+  ) THEN
+    CREATE INDEX IF NOT EXISTS idx_blogs_author_id ON public.blogs(author_id);
+  END IF;
+END $$;
+
+-- ============================================
+-- PART 7.5: BLOG LIKES TABLE
+-- ============================================
+
+-- Create blog_likes table (with failsafe)
+CREATE TABLE IF NOT EXISTS public.blog_likes (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  blog_id UUID NOT NULL REFERENCES public.blogs(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(blog_id, user_id)
+);
+
+-- Enable Row Level Security for blog_likes (idempotent)
+ALTER TABLE public.blog_likes ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist (failsafe)
+DROP POLICY IF EXISTS "Users can view all blog likes" ON public.blog_likes;
+DROP POLICY IF EXISTS "Users can like blogs" ON public.blog_likes;
+DROP POLICY IF EXISTS "Users can unlike their own likes" ON public.blog_likes;
+
+-- Create policies for blog_likes table
+-- Everyone can view likes (for counting)
+CREATE POLICY "Users can view all blog likes"
+  ON public.blog_likes
+  FOR SELECT
+  USING (TRUE);
+
+-- Authenticated users can like blogs
+CREATE POLICY "Users can like blogs"
+  ON public.blog_likes
+  FOR INSERT
+  WITH CHECK (
+    auth.uid() = user_id
+  );
+
+-- Users can unlike their own likes
+CREATE POLICY "Users can unlike their own likes"
+  ON public.blog_likes
+  FOR DELETE
+  USING (
+    auth.uid() = user_id
+  );
+
+-- Create indexes for blog_likes (IF NOT EXISTS is failsafe)
+CREATE INDEX IF NOT EXISTS idx_blog_likes_blog_id ON public.blog_likes(blog_id);
+CREATE INDEX IF NOT EXISTS idx_blog_likes_user_id ON public.blog_likes(user_id);
+CREATE INDEX IF NOT EXISTS idx_blog_likes_blog_user ON public.blog_likes(blog_id, user_id);
 
 -- ============================================
 -- PART 8: TUTORIALS TABLE

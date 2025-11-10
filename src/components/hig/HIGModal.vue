@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch, nextTick } from 'vue'
+import { computed, watch, nextTick, onUnmounted } from 'vue'
 import Icon from '../Icon.vue'
 
 interface Props {
@@ -86,8 +86,17 @@ watch(() => props.isOpen, (isOpen) => {
     })
   } else {
     document.removeEventListener('keydown', handleEscape)
-    document.body.style.overflow = ''
+    // Use setTimeout to ensure cleanup happens even if component unmounts
+    setTimeout(() => {
+      document.body.style.overflow = ''
+    }, 100)
   }
+})
+
+// Safety: Cleanup on unmount
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleEscape)
+  document.body.style.overflow = ''
 })
 </script>
 

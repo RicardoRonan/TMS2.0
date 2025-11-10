@@ -42,34 +42,19 @@
               </div>
                 </div>
 
-            <!-- Pages Grid -->
-            <div v-if="getCategoryPages(category.category_id).length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <HIGCard
-                v-for="page in getCategoryPages(category.category_id)"
-                :key="page.id"
-                class="hover:shadow-hig-lg transition-shadow cursor-pointer"
-                @click="openPage(category, page)"
-              >
-                <div class="p-6">
-                  <div class="flex items-start justify-between mb-3">
-                    <h3 class="text-lg font-semibold text-text-primary flex-1">
-                      {{ page.title }}
-                </h3>
-                  <span
-                      v-if="page.published"
-                      class="ml-2 px-2 py-1 rounded text-xs font-medium bg-success-500/20 text-success-500"
-                  >
-                      Published
-                  </span>
-                  </div>
-                  <div class="text-sm text-text-tertiary mb-3">
-                    Page {{ page.page_order + 1 }}
-                  </div>
-                  <div class="text-sm text-text-secondary line-clamp-2">
-                    {{ getPagePreview(page) }}
-                  </div>
-                </div>
-              </HIGCard>
+            <!-- Pages Card -->
+            <div v-if="getCategoryPages(category.category_id).length > 0" class="tutorial-card-container">
+              <div class="tutorial-card">
+                <p
+                  v-for="page in getCategoryPages(category.category_id)"
+                  :key="page.id"
+                  @click="openPage(category, page)"
+                  class="lesson-box"
+                >
+                  <span class="lesson-title">{{ page.title }}</span>
+                  <span class="lesson-description">{{ getPagePreview(page) }}</span>
+                </p>
+              </div>
             </div>
             <HIGCard v-else>
               <div class="p-6 text-center py-12 text-text-secondary">
@@ -472,5 +457,123 @@ onMounted(async () => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.tutorial-card-container {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+.tutorial-card {
+  width: 100%;
+  max-width: 800px;
+  min-height: 400px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, var(--color-bg-secondary), var(--color-bg-tertiary));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0.6em;
+  box-shadow: 0 4px 12px var(--shadow-color-hig);
+  overflow: hidden;
+  border: 1px solid var(--color-border-primary);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tutorial-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px var(--shadow-color-hig);
+}
+
+.tutorial-card p.lesson-box {
+  flex: 1;
+  overflow: hidden;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: flex 0.5s ease;
+  background: linear-gradient(145deg, var(--color-bg-tertiary), var(--color-bg-secondary));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  position: relative;
+  border: 1px solid var(--color-border-primary);
+  min-height: 60px;
+  padding: 1em;
+}
+
+.tutorial-card p.lesson-box:hover {
+  flex: 4;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 2px 8px rgba(235, 94, 40, 0.2);
+}
+
+.tutorial-card p.lesson-box .lesson-title {
+  padding: 0.4em;
+  text-align: center;
+  transform: rotate(-0deg);
+  transition: transform 0.5s ease, color 0.3s, opacity 0.3s;
+  text-transform: none;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  position: relative;
+  z-index: 1;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  display: block;
+}
+
+.tutorial-card p.lesson-box:hover .lesson-title {
+  transform: rotate(0);
+  color: var(--color-primary-500);
+  margin-bottom: 0.5em;
+}
+
+.tutorial-card p.lesson-box .lesson-description {
+  padding: 0.4em;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-weight: 400;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.5s ease, max-height 0.5s ease, margin 0.5s ease;
+  margin: 0;
+}
+
+.tutorial-card p.lesson-box:hover .lesson-description {
+  opacity: 1;
+  max-height: 200px;
+  margin-top: 0.5em;
+}
+
+.tutorial-card p.lesson-box::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(235, 94, 40, 0.1), rgba(235, 94, 40, 0.05));
+  z-index: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: 8px;
+}
+
+.tutorial-card p.lesson-box:hover::before {
+  opacity: 1;
 }
 </style>

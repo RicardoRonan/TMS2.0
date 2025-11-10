@@ -21,19 +21,20 @@ If running individually, run these scripts in your Supabase Dashboard → SQL Ed
 9. **08_blogs_triggers.sql** - Creates triggers for the blogs table
 10. **09_blogs_indexes.sql** - Creates indexes for the blogs table
 11. **25_update_blogs_policies.sql** - Updates blog policies for admin access
-12. **11_tutorials_table.sql** - Creates the tutorials table
-13. **12_tutorials_policies.sql** - Sets up Row Level Security policies for tutorials (requires is_admin() function)
-14. **13_tutorials_triggers.sql** - Creates triggers for the tutorials table
-15. **14_tutorials_indexes.sql** - Creates indexes for the tutorials table
-16. **15_import_sample_tutorials.sql** - (Optional) Imports sample tutorial data
-17. **16_tutorial_pages_table.sql** - Creates the tutorial_pages table
-18. **17_tutorial_pages_policies.sql** - Sets up RLS policies for tutorial_pages (requires is_admin() function)
-19. **18_tutorial_pages_triggers.sql** - Creates triggers for tutorial_pages
-20. **19_tutorial_pages_indexes.sql** - Creates indexes for tutorial_pages
-21. **20_tools_table.sql** - Creates the tools table
-22. **21_tools_policies.sql** - Sets up RLS policies for tools (requires is_admin() function)
-23. **22_tools_triggers.sql** - Creates triggers for tools
-24. **23_tools_indexes.sql** - Creates indexes for tools
+12. **27_blog_likes_table.sql** - Creates the blog_likes table for blog post likes
+13. **11_tutorials_table.sql** - Creates the tutorials table
+14. **12_tutorials_policies.sql** - Sets up Row Level Security policies for tutorials (requires is_admin() function)
+15. **13_tutorials_triggers.sql** - Creates triggers for the tutorials table
+16. **14_tutorials_indexes.sql** - Creates indexes for the tutorials table
+17. **15_import_sample_tutorials.sql** - (Optional) Imports sample tutorial data
+18. **16_tutorial_pages_table.sql** - Creates the tutorial_pages table
+19. **17_tutorial_pages_policies.sql** - Sets up RLS policies for tutorial_pages (requires is_admin() function)
+20. **18_tutorial_pages_triggers.sql** - Creates triggers for tutorial_pages
+21. **19_tutorial_pages_indexes.sql** - Creates indexes for tutorial_pages
+22. **20_tools_table.sql** - Creates the tools table
+23. **21_tools_policies.sql** - Sets up RLS policies for tools (requires is_admin() function)
+24. **22_tools_triggers.sql** - Creates triggers for tools
+25. **23_tools_indexes.sql** - Creates indexes for tools
 
 **Note:** If you encounter infinite recursion errors (42P17), run **26_fix_users_policies_recursion.sql** to fix all policies at once.
 

@@ -60,9 +60,8 @@ INSERT INTO public.tutorials_category (
   TRUE,
   NOW()
 )
-ON CONFLICT (category_id) DO UPDATE SET
+ON CONFLICT (slug) DO UPDATE SET
   title = EXCLUDED.title,
-  slug = EXCLUDED.slug,
   description = EXCLUDED.description,
   level = EXCLUDED.level,
   duration = EXCLUDED.duration,
@@ -81,7 +80,7 @@ INSERT INTO public.tutorial_pages (
   published_at
 ) VALUES
 (
-  '550e8400-e29b-41d4-a716-446655440001'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'vue-3-basics'),
   'Introduction to Vue 3: Getting Started with the Composition API',
   'introduction-to-vue-3-getting-started',
   'This page should cover: What is Vue 3, why use it, installation and setup, creating your first component, understanding the Composition API basics.',
@@ -90,7 +89,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440001'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'vue-3-basics'),
   'Understanding Reactivity: ref(), reactive(), and computed()',
   'understanding-reactivity-ref-reactive-computed',
   'This page should cover: How Vue 3 reactivity works, using ref() for primitive values, using reactive() for objects, computed properties, watch and watchEffect.',
@@ -99,7 +98,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440001'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'vue-3-basics'),
   'Components and Props: Building Reusable UI Elements',
   'components-and-props-building-reusable-ui',
   'This page should cover: Creating components, passing props, prop validation, emitting events, component communication patterns.',
@@ -108,7 +107,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440001'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'vue-3-basics'),
   'Directives and Template Syntax: v-if, v-for, v-bind, and More',
   'directives-and-template-syntax',
   'This page should cover: Template syntax basics, conditional rendering with v-if/v-show, list rendering with v-for, binding attributes with v-bind, event handling with v-on.',
@@ -117,7 +116,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440001'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'vue-3-basics'),
   'Lifecycle Hooks: Understanding Component Lifecycle',
   'lifecycle-hooks-understanding-component-lifecycle',
   'This page should cover: onMounted, onUpdated, onUnmounted, onBeforeMount, onBeforeUpdate, onBeforeUnmount, when to use each hook.',
@@ -126,7 +125,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440001'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'vue-3-basics'),
   'Event Handling: v-on, Event Modifiers, and Custom Events',
   'event-handling-v-on-event-modifiers-custom-events',
   'This page should cover: Handling click events, keyboard events, form events, event modifiers (.stop, .prevent, .once), custom events with $emit, event payloads, listening to events in parent components.',
@@ -135,7 +134,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440001'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'vue-3-basics'),
   'Form Handling: Two-Way Data Binding with v-model',
   'form-handling-two-way-data-binding-v-model',
   'This page should cover: Using v-model for input, textarea, select, checkbox, radio buttons, v-model modifiers (.lazy, .number, .trim), custom v-model in components, form validation basics.',
@@ -144,7 +143,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440001'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'vue-3-basics'),
   'Computed Properties and Watchers: Reactive Data Transformations',
   'computed-properties-watchers-reactive-data-transformations',
   'This page should cover: When to use computed vs methods, computed property caching, watch() for side effects, watchEffect() for automatic tracking, deep watching, watching multiple sources.',
@@ -153,7 +152,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440001'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'vue-3-basics'),
   'Slots: Flexible Component Composition',
   'slots-flexible-component-composition',
   'This page should cover: Default slots, named slots, scoped slots, slot props, slot fallback content, when to use slots vs props.',
@@ -162,7 +161,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440001'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'vue-3-basics'),
   'Dynamic Components and Keep-Alive: Switching Between Components',
   'dynamic-components-keep-alive-switching-between-components',
   'This page should cover: Using :is directive for dynamic components, component switching, keep-alive for component state preservation, include/exclude props, lifecycle hooks with keep-alive.',
@@ -189,7 +188,7 @@ INSERT INTO public.tutorial_pages (
   published_at
 ) VALUES
 (
-  '550e8400-e29b-41d4-a716-446655440002'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'typescript-vue'),
   'Setting Up TypeScript in a Vue 3 Project',
   'setting-up-typescript-in-vue-3-project',
   'This page should cover: Installing TypeScript, configuring tsconfig.json, setting up Vite with TypeScript, type checking setup, IDE configuration.',
@@ -198,7 +197,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440002'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'typescript-vue'),
   'Typing Components: defineComponent and Component Props',
   'typing-components-definecomponent-and-props',
   'This page should cover: Using defineComponent, typing props with interfaces, optional and required props, default values, prop validation with TypeScript.',
@@ -207,7 +206,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440002'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'typescript-vue'),
   'Composition API with TypeScript: Type-Safe Reactive State',
   'composition-api-with-typescript-type-safe-reactive-state',
   'This page should cover: Typing ref() and reactive(), typing computed properties, typing functions and methods, generic types in composition functions.',
@@ -216,7 +215,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440002'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'typescript-vue'),
   'Type Inference and Type Guards in Vue Components',
   'type-inference-and-type-guards-in-vue-components',
   'This page should cover: How TypeScript infers types in Vue, using type guards, narrowing types, working with union types, type assertions when needed.',
@@ -225,7 +224,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440002'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'typescript-vue'),
   'Typing Emits: Type-Safe Custom Events',
   'typing-emits-type-safe-custom-events',
   'This page should cover: Typing emit definitions, typed event payloads, optional and required events, using defineEmits with TypeScript, type checking emitted events.',
@@ -234,7 +233,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440002'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'typescript-vue'),
   'Typing Slots: Type-Safe Slot Props and Named Slots',
   'typing-slots-type-safe-slot-props-named-slots',
   'This page should cover: Typing default slots, typing named slots, typing scoped slot props, slot type inference, generic slot types.',
@@ -243,7 +242,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440002'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'typescript-vue'),
   'Composables with TypeScript: Reusable Type-Safe Logic',
   'composables-with-typescript-reusable-type-safe-logic',
   'This page should cover: Creating typed composables, generic composables, return type inference, typing composable parameters, sharing types between composables.',
@@ -252,7 +251,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440002'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'typescript-vue'),
   'Type Utilities: Working with Vue Types and Helpers',
   'type-utilities-working-with-vue-types-helpers',
   'This page should cover: PropType utility, ExtractPropTypes, ComponentPublicInstance, Ref types, UnwrapRef, working with template refs types.',
@@ -279,7 +278,7 @@ INSERT INTO public.tutorial_pages (
   published_at
 ) VALUES
 (
-  '550e8400-e29b-41d4-a716-446655440003'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'state-management'),
   'Introduction to Vuex: Centralized State Management',
   'introduction-to-vuex-centralized-state-management',
   'This page should cover: What is Vuex, when to use it, installing Vuex 4, creating a store, state, getters, mutations, and actions basics.',
@@ -288,7 +287,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440003'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'state-management'),
   'Store Structure: Organizing State, Getters, and Mutations',
   'store-structure-organizing-state-getters-mutations',
   'This page should cover: Store architecture, defining state, creating getters for computed state, mutations for synchronous updates, actions for async operations.',
@@ -297,7 +296,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440003'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'state-management'),
   'Modules: Splitting Your Store into Manageable Pieces',
   'modules-splitting-store-into-manageable-pieces',
   'This page should cover: Why use modules, creating module structure, namespaced modules, accessing module state and actions, module organization patterns.',
@@ -306,7 +305,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440003'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'state-management'),
   'Using Vuex in Components: mapState, mapGetters, and mapActions',
   'using-vuex-in-components-mapstate-mapgetters-mapactions',
   'This page should cover: Accessing store in components, mapState helper, mapGetters helper, mapActions helper, using store directly in Composition API.',
@@ -315,7 +314,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440003'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'state-management'),
   'Vuex with Composition API: useStore and Reactive State',
   'vuex-with-composition-api-usestore-reactive-state',
   'This page should cover: Using useStore() hook, accessing state reactively, calling mutations and actions, computed properties from store, watch store changes.',
@@ -324,7 +323,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440003'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'state-management'),
   'Pinia: Modern State Management for Vue 3',
   'pinia-modern-state-management-for-vue-3',
   'This page should cover: What is Pinia, why use Pinia over Vuex, installing Pinia, creating stores, defining state, getters, and actions, using stores in components.',
@@ -333,7 +332,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440003'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'state-management'),
   'Pinia Stores: Setup Stores vs Options Stores',
   'pinia-stores-setup-stores-vs-options-stores',
   'This page should cover: Options API style stores, Setup stores with Composition API, when to use each, store composition, sharing state between stores.',
@@ -342,7 +341,7 @@ INSERT INTO public.tutorial_pages (
   NOW()
 ),
 (
-  '550e8400-e29b-41d4-a716-446655440003'::UUID,
+  (SELECT category_id FROM public.tutorials_category WHERE slug = 'state-management'),
   'State Persistence: Saving and Restoring Application State',
   'state-persistence-saving-restoring-application-state',
   'This page should cover: Persisting Vuex state to localStorage, using vuex-persistedstate, Pinia persistence plugins, selective state persistence, handling state hydration.',
