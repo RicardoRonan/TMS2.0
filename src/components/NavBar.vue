@@ -1,0 +1,465 @@
+<template>
+  <nav class="bg-bg-secondary border-b border-border-primary sticky top-0 z-50">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo -->
+        <router-link to="/" class="flex items-center space-x-2">
+          <img src="@/assets/meta-stack-logo.png" alt="MetaStack Logo" class="w-8 h-8" />
+          <span class="text-xl font-bold text-text-primary">MetaStack</span>
+        </router-link>
+
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center space-x-8">
+          <router-link
+            v-for="item in regularNavigationItems"
+            :key="item.name"
+            :to="item.href"
+            :class="navLinkClasses(item.href)"
+            @click="closeMobileMenu"
+          >
+            {{ item.name }}
+          </router-link>
+          
+          <!-- Resources Dropdown -->
+          <div
+            class="relative"
+            ref="resourcesMenuRef"
+            @mouseenter="showResourcesMenu = true"
+            @mouseleave="showResourcesMenu = false"
+          >
+            <button
+              :class="[
+                'nav-link flex items-center space-x-1',
+                {
+                  'nav-link-active': isResourcesRouteActive
+                }
+              ]"
+            >
+              <span>Resources</span>
+              <Icon 
+                name="chevron-down" 
+                :size="16" 
+                :class="[
+                  'transition-transform duration-200 ease-in-out',
+                  { 'rotate-180': showResourcesMenu }
+                ]"
+              />
+            </button>
+
+            <!-- Resources Dropdown -->
+            <Transition name="dropdown">
+              <div
+                v-if="showResourcesMenu"
+                class="absolute left-0 mt-2 w-48 bg-bg-secondary rounded-lg shadow-hig border border-border-primary py-1"
+              >
+                <router-link
+                  to="/blog"
+                  class="block px-4 py-2 text-sm text-text-primary hover:bg-bg-tertiary transition-colors"
+                  @click="closeResourcesMenu"
+                >
+                  Blog
+                </router-link>
+                <router-link
+                  to="/tools"
+                  class="block px-4 py-2 text-sm text-text-primary hover:bg-bg-tertiary transition-colors"
+                  @click="closeResourcesMenu"
+                >
+                  Tools
+                </router-link>
+                <router-link
+                  to="/tutorials"
+                  class="block px-4 py-2 text-sm text-text-primary hover:bg-bg-tertiary transition-colors"
+                  @click="closeResourcesMenu"
+                >
+                  Tutorials
+                </router-link>
+              </div>
+            </Transition>
+          </div>
+        </div>
+
+        <!-- User Menu / Auth Buttons -->
+        <div class="hidden md:flex items-center space-x-4">
+          <template v-if="isAuthenticated">
+            <div 
+              class="relative" 
+              ref="userMenuRef"
+              @mouseenter="showUserMenu = true"
+              @mouseleave="showUserMenu = false"
+            >
+              <button
+                class="flex items-center space-x-2 text-text-primary hover:text-primary-500 transition-colors"
+              >
+                <div class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+                  <span class="text-white text-sm font-medium">
+                    {{ userInitials }}
+                  </span>
+                </div>
+                <span class="text-sm">{{ currentUser?.displayName || 'User' }}</span>
+                <Icon 
+                  name="chevron-down" 
+                  :size="16" 
+                  :class="[
+                    'transition-transform duration-200 ease-in-out',
+                    { 'rotate-180': showUserMenu }
+                  ]"
+                />
+              </button>
+
+              <!-- User Dropdown -->
+              <Transition name="dropdown">
+                <div v-if="showUserMenu" class="absolute right-0 mt-2 w-48 bg-bg-secondary rounded-lg shadow-hig border border-border-primary py-1">
+                  <router-link
+                    to="/profile"
+                    class="block px-4 py-2 text-sm text-text-primary hover:bg-bg-tertiary transition-colors"
+                    @click="closeUserMenu"
+                  >
+                    Profile
+                  </router-link>
+                  <router-link
+                    to="/settings"
+                    class="block px-4 py-2 text-sm text-text-primary hover:bg-bg-tertiary transition-colors"
+                    @click="closeUserMenu"
+                  >
+                    Settings
+                  </router-link>
+                  <div class="border-t border-border-primary my-1"></div>
+                  <button
+                    class="block w-full text-left px-4 py-2 text-sm text-danger hover:bg-bg-tertiary transition-colors"
+                    @click="handleLogout"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </Transition>
+            </div>
+          </template>
+          <template v-else>
+            <HIGButton variant="tertiary" size="sm" @click="showLoginModal = true">
+              Sign In
+            </HIGButton>
+            <HIGButton variant="primary" size="sm" @click="showRegisterModal = true">
+              Sign Up
+            </HIGButton>
+          </template>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button
+          class="md:hidden p-2 text-text-primary hover:text-primary-500 transition-colors"
+          @click="toggleMobileMenu"
+          aria-label="Toggle mobile menu"
+        >
+          <Icon v-if="!showMobileMenu" name="menu" :size="24" />
+          <Icon v-else name="close" :size="24" />
+        </button>
+      </div>
+
+      <!-- Mobile Navigation -->
+      <Transition name="mobile-menu">
+        <div v-if="showMobileMenu" class="md:hidden border-t border-border-primary py-4">
+          <div class="space-y-2">
+            <router-link
+              v-for="item in regularNavigationItems"
+              :key="item.name"
+              :to="item.href"
+              :class="mobileNavLinkClasses(item.href)"
+              @click="closeMobileMenu"
+            >
+              {{ item.name }}
+            </router-link>
+            
+            <!-- Resources Mobile Dropdown -->
+            <div>
+              <button
+                class="block w-full px-4 py-2 text-sm font-medium rounded-md transition-colors text-text-secondary hover:text-text-primary hover:bg-bg-tertiary flex items-center justify-between"
+                @click="toggleResourcesMobileMenu"
+              >
+                <span>Resources</span>
+                <Icon
+                  :name="showResourcesMobileMenu ? 'chevron-up' : 'chevron-down'"
+                  :size="16"
+                />
+              </button>
+              <Transition name="mobile-menu">
+                <div v-if="showResourcesMobileMenu" class="pl-4 mt-2 space-y-2">
+                  <router-link
+                    to="/blog"
+                    :class="mobileNavLinkClasses('/blog')"
+                    @click="closeMobileMenu"
+                  >
+                    Blog
+                  </router-link>
+                  <router-link
+                    to="/tools"
+                    :class="mobileNavLinkClasses('/tools')"
+                    @click="closeMobileMenu"
+                  >
+                    Tools
+                  </router-link>
+                  <router-link
+                    to="/tutorials"
+                    :class="mobileNavLinkClasses('/tutorials')"
+                    @click="closeMobileMenu"
+                  >
+                    Tutorials
+                  </router-link>
+                </div>
+              </Transition>
+            </div>
+          </div>
+          
+          <div v-if="isAuthenticated" class="mt-4 pt-4 border-t border-border-primary space-y-2">
+            <router-link
+              to="/profile"
+              :class="mobileNavLinkClasses('/profile')"
+              @click="closeMobileMenu"
+            >
+              Profile
+            </router-link>
+            <router-link
+              to="/settings"
+              :class="mobileNavLinkClasses('/settings')"
+              @click="closeMobileMenu"
+            >
+              Settings
+            </router-link>
+          </div>
+          
+          <div v-if="!isAuthenticated" class="mt-4 pt-4 border-t border-border-primary space-y-2">
+            <HIGButton
+              variant="tertiary"
+              size="sm"
+              full-width
+              @click="showLoginModal = true; closeMobileMenu()"
+            >
+              Sign In
+            </HIGButton>
+            <HIGButton
+              variant="primary"
+              size="sm"
+              full-width
+              @click="showRegisterModal = true; closeMobileMenu()"
+            >
+              Sign Up
+            </HIGButton>
+          </div>
+        </div>
+      </Transition>
+    </div>
+
+    <!-- Login Modal -->
+    <HIGModal
+      v-model:is-open="showLoginModal"
+      title="Sign In"
+      size="sm"
+    >
+      <LoginForm @success="handleLoginSuccess" />
+    </HIGModal>
+
+    <!-- Register Modal -->
+    <HIGModal
+      v-model:is-open="showRegisterModal"
+      title="Create Account"
+      size="sm"
+    >
+      <RegisterForm @success="handleRegisterSuccess" />
+    </HIGModal>
+  </nav>
+</template>
+
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
+import { useAuth } from '../composables/useAuth'
+import HIGButton from './hig/HIGButton.vue'
+import HIGModal from './hig/HIGModal.vue'
+import LoginForm from './LoginForm.vue'
+import RegisterForm from './RegisterForm.vue'
+import Icon from './Icon.vue'
+
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
+const { logout } = useAuth()
+
+// State
+const showMobileMenu = ref(false)
+const showUserMenu = ref(false)
+const showResourcesMenu = ref(false)
+const showResourcesMobileMenu = ref(false)
+const showLoginModal = ref(false)
+const showRegisterModal = ref(false)
+const userMenuRef = ref<HTMLElement>()
+const resourcesMenuRef = ref<HTMLElement>()
+
+// Navigation items
+const regularNavigationItems = [
+  { name: 'Home', href: '/' },
+  // { name: 'Projects', href: '/projects' },
+  { name: 'About', href: '/about' },
+  { name: 'Contact', href: '/contact' }
+]
+
+const resourcesItems = [
+  { name: 'Blog', href: '/blog' },
+  { name: 'Tools', href: '/tools' },
+  { name: 'Tutorials', href: '/tutorials' }
+]
+
+// Computed
+const isAuthenticated = computed(() => store.getters.isAuthenticated)
+const currentUser = computed(() => store.getters.currentUser)
+const userInitials = computed(() => {
+  if (!currentUser.value?.displayName) return 'U'
+  return currentUser.value.displayName
+    .split(' ')
+    .map(name => name[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+})
+
+const isResourcesRouteActive = computed(() => {
+  return resourcesItems.some(item => route.path === item.href || route.path.startsWith(item.href + '/'))
+})
+
+// Methods
+const navLinkClasses = (href: string) => [
+  'nav-link',
+  {
+    'nav-link-active': route.path === href
+  }
+]
+
+const mobileNavLinkClasses = (href: string) => [
+  'block px-4 py-2 text-sm font-medium rounded-md transition-colors',
+  {
+    'text-primary-500 bg-primary-50': route.path === href,
+    'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary': route.path !== href
+  }
+]
+
+const toggleMobileMenu = () => {
+  showMobileMenu.value = !showMobileMenu.value
+}
+
+const closeMobileMenu = () => {
+  showMobileMenu.value = false
+  showResourcesMobileMenu.value = false
+}
+
+const closeUserMenu = () => {
+  showUserMenu.value = false
+}
+
+const closeResourcesMenu = () => {
+  showResourcesMenu.value = false
+}
+
+const toggleResourcesMobileMenu = () => {
+  showResourcesMobileMenu.value = !showResourcesMobileMenu.value
+}
+
+const handleLogout = async () => {
+  try {
+    await logout()
+    closeUserMenu()
+    router.push('/')
+    store.dispatch('addNotification', {
+      type: 'success',
+      message: 'Successfully signed out'
+    })
+  } catch (error) {
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: 'Failed to sign out'
+    })
+  }
+}
+
+const handleLoginSuccess = () => {
+  console.log('Login success handler called')
+  showLoginModal.value = false
+  
+  // Wait a moment for store to update, then verify user is actually signed in
+  setTimeout(() => {
+    const user = store.getters.currentUser
+    const authenticated = store.getters.isAuthenticated
+    console.log('After login - User:', user, 'Authenticated:', authenticated)
+    
+    if (authenticated && user) {
+      // User is actually signed in, navigate if needed
+      if (route.path === '/auth' || route.path.includes('/auth')) {
+        router.push('/')
+      }
+    } else {
+      // User not actually signed in - show error
+      console.error('Login appeared successful but user is not in store')
+      store.dispatch('addNotification', {
+        type: 'error',
+        message: 'Sign in may not have completed. Please try again.'
+      })
+    }
+  }, 100)
+}
+
+const handleRegisterSuccess = () => {
+  console.log('Register success handler called')
+  showRegisterModal.value = false
+  
+  // Wait a moment for store to update, then verify user is actually signed in
+  setTimeout(() => {
+    const user = store.getters.currentUser
+    const authenticated = store.getters.isAuthenticated
+    console.log('After register - User:', user, 'Authenticated:', authenticated)
+    
+    if (authenticated && user) {
+      // User is actually signed in, navigate if needed
+      if (route.path === '/auth' || route.path.includes('/auth')) {
+        router.push('/')
+      }
+    } else {
+      // User not actually signed in - might need email confirmation
+      console.log('User registered but may need email confirmation')
+      // Don't show error - email confirmation message already shown
+    }
+  }, 100)
+}
+
+// User menu now uses hover, so no click outside handler needed
+</script>
+
+<style scoped>
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.2s ease;
+}
+
+.dropdown-enter-from {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.mobile-menu-enter-active,
+.mobile-menu-leave-active {
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-enter-from {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.mobile-menu-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+</style>
+

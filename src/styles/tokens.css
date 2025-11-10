@@ -1,0 +1,188 @@
+/* MetaStack Design Tokens - Apple HIG Inspired */
+
+:root {
+  /* Color System */
+  --color-primary-50: #fef7f0;
+  --color-primary-100: #fdeee0;
+  --color-primary-200: #fbd9c1;
+  --color-primary-300: #f8c4a2;
+  --color-primary-400: #f5af83;
+  --color-primary-500: #eb5e28; /* Main brand color */
+  --color-primary-600: #d44e1e;
+  --color-primary-700: #b83e14;
+  --color-primary-800: #9c2e0a;
+  --color-primary-900: #801e00;
+
+  /* Background Hierarchy */
+  --color-bg-primary: #1f1f1f;
+  --color-bg-secondary: #2a2a2a;
+  --color-bg-tertiary: #3a3a3a;
+  --color-bg-elevated: #404040;
+  --color-bg-overlay: rgba(0, 0, 0, 0.8);
+  
+  /* Shadow colors for theme-aware shadows */
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color-hig: rgba(0, 0, 0, 0.3);
+
+  /* Text Hierarchy */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #b3b3b3;
+  --color-text-tertiary: #808080;
+  --color-text-quaternary: #4d4d4d;
+  --color-text-inverse: #ffffff;
+
+  /* Semantic Colors */
+  --color-success: #4ade80;
+  --color-success-bg: rgba(74, 222, 128, 0.1);
+  --color-warning: #fbbf24;
+  --color-warning-bg: rgba(251, 191, 36, 0.1);
+  --color-danger: #ef4444;
+  --color-danger-bg: rgba(239, 68, 68, 0.1);
+  --color-info: #3b82f6;
+  --color-info-bg: rgba(59, 130, 246, 0.1);
+
+  /* Border Colors */
+  --color-border-primary: #404040;
+  --color-border-secondary: #2a2a2a;
+  --color-border-focus: var(--color-primary-500);
+
+  /* Typography Scale */
+  --font-family-primary: 'Geomanist', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-family-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+
+  /* Font Sizes */
+  --font-size-caption: 12px;
+  --font-size-footnote: 13px;
+  --font-size-subheadline: 15px;
+  --font-size-callout: 16px;
+  --font-size-body: 17px;
+  --font-size-headline: 17px;
+  --font-size-title3: 20px;
+  --font-size-title2: 22px;
+  --font-size-title1: 28px;
+  --font-size-large-title: 34px;
+
+  /* Line Heights */
+  --line-height-tight: 1.1;
+  --line-height-normal: 1.4;
+  --line-height-relaxed: 1.6;
+
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing System (8-point grid) */
+  --space-0: 0px;
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-2-5: 10px;
+  --space-3: 12px;
+  --space-3-5: 14px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-11: 44px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-28: 112px;
+  --space-32: 128px;
+
+  /* Border Radius */
+  --radius-none: 0px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Shadows - use theme-aware shadow colors */
+  --shadow-sm: 0 1px 2px var(--shadow-color);
+  --shadow-md: 0 4px 6px var(--shadow-color);
+  --shadow-lg: 0 10px 15px var(--shadow-color);
+  --shadow-xl: 0 20px 25px var(--shadow-color);
+  --shadow-2xl: 0 25px 50px var(--shadow-color);
+  --shadow-hig: 0 4px 16px var(--shadow-color-hig);
+  --shadow-hig-lg: 0 8px 32px var(--shadow-color-hig);
+  --shadow-hig-xl: 0 16px 64px var(--shadow-color-hig);
+
+  /* Z-Index Scale */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-toast: 1080;
+
+  /* Breakpoints */
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 768px;
+  --breakpoint-md: 1024px;
+  --breakpoint-lg: 1200px;
+  --breakpoint-xl: 1370px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 300ms ease;
+  --transition-slow: 500ms ease;
+
+  /* Focus Ring */
+  --focus-ring: 0 0 0 3px rgba(235, 94, 40, 0.3);
+
+  /* Touch Targets */
+  --touch-target-min: 44px;
+}
+
+/* Dark theme (default) */
+[data-theme="dark"] {
+  --color-bg-primary: #1f1f1f;
+  --color-bg-secondary: #2a2a2a;
+  --color-bg-tertiary: #3a3a3a;
+  --color-bg-elevated: #404040;
+  --color-bg-overlay: rgba(0, 0, 0, 0.8);
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #b3b3b3;
+  --color-text-tertiary: #808080;
+  --color-text-quaternary: #4d4d4d;
+  --color-border-primary: #404040;
+  --color-border-secondary: #2a2a2a;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color-hig: rgba(0, 0, 0, 0.3);
+}
+
+/* Light theme */
+[data-theme="light"] {
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f8f9fa;
+  --color-bg-tertiary: #e9ecef;
+  --color-bg-elevated: #ffffff;
+  --color-bg-overlay: rgba(255, 255, 255, 0.8);
+  --color-text-primary: #212529;
+  --color-text-secondary: #6c757d;
+  --color-text-tertiary: #adb5bd;
+  --color-text-quaternary: #ced4da;
+  --color-border-primary: #e9ecef;
+  --color-border-secondary: #dee2e6;
+  --shadow-color: rgba(0, 0, 0, 0.05);
+  --shadow-color-hig: rgba(0, 0, 0, 0.15);
+  /* Semantic color backgrounds with better contrast in light theme */
+  --color-success-bg: rgba(74, 222, 128, 0.15);
+  --color-warning-bg: rgba(251, 191, 36, 0.15);
+  --color-danger-bg: rgba(239, 68, 68, 0.15);
+  --color-info-bg: rgba(59, 130, 246, 0.15);
+}
+

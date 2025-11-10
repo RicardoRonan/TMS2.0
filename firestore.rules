@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read and write their own user document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Blogs are readable by everyone, writable by authenticated users
+    match /blogs/{blogId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Tools are readable by everyone, writable by authenticated users
+    match /tools/{toolId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Projects are readable by everyone, writable by authenticated users
+    match /projects/{projectId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Tutorials are readable by everyone, writable by authenticated users
+    match /tutorials/{tutorialId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Contact submissions are writable by everyone, readable by authenticated users
+    match /contacts/{contactId} {
+      allow read: if request.auth != null;
+      allow write: if true;
+    }
+    
+    // Newsletter subscriptions are writable by everyone, readable by authenticated users
+    match /newsletters/{newsletterId} {
+      allow read: if request.auth != null;
+      allow write: if true;
+    }
+  }
+}
+

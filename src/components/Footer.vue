@@ -1,0 +1,81 @@
+<template>
+  <footer class="bg-bg-secondary border-t border-border-primary mt-16">
+    <div class="container mx-auto px-4 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <!-- Brand -->
+        <div class="space-y-4">
+          <div class="flex items-center space-x-2">
+            <img src="@/assets/meta-stack-logo.png" alt="MetaStack Logo" class="w-8 h-8" />
+            <span class="text-xl font-bold text-text-primary">MetaStack</span>
+          </div>
+          <p class="text-text-secondary text-sm">
+            A digital community platform for developers, designers, and creators to share knowledge and build innovative solutions.
+          </p>
+          <div class="flex space-x-4">
+            <a href="#" class="w-12 h-12 bg-bg-tertiary rounded-lg flex items-center justify-center text-text-tertiary hover:text-primary-500 hover:bg-primary-50 transition-colors" aria-label="Twitter">
+              <Icon name="twitter" :size="24" />
+            </a>
+            <a href="#" class="w-12 h-12 bg-bg-tertiary rounded-lg flex items-center justify-center text-text-tertiary hover:text-primary-500 hover:bg-primary-50 transition-colors" aria-label="GitHub">
+              <Icon name="github" :size="24" />
+            </a>
+            <a href="#" class="w-12 h-12 bg-bg-tertiary rounded-lg flex items-center justify-center text-text-tertiary hover:text-primary-500 hover:bg-primary-50 transition-colors" aria-label="LinkedIn">
+              <Icon name="linkedin" :size="24" />
+            </a>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="space-y-4">
+          <h3 class="text-sm font-semibold text-text-primary uppercase tracking-wider">Quick Links</h3>
+          <ul class="space-y-2">
+            <li><router-link to="/blog" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Blog</router-link></li>
+            <li><router-link to="/tools" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Tools</router-link></li>
+            <li><router-link to="/tutorials" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Tutorials</router-link></li>
+            <!-- <li><router-link to="/projects" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Projects</router-link></li> -->
+          </ul>
+        </div>
+
+        <!-- Community -->
+        <div class="space-y-4">
+          <h3 class="text-sm font-semibold text-text-primary uppercase tracking-wider">Community</h3>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Discord</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">GitHub</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Newsletter</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Support</a></li>
+          </ul>
+        </div>
+
+        <!-- Legal -->
+        <div class="space-y-4">
+          <h3 class="text-sm font-semibold text-text-primary uppercase tracking-wider">Legal</h3>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Privacy Policy</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Terms of Service</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Cookie Policy</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">DMCA</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-8 pt-8 border-t border-border-primary">
+        <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          <p class="text-text-tertiary text-sm">
+            © {{ currentYear }} MetaStack. All rights reserved.
+          </p>
+          <div class="flex items-center space-x-4 text-sm text-text-tertiary">
+            <span>Made with ❤️ for developers</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+</template>
+
+<script setup lang="ts">
+import { computed } from 'vue'
+import Icon from './Icon.vue'
+
+const currentYear = computed(() => new Date().getFullYear())
+</script>
+
