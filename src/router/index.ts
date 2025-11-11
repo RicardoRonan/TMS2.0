@@ -170,14 +170,8 @@ router.beforeEach(async (to, from, next) => {
     document.title = to.meta.title as string
   }
   
-  // Restore Supabase session before navigation to ensure it's available for all pages
-  try {
-    const { supabase } = await import('../supabase')
-    await supabase.auth.getSession()
-  } catch (err) {
-    console.warn('Failed to restore session during navigation:', err)
-    // Continue navigation even if session restore fails
-  }
+  // Supabase session is automatically managed by the auth listener in useAuth
+  // No need to call getSession() here - it's unnecessary and can cause delays
   
   // Check authentication
   if (to.meta.requiresAuth && !store.getters.isAuthenticated) {

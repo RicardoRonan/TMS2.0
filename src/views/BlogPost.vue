@@ -414,8 +414,7 @@ const fetchBlogPost = async (slug: string) => {
     loading.value = true
     error.value = null
     
-    // Ensure Supabase session is restored before making calls
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
     
     const { data, error: fetchError } = await supabase
       .from('blogs')

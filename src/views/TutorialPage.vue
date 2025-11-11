@@ -740,8 +740,7 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
     loading.value = true
     error.value = null
     
-    // Ensure Supabase session is restored before making calls
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
     
     // Fetch category
     let categoryData = null

@@ -47,7 +47,7 @@
   --color-border-focus: var(--color-primary-500);
 
   /* Typography Scale */
-  --font-family-primary: 'Geomanist', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-family-primary: 'Stack Sans Notch', 'Geomanist', 'Inter', system-ui, -apple-system, sans-serif;
   --font-family-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
 
   /* Font Sizes */

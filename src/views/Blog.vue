@@ -276,9 +276,7 @@ const fetchBlogs = async (force = false) => {
   try {
     loading.value = true
     
-    // Ensure Supabase session is restored before making calls
-    await supabase.auth.getSession()
-    
+    // Supabase session is automatically managed - no need to call getSession()
     const { data, error } = await supabase
       .from('blogs')
       .select(`

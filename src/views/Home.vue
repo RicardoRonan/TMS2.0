@@ -323,7 +323,7 @@ const formatCount = (count: number): string => {
 // Fetch stats from database
 const fetchStats = async () => {
   try {
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
     
     // Fetch users count using database function
     try {

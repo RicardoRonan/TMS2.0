@@ -3,6 +3,21 @@ import { useStore } from 'vuex'
 import { supabase } from '../supabase'
 import type { User, AuthError } from '@supabase/supabase-js'
 
+// Singleton pattern to ensure only one auth listener exists
+let authListener: { data: { subscription: any } } | null = null
+let isListenerInitialized = false
+let lastTokenRefreshTime = 0
+const TOKEN_REFRESH_DEBOUNCE_MS = 60000 // Only reload user data once per minute for token refreshes
+
+// Export cleanup function for app unmount
+export function cleanupAuthListener() {
+  if (authListener?.data?.subscription) {
+    authListener.data.subscription.unsubscribe()
+    authListener = null
+    isListenerInitialized = false
+  }
+}
+
 export function useAuth() {
   const store = useStore()
   const loading = ref(false)
@@ -239,13 +254,19 @@ export function useAuth() {
       loading.value = true
       error.value = null
 
-      const { error: authError } = await supabase.auth.signOut()
-      if (authError) throw authError
-
+      // Always clear local state first, even if signOut fails
       store.dispatch('setUser', null)
+
+      // Try to sign out from Supabase (non-blocking)
+      const { error: authError } = await supabase.auth.signOut()
+      if (authError) {
+        // Log error but don't throw - user is already logged out locally
+        console.warn('Sign out error (non-critical):', authError)
+      }
     } catch (err: any) {
+      // Even if there's an error, user is already logged out locally
       error.value = getErrorMessage(err)
-      throw err
+      // Don't throw - logout should succeed locally even if server call fails
     } finally {
       loading.value = false
     }
@@ -310,60 +331,76 @@ export function useAuth() {
     }
   }
 
-  // Initialize auth state listener
-  let authListener: { data: { subscription: any } } | null = null
-
+  // Initialize auth state listener (singleton pattern - only initialize once)
   onMounted(() => {
-    // Check for existing session (with timeout to prevent hanging)
-    const sessionPromise = supabase.auth.getSession()
-    const timeoutPromise = new Promise((resolve) => 
-      setTimeout(() => resolve({ data: { session: null } }), 5000)
-    )
-    
-    Promise.race([sessionPromise, timeoutPromise]).then((result: any) => {
-      const { data: { session } } = result || { data: { session: null } }
-      if (session?.user) {
-        loadUserData(session.user)
-      }
-    }).catch(() => {
-      // Silently fail - session check is not critical
-    })
+    // Only initialize the listener once globally
+    if (!isListenerInitialized) {
+      isListenerInitialized = true
 
-    // Listen for auth changes - handle all events properly
-    authListener = supabase.auth.onAuthStateChange(async (event, session) => {
-      switch (event) {
-        case 'SIGNED_IN':
-        case 'TOKEN_REFRESHED':
-          if (session?.user) {
-            await loadUserData(session.user)
-          }
-          break
-        
-        case 'SIGNED_OUT':
-          store.dispatch('setUser', null)
-          break
-        
-        case 'USER_UPDATED':
-          if (session?.user) {
-            await loadUserData(session.user)
-          }
-          break
-        
-        default:
-          // For other events, check if we have a session
-          if (session?.user) {
-            await loadUserData(session.user)
-          } else {
+      // Check for existing session (with timeout to prevent hanging)
+      const sessionPromise = supabase.auth.getSession()
+      const timeoutPromise = new Promise((resolve) => 
+        setTimeout(() => resolve({ data: { session: null } }), 5000)
+      )
+      
+      Promise.race([sessionPromise, timeoutPromise]).then((result: any) => {
+        const { data: { session } } = result || { data: { session: null } }
+        if (session?.user) {
+          loadUserData(session.user)
+        }
+      }).catch(() => {
+        // Silently fail - session check is not critical
+      })
+
+      // Listen for auth changes - handle all events properly
+      authListener = supabase.auth.onAuthStateChange(async (event, session) => {
+        switch (event) {
+          case 'SIGNED_IN':
+            if (session?.user) {
+              await loadUserData(session.user)
+            }
+            break
+          
+          case 'TOKEN_REFRESHED':
+            // Debounce token refresh events to prevent excessive reloads
+            const now = Date.now()
+            if (now - lastTokenRefreshTime > TOKEN_REFRESH_DEBOUNCE_MS) {
+              lastTokenRefreshTime = now
+              // Only reload if user data might have changed (skip if same user)
+              const currentUser = store.getters.currentUser
+              if (!currentUser || currentUser.uid !== session?.user?.id) {
+                if (session?.user) {
+                  await loadUserData(session.user)
+                }
+              }
+            }
+            break
+          
+          case 'SIGNED_OUT':
             store.dispatch('setUser', null)
-          }
-      }
-    })
+            break
+          
+          case 'USER_UPDATED':
+            if (session?.user) {
+              await loadUserData(session.user)
+            }
+            break
+          
+          default:
+            // For other events, check if we have a session
+            if (session?.user) {
+              await loadUserData(session.user)
+            } else {
+              store.dispatch('setUser', null)
+            }
+        }
+      })
+    }
   })
 
   onUnmounted(() => {
-    if (authListener?.data?.subscription) {
-      authListener.data.subscription.unsubscribe()
-    }
+    // Don't unsubscribe here - the listener is global and should persist
+    // It will be cleaned up when the app unmounts
   })
 
   // Helper function to load user data

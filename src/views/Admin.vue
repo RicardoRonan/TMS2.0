@@ -1143,8 +1143,7 @@ const toggleCategory = (categoryId: string) => {
 const fetchBlogs = async () => {
   try {
     loadingBlogs.value = true
-    // Ensure Supabase session is restored before making calls
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
     const { data, error } = await supabase
       .from('blogs')
       .select('*')
@@ -1170,8 +1169,7 @@ const fetchBlogs = async () => {
 const fetchCategories = async () => {
   try {
     loadingCategories.value = true
-    // Ensure Supabase session is restored before making calls
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
     const { data, error } = await supabase
       .from('tutorials_category')
       .select('*')
@@ -1193,8 +1191,7 @@ const fetchCategories = async () => {
 const fetchPages = async () => {
   try {
     loadingPages.value = true
-    // Ensure Supabase session is restored before making calls
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
     const { data, error } = await supabase
       .from('tutorial_pages')
       .select('*')
@@ -1216,8 +1213,7 @@ const fetchPages = async () => {
 const fetchTools = async () => {
   try {
     loadingTools.value = true
-    // Ensure Supabase session is restored before making calls
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
     const { data, error } = await supabase
       .from('tools')
       .select('*')
@@ -1239,8 +1235,7 @@ const fetchTools = async () => {
 const fetchUsers = async () => {
   try {
     loadingUsers.value = true
-    // Ensure Supabase session is restored before making calls
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
     const { data, error } = await supabase
       .from('users')
       .select('*')
@@ -1362,24 +1357,9 @@ const handleSubmitBlog = async () => {
       throw new Error('User not authenticated')
     }
 
-    // Ensure Supabase session is restored before making calls
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-    
-    if (sessionError) {
-      console.error('Session error:', sessionError)
-      throw new Error('Failed to get session. Please sign in again.')
-    }
-    
-    if (!sessionData?.session) {
-      console.error('No session found')
-      throw new Error('No active session. Please sign in again.')
-    }
-    
-    console.log('Session verified:', {
-      userId: sessionData.session.user.id,
-      email: sessionData.session.user.email,
-      expiresAt: sessionData.session.expires_at
-    })
+    // Supabase session is automatically managed - use user from store
+    // The auth listener ensures the store user is always in sync with the session
+    const authorId = user.value.uid
 
     // Validate required fields
     if (!blogForm.value.title || !blogForm.value.title.trim()) {
@@ -1390,18 +1370,6 @@ const handleSubmitBlog = async () => {
     }
     if (!blogForm.value.content || !blogForm.value.content.trim()) {
       throw new Error('Content is required')
-    }
-
-    // Use session user ID to ensure it matches the authenticated user
-    const authorId = sessionData.session.user.id
-    
-    // Verify author_id matches session user
-    if (authorId !== user.value.uid) {
-      console.warn('User ID mismatch:', {
-        sessionUserId: authorId,
-        storeUserId: user.value.uid
-      })
-      // Use session user ID as it's the source of truth
     }
 
     const blogData = {
@@ -1574,8 +1542,7 @@ const handleDeleteBlog = async () => {
 
   try {
     deleting.value = true
-    // Ensure Supabase session is restored before making calls
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
     const { error } = await supabase
       .from('blogs')
       .delete()
@@ -1643,8 +1610,7 @@ const handleSubmitCategory = async () => {
       throw new Error('User not authenticated')
     }
 
-    // Ensure Supabase session is restored before making calls
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
 
     const categoryData = {
       ...categoryForm.value,
@@ -1699,8 +1665,7 @@ const handleDeleteCategory = async () => {
 
   try {
     deleting.value = true
-    // Ensure Supabase session is restored before making calls
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
     const { error } = await supabase
       .from('tutorials_category')
       .delete()
@@ -1763,8 +1728,7 @@ const closePageModal = () => {
 const handleSubmitPage = async () => {
   try {
     submitting.value = true
-    // Ensure Supabase session is restored before making calls
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
 
     const pageData = {
       ...pageForm.value,
@@ -1818,8 +1782,7 @@ const handleDeletePage = async () => {
 
   try {
     deleting.value = true
-    // Ensure Supabase session is restored before making calls
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
     const { error } = await supabase
       .from('tutorial_pages')
       .delete()
@@ -1882,8 +1845,7 @@ const closeToolModal = () => {
 const handleSubmitTool = async () => {
   try {
     submitting.value = true
-    // Ensure Supabase session is restored before making calls
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
 
     if (editingTool.value) {
       const { error } = await supabase
@@ -1932,8 +1894,7 @@ const handleDeleteTool = async () => {
 
   try {
     deleting.value = true
-    // Ensure Supabase session is restored before making calls
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
     const { error } = await supabase
       .from('tools')
       .delete()
@@ -1983,8 +1944,7 @@ const handleSubmitUser = async () => {
 
   try {
     submitting.value = true
-    // Ensure Supabase session is restored before making calls
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
 
     const { error } = await supabase
       .from('users')
@@ -2056,8 +2016,7 @@ const checkAdminStatus = async () => {
   }
 
   try {
-    // Ensure Supabase session is restored before making calls
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
     
     console.log('=== Admin Status Check ===')
     console.log('User from store:', {

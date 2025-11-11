@@ -11,17 +11,6 @@
           <p class="text-text-secondary text-sm">
             A digital community platform for developers, designers, and creators to share knowledge and build innovative solutions.
           </p>
-          <div class="flex space-x-4">
-            <a href="#" class="w-12 h-12 bg-bg-tertiary rounded-lg flex items-center justify-center text-text-tertiary hover:text-primary-500 hover:bg-primary-50 transition-colors" aria-label="Twitter">
-              <Icon name="twitter" :size="24" />
-            </a>
-            <a href="#" class="w-12 h-12 bg-bg-tertiary rounded-lg flex items-center justify-center text-text-tertiary hover:text-primary-500 hover:bg-primary-50 transition-colors" aria-label="GitHub">
-              <Icon name="github" :size="24" />
-            </a>
-            <a href="#" class="w-12 h-12 bg-bg-tertiary rounded-lg flex items-center justify-center text-text-tertiary hover:text-primary-500 hover:bg-primary-50 transition-colors" aria-label="LinkedIn">
-              <Icon name="linkedin" :size="24" />
-            </a>
-          </div>
         </div>
 
         <!-- Quick Links -->
@@ -82,7 +71,6 @@
 
 <script setup lang="ts">
 import { computed, inject } from 'vue'
-import Icon from './Icon.vue'
 
 const currentYear = computed(() => new Date().getFullYear())
 

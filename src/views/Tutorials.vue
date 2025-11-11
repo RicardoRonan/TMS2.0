@@ -463,7 +463,7 @@ const getCategoryIcon = (iconName: string | null | undefined) => {
 
 const fetchTopLevelGroups = async () => {
   try {
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
     const { data, error } = await supabase
       .from('tutorial_top_level_groups')
       .select('*')
@@ -497,7 +497,7 @@ const fetchTopLevelGroups = async () => {
 
 const fetchCategories = async () => {
   try {
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
     const { data, error } = await supabase
       .from('tutorials_category')
       .select('*')
@@ -527,7 +527,7 @@ const fetchCategories = async () => {
 
 const fetchPages = async () => {
   try {
-    await supabase.auth.getSession()
+    // Supabase session is automatically managed - no need to call getSession()
     const { data, error } = await supabase
       .from('tutorial_pages')
       .select('*')
