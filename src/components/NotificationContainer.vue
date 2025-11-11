@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed top-4 left-1/2 -translate-x-1/2 right-4 md:left-auto md:translate-x-0 md:right-4 z-toast space-y-2 max-w-sm w-[calc(100%-2rem)] md:w-auto">
+  <div class="fixed top-4 left-1/2 -translate-x-1/2 right-4 md:left-auto md:translate-x-0 md:right-4 z-toast space-y-2 w-[calc(100%-2rem)] md:w-[384px]">
     <TransitionGroup name="toast" tag="div">
       <div
         v-for="notification in notifications"
