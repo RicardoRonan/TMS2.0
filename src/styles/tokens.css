@@ -48,6 +48,7 @@
 
   /* Typography Scale */
   --font-family-primary: 'Stack Sans Notch', 'Geomanist', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-family-content: 'Stack Sans Text', 'Inter', system-ui, -apple-system, sans-serif;
   --font-family-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
 
   /* Font Sizes */
