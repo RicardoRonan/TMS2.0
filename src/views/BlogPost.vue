@@ -208,9 +208,11 @@
                 :comment="comment"
                 :current-user-id="currentUser?.uid"
                 :all-comments="comments"
+                :replying-to-id="replyingToComment?.id"
                 @reply="handleReply"
                 @edit="handleEdit"
                 @delete="handleDelete"
+                @submit-reply="handleSubmitReply"
               />
             </div>
           </div>
@@ -752,16 +754,98 @@ const handleDelete = async (commentId: string) => {
 
 // Handle reply
 const handleReply = (comment: any) => {
+  if (comment === null) {
+    // Clear reply state
+    replyingToComment.value = null
+    return
+  }
   replyingToComment.value = comment
   editingComment.value = null
   newCommentContent.value = ''
-  // Scroll to comment form
-  nextTick(() => {
-    const formElement = document.querySelector('.comment-form')
-    if (formElement) {
-      formElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+}
+
+// Handle inline reply submission
+const handleSubmitReply = async (content: string, parentId: string) => {
+  if (!isAuthenticated.value || !post.value || !content.trim()) {
+    return
+  }
+
+  const userId = currentUser.value?.uid
+  if (!userId) {
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: 'Please sign in to comment'
+    })
+    return
+  }
+
+  try {
+    isSubmittingComment.value = true
+
+    const { data, error: insertError } = await supabase
+      .from('blog_comments')
+      .insert({
+        blog_id: post.value.id,
+        user_id: userId,
+        parent_id: parentId,
+        content: content.trim()
+      })
+      .select(`
+        *,
+        user:users!user_id (
+          id,
+          display_name,
+          email,
+          photo_url
+        )
+      `)
+      .single()
+
+    if (insertError) {
+      if (insertError.code === '42P01' || 
+          insertError.message?.includes('does not exist') ||
+          insertError.message?.includes('schema cache') ||
+          insertError.code === 'PGRST116') {
+        throw new Error('Comments feature is not available yet. Please run the database migration.')
+      }
+      throw insertError
     }
-  })
+
+    // Add new comment to list
+    const newComment = {
+      id: data.id,
+      blog_id: data.blog_id,
+      user_id: data.user_id,
+      parent_id: data.parent_id,
+      content: data.content,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      user: data.user ? {
+        id: data.user.id,
+        display_name: data.user.display_name,
+        email: data.user.email,
+        photo_url: data.user.photo_url
+      } : null
+    }
+
+    comments.value.push(newComment)
+    // Update count - only count top-level comments
+    commentCount.value = comments.value.filter(c => !c.parent_id).length
+    replyingToComment.value = null
+
+    store.dispatch('addNotification', {
+      type: 'success',
+      message: 'Reply posted successfully'
+    })
+  } catch (err: any) {
+    console.error('Error submitting reply:', err)
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: err.message || 'Failed to post reply. Please try again.'
+    })
+  } finally {
+    isSubmittingComment.value = false
+  }
 }
 
 // Handle edit

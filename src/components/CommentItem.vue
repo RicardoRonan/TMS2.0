@@ -46,25 +46,68 @@
         <!-- Reply Button -->
         <div class="mt-2 flex items-center space-x-4">
           <button
-            class="text-sm text-text-tertiary hover:text-primary-500 transition-colors"
+            class="text-sm text-text-tertiary hover:text-primary-500 transition-colors font-medium"
             @click="$emit('reply', comment)"
           >
             Reply
           </button>
+          <span v-if="replies.length > 0" class="text-xs text-text-tertiary">
+            {{ replies.length }} {{ replies.length === 1 ? 'reply' : 'replies' }}
+          </span>
         </div>
 
-        <!-- Nested Replies -->
-        <div v-if="replies.length > 0" class="mt-4 ml-6 space-y-4 border-l-2 border-border-primary pl-4">
-          <CommentItem
-            v-for="reply in replies"
-            :key="reply.id"
-            :comment="reply"
-            :current-user-id="currentUserId"
-            :all-comments="allComments"
-            @reply="$emit('reply', $event)"
-            @edit="$emit('edit', $event)"
-            @delete="$emit('delete', $event)"
-          />
+        <!-- Inline Reply Form (shown when this comment is being replied to) -->
+        <div v-if="showReplyForm && currentUserId" class="mt-4 ml-0">
+          <div class="bg-bg-secondary rounded-lg p-4 border border-border-primary">
+            <div class="flex items-start space-x-3 mb-3">
+              <div class="flex-1">
+                <p class="text-xs text-text-tertiary mb-2">
+                  Replying to <span class="font-medium text-text-primary">{{ getAuthorName() }}</span>
+                </p>
+                <textarea
+                  v-model="replyContent"
+                  :placeholder="`Write a reply to ${getAuthorName()}...`"
+                  rows="3"
+                  class="w-full px-3 py-2 bg-bg-primary border border-border-primary rounded-lg text-text-primary placeholder-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                ></textarea>
+                <div class="flex items-center justify-end space-x-2 mt-2">
+                  <button
+                    class="text-sm text-text-tertiary hover:text-text-primary transition-colors px-3 py-1"
+                    @click="cancelReply"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    class="text-sm bg-primary-500 hover:bg-primary-600 text-white px-4 py-1.5 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    :disabled="!replyContent.trim()"
+                    @click="submitReply"
+                  >
+                    Post Reply
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else-if="showReplyForm && !currentUserId" class="mt-4 ml-0 p-3 bg-bg-secondary rounded-lg border border-border-primary">
+          <p class="text-sm text-text-secondary mb-2">Please sign in to reply to comments.</p>
+        </div>
+
+        <!-- Nested Replies Thread -->
+        <div v-if="replies.length > 0" class="mt-4 space-y-4">
+          <div class="ml-6 pl-4 border-l-2 border-border-primary space-y-4">
+            <CommentItem
+              v-for="reply in replies"
+              :key="reply.id"
+              :comment="reply"
+              :current-user-id="currentUserId"
+              :all-comments="allComments"
+              :replying-to-id="replyingToId"
+              @reply="handleReply"
+              @edit="$emit('edit', $event)"
+              @delete="$emit('delete', $event)"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -72,21 +115,51 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 interface Props {
   comment: any
   currentUserId?: string
   allComments: any[]
+  replyingToId?: string
 }
 
 const props = defineProps<Props>()
 
-defineEmits<{
+const emit = defineEmits<{
   reply: [comment: any]
   edit: [comment: any]
   delete: [commentId: string]
+  submitReply: [content: string, parentId: string]
 }>()
+
+const showReplyForm = ref(false)
+const replyContent = ref('')
+
+// Watch if this comment is being replied to
+watch(() => props.replyingToId, (newId) => {
+  showReplyForm.value = newId === props.comment.id
+  if (showReplyForm.value) {
+    replyContent.value = ''
+  }
+}, { immediate: true })
+
+const handleReply = (comment: any) => {
+  emit('reply', comment)
+}
+
+const submitReply = () => {
+  if (!replyContent.value.trim()) return
+  emit('submitReply', replyContent.value.trim(), props.comment.id)
+  replyContent.value = ''
+  showReplyForm.value = false
+}
+
+const cancelReply = () => {
+  replyContent.value = ''
+  showReplyForm.value = false
+  emit('reply', null) // Clear the replying state
+}
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
