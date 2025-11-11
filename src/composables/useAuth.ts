@@ -18,12 +18,6 @@ export function useAuth() {
       loading.value = true
       error.value = null
 
-      console.log('Attempting to sign in...', { email, hasPassword: !!password })
-      console.log('Supabase client check:', { 
-        hasClient: !!supabase,
-        hasAuth: !!supabase?.auth
-      })
-
       // Add timeout to prevent hanging
       const signInPromise = supabase.auth.signInWithPassword({
         email,
@@ -39,15 +33,7 @@ export function useAuth() {
         timeoutPromise
       ]) as any
 
-      console.log('Sign in response:', { 
-        hasData: !!data, 
-        hasUser: !!data?.user, 
-        hasSession: !!data?.session,
-        error: authError 
-      })
-
       if (authError) {
-        console.error('Auth error:', authError)
         throw authError
       }
 
@@ -112,7 +98,6 @@ export function useAuth() {
                 }
               }
             } catch (insertErr) {
-              console.error('Error creating user profile:', insertErr)
               // Continue with auth data only
             }
           } else if (!profileError && userData) {
@@ -134,12 +119,10 @@ export function useAuth() {
                 .update({ last_login_at: new Date().toISOString() })
                 .eq('id', data.user.id)
             } catch (updateErr) {
-              console.error('Error updating last login:', updateErr)
               // Non-critical, continue
             }
           }
         } catch (profileErr) {
-          console.error('Error fetching user profile:', profileErr)
           // Continue with auth data only - user is still signed in
         }
 
@@ -198,7 +181,6 @@ export function useAuth() {
 
           // Ignore duplicate key errors (trigger might have already created it)
           if (profileError && profileError.code !== '23505') {
-            console.error('Error creating user profile:', profileError)
             // Don't throw - trigger should have created it
           }
 
@@ -348,8 +330,6 @@ export function useAuth() {
 
     // Listen for auth changes - handle all events properly
     authListener = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change in useAuth:', event)
-      
       switch (event) {
         case 'SIGNED_IN':
         case 'TOKEN_REFRESHED':
@@ -396,7 +376,6 @@ export function useAuth() {
 
       if (profileError && profileError.code !== 'PGRST116') {
         // PGRST116 is "not found" - user might not have profile yet
-        console.error('Error fetching user data:', profileError)
       }
 
       store.dispatch('setUser', {
@@ -409,7 +388,6 @@ export function useAuth() {
         lastLoginAt: userData?.last_login_at || new Date().toISOString()
       })
     } catch (err) {
-      console.error('Error fetching user data:', err)
       // Fallback to auth user data
       store.dispatch('setUser', {
         uid: supabaseUser.id,

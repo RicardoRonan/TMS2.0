@@ -54,7 +54,6 @@ async function loadUserData(supabaseUser: User) {
       .single()
 
     if (profileError && profileError.code !== 'PGRST116') {
-      console.error('Error fetching user data:', profileError)
     }
 
     store.dispatch('setUser', {
@@ -67,7 +66,6 @@ async function loadUserData(supabaseUser: User) {
       lastLoginAt: userData?.last_login_at || new Date().toISOString()
     })
   } catch (err: any) {
-    console.error('Error loading user data:', err)
     // Still set basic user data from auth
     store.dispatch('setUser', {
       uid: supabaseUser.id,
@@ -94,14 +92,11 @@ onMounted(() => {
   
   // Safety: Reset loading state if it's stuck
   if (store.getters.isLoading) {
-    console.warn('Loading state was stuck, resetting...')
     store.dispatch('setLoading', false)
   }
 
   // Set up auth state change listener to keep user state in sync
   authListener = supabase.auth.onAuthStateChange(async (event, session) => {
-    console.log('Auth state changed:', event, session?.user?.email)
-    
     // Handle different auth events
     switch (event) {
       case 'SIGNED_IN':
@@ -138,7 +133,6 @@ onMounted(() => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession()
         if (error) {
-          console.error('Error getting session on visibility change:', error)
           store.dispatch('setUser', null)
         } else if (!session) {
           store.dispatch('setUser', null)
@@ -147,7 +141,6 @@ onMounted(() => {
           await loadUserData(session.user)
         }
       } catch (err) {
-        console.error('Error checking session on visibility change:', err)
       }
     }
   }
