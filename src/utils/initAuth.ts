@@ -5,26 +5,42 @@ import type { User } from '@supabase/supabase-js'
 
 export async function initializeAuth(store: any): Promise<void> {
   try {
-    // Check for existing session (with timeout to prevent hanging)
+    // Check if Supabase is properly configured
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('⚠️ Cannot initialize auth: Supabase environment variables are missing')
+      console.error('Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables')
+      return
+    }
+
+    // Check for existing session (with longer timeout for better reliability)
+    // This is a backup - the auth listener's INITIAL_SESSION event is the primary handler
     const sessionPromise = supabase.auth.getSession()
     const timeoutPromise = new Promise((resolve) => 
-      setTimeout(() => resolve({ data: { session: null } }), 5000)
+      setTimeout(() => resolve({ data: { session: null } }), 10000)
     )
     
     const result = await Promise.race([sessionPromise, timeoutPromise]) as any
     const { data: { session }, error } = result || { data: { session: null }, error: null }
     
     if (error) {
+      console.warn('Auth initialization error:', error)
       return
     }
     
     if (session?.user) {
+      console.log('Session found during auth init, loading user data')
       await loadUserData(session.user, store)
     } else {
+      console.log('No session found during auth init')
       store.dispatch('setUser', null)
     }
   } catch (err: any) {
+    console.warn('Auth initialization failed:', err)
     // Don't throw - allow app to continue loading
+    // The auth listener will handle session restoration
   }
 }
 

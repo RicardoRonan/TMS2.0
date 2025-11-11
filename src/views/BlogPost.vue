@@ -905,6 +905,7 @@ onBeforeRouteUpdate((to, from, next) => {
 
 .markdown-content :deep(h3) {
   @apply text-2xl font-semibold text-text-primary mt-5 mb-2;
+  font-family: var(--font-family-content);
 }
 
 .markdown-content :deep(h4) {
