@@ -73,9 +73,10 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <HIGCard v-for="post in featuredPosts" :key="post.id" class="hover:shadow-hig-lg transition-shadow">
             <div class="p-6">
-              <div class="aspect-video bg-bg-tertiary rounded-lg mb-4 flex items-center justify-center">
+              <!-- Featured Image - Commented out for now -->
+              <!-- <div class="aspect-video bg-bg-tertiary rounded-lg mb-4 flex items-center justify-center">
                 <span class="text-text-tertiary">Featured Image</span>
-              </div>
+              </div> -->
               <div class="space-y-3">
                 <div class="flex items-center space-x-2 text-sm text-text-tertiary">
                   <span>{{ post.category }}</span>
@@ -324,17 +325,16 @@ const fetchStats = async () => {
   try {
     await supabase.auth.getSession()
     
-    // Fetch users count (may fail due to RLS, that's okay)
+    // Fetch users count using database function
     try {
-      const { count: usersCount, error: usersError } = await supabase
-        .from('users')
-        .select('*', { count: 'exact', head: true })
+      const { data: usersCount, error: usersError } = await supabase
+        .rpc('get_user_count')
       
-      if (!usersError && usersCount !== null) {
+      if (!usersError && usersCount !== null && usersCount !== undefined) {
         stats.value.activeMembers = usersCount
       }
     } catch (err) {
-      console.log('Could not fetch users count (RLS may be blocking):', err)
+      console.log('Could not fetch users count:', err)
       // Keep default value
     }
     

@@ -280,17 +280,16 @@ const fetchStats = async () => {
   try {
     await supabase.auth.getSession()
     
-    // Fetch users count (may fail due to RLS, that's okay)
+    // Fetch users count using database function
     try {
-      const { count: usersCount, error: usersError } = await supabase
-        .from('users')
-        .select('*', { count: 'exact', head: true })
+      const { data: usersCount, error: usersError } = await supabase
+        .rpc('get_user_count')
       
-      if (!usersError && usersCount !== null) {
+      if (!usersError && usersCount !== null && usersCount !== undefined) {
         stats.value.activeMembers = usersCount
       }
     } catch (err) {
-      console.log('Could not fetch users count (RLS may be blocking):', err)
+      console.log('Could not fetch users count:', err)
       // Keep default value
     }
     

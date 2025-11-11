@@ -176,7 +176,8 @@
                   :key="post.id"
                   class="border border-border-primary rounded-lg overflow-hidden hover:shadow-hig-lg transition-shadow"
                 >
-                  <div v-if="post.featured_image_url" class="aspect-video bg-bg-tertiary overflow-hidden">
+                  <!-- Featured Image - Commented out for now -->
+                  <!-- <div v-if="post.featured_image_url" class="aspect-video bg-bg-tertiary overflow-hidden">
                     <img
                       :src="post.featured_image_url"
                       :alt="post.title"
@@ -185,7 +186,7 @@
                   </div>
                   <div v-else class="aspect-video bg-bg-tertiary flex items-center justify-center">
                     <span class="text-text-tertiary">No Image</span>
-                  </div>
+                  </div> -->
                   <div class="p-4">
                     <div class="flex items-center space-x-2 text-sm text-text-tertiary mb-2">
                       <span v-if="post.category" class="badge badge-secondary">{{ post.category }}</span>

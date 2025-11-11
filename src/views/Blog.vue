@@ -75,7 +75,8 @@
         <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <HIGCard v-for="post in paginatedPosts" :key="post.id" class="hover:shadow-hig-lg transition-shadow">
             <div class="p-6">
-              <div v-if="post.featuredImageUrl" class="aspect-video bg-bg-tertiary rounded-lg mb-4 overflow-hidden">
+              <!-- Featured Image - Commented out for now -->
+              <!-- <div v-if="post.featuredImageUrl" class="aspect-video bg-bg-tertiary rounded-lg mb-4 overflow-hidden">
                 <img 
                   :src="post.featuredImageUrl" 
                   :alt="post.title"
@@ -84,7 +85,7 @@
               </div>
               <div v-else class="aspect-video bg-bg-tertiary rounded-lg mb-4 flex items-center justify-center">
                 <span class="text-text-tertiary">No Image</span>
-              </div>
+              </div> -->
               <div class="space-y-3">
                 <div class="flex items-center space-x-2 text-sm text-text-tertiary">
                   <span v-if="post.category" class="badge badge-secondary">{{ post.category }}</span>

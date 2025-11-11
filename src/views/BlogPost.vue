@@ -72,14 +72,14 @@
           </div>
         </header>
 
-        <!-- Featured Image -->
-        <div v-if="post.featuredImageUrl" class="aspect-video bg-bg-tertiary rounded-lg mb-12 overflow-hidden">
+        <!-- Featured Image - Commented out for now -->
+        <!-- <div v-if="post.featuredImageUrl" class="aspect-video bg-bg-tertiary rounded-lg mb-12 overflow-hidden">
           <img 
             :src="post.featuredImageUrl" 
             :alt="post.title"
             class="w-full h-full object-cover"
           />
-        </div>
+        </div> -->
 
         <!-- Article Content -->
         <div class="markdown-content prose prose-invert max-w-none">
