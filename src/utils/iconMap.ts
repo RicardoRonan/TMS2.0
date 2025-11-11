@@ -76,7 +76,8 @@ import {
   faGithub,
   faLinkedin,
   faFacebook,
-  faPinterest
+  faPinterest,
+  faReddit
 } from '@fortawesome/free-brands-svg-icons'
 
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core'
@@ -165,6 +166,7 @@ export const iconMap: Record<string, IconMapping> = {
   'github': { icon: faGithub },
   'pinterest': { icon: faPinterest },
   'linkedin': { icon: faLinkedin },
+  'reddit': { icon: faReddit },
   
   // Media
   'image': { icon: faImage },

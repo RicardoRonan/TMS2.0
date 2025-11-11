@@ -65,6 +65,9 @@
             <div class="flex items-center space-x-4">
               <span class="badge badge-secondary">{{ post.category }}</span>
               <span>{{ post.readTime }} min read</span>
+              <span v-if="commentCount > 0" class="text-text-tertiary">
+                {{ commentCount }} {{ commentCount === 1 ? 'comment' : 'comments' }}
+              </span>
             </div>
           </div>
         </header>
@@ -120,24 +123,123 @@
             <button
               class="p-2 text-text-tertiary hover:text-primary-500 transition-colors"
               title="Share"
-              @click="sharePost"
+              @click="showShareModal = true"
             >
               <Icon name="share" :size="20" />
             </button>
           </div>
         </div>
+
+        <!-- Comments Section -->
+        <div class="mt-12 pt-8 border-t border-border-primary">
+          <h2 class="text-2xl font-bold text-text-primary mb-6">
+            Comments
+            <span v-if="commentCount > 0" class="text-lg font-normal text-text-tertiary">
+              ({{ commentCount }})
+            </span>
+          </h2>
+
+          <!-- Comment Form -->
+          <div v-if="isAuthenticated" class="mb-8 comment-form">
+            <div class="flex items-start space-x-4">
+              <div v-if="currentUser?.photoURL" class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                <img 
+                  :src="currentUser.photoURL" 
+                  :alt="currentUser.displayName || 'User'"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div v-else class="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <span class="text-white font-medium text-sm">{{ getCurrentUserInitials() }}</span>
+              </div>
+              <div class="flex-1">
+                <FullScreenTextarea
+                  v-model="newCommentContent"
+                  :placeholder="editingComment ? 'Edit your comment...' : 'Write a comment...'"
+                  :rows="4"
+                  class="mb-3"
+                />
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-2">
+                    <HIGButton
+                      v-if="editingComment"
+                      variant="secondary"
+                      size="sm"
+                      @click="cancelEdit"
+                    >
+                      Cancel
+                    </HIGButton>
+                    <HIGButton
+                      variant="primary"
+                      size="sm"
+                      :disabled="!newCommentContent.trim() || isSubmittingComment"
+                      :loading="isSubmittingComment"
+                      @click="editingComment ? updateComment() : submitComment()"
+                    >
+                      {{ editingComment ? 'Update' : 'Post' }} Comment
+                    </HIGButton>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="mb-8 p-4 bg-bg-secondary rounded-lg border border-border-primary">
+            <p class="text-text-secondary mb-3">Please sign in to leave a comment.</p>
+            <HIGButton variant="primary" size="sm" @click="$router.push('/auth')">
+              Sign In
+            </HIGButton>
+          </div>
+
+          <!-- Comments List -->
+          <div v-if="loadingComments" class="text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+            <p class="text-text-tertiary mt-2">Loading comments...</p>
+          </div>
+          <div v-else-if="comments.length === 0" class="text-center py-8 text-text-tertiary">
+            <p>No comments yet. Be the first to comment!</p>
+          </div>
+          <div v-else class="space-y-6">
+            <div
+              v-for="comment in topLevelComments"
+              :key="comment.id"
+              class="comment-item"
+            >
+              <CommentItem
+                :comment="comment"
+                :current-user-id="currentUser?.uid"
+                :all-comments="comments"
+                @reply="handleReply"
+                @edit="handleEdit"
+                @delete="handleDelete"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </article>
+
+    <!-- Share Modal -->
+    <ShareModal
+      v-if="post"
+      v-model:is-open="showShareModal"
+      :title="post.title"
+      :url="shareUrl"
+      :description="post.excerpt || post.title"
+      @copied="handleShareCopied"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { useStore } from 'vuex'
 import { supabase } from '../supabase'
 import HIGButton from '../components/hig/HIGButton.vue'
 import Icon from '../components/Icon.vue'
+import ShareModal from '../components/ShareModal.vue'
+import FullScreenTextarea from '../components/FullScreenTextarea.vue'
+import CommentItem from '../components/CommentItem.vue'
 import { renderMarkdown } from '../utils/markdown'
 import 'highlight.js/styles/vs2015.css'
 
@@ -149,6 +251,16 @@ const error = ref<string | null>(null)
 const post = ref<any>(null)
 const likeCount = ref(0)
 const isLiking = ref(false)
+const showShareModal = ref(false)
+
+// Comments state
+const comments = ref<any[]>([])
+const loadingComments = ref(false)
+const newCommentContent = ref('')
+const isSubmittingComment = ref(false)
+const editingComment = ref<any>(null)
+const replyingToComment = ref<any>(null)
+const commentCount = ref(0)
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', { 
@@ -179,6 +291,28 @@ const renderedContent = computed(() => {
 
 const currentUser = computed(() => store.getters.currentUser)
 const isAuthenticated = computed(() => store.getters.isAuthenticated)
+const shareUrl = computed(() => window.location.href)
+
+const getCurrentUserInitials = () => {
+  const user = currentUser.value
+  if (user?.displayName) {
+    const parts = user.displayName.trim().split(' ')
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    }
+    return user.displayName.substring(0, 2).toUpperCase()
+  }
+  if (user?.email) {
+    return user.email.substring(0, 2).toUpperCase()
+  }
+  return 'AN'
+}
+
+const topLevelComments = computed(() => {
+  return comments.value
+    .filter(comment => !comment.parent_id)
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+})
 
 const toggleLike = async () => {
   if (!isAuthenticated.value) {
@@ -208,8 +342,11 @@ const toggleLike = async () => {
         .eq('user_id', userId)
 
       if (unlikeError) {
-        // If table doesn't exist, show helpful message
-        if (unlikeError.code === '42P01' || unlikeError.message?.includes('does not exist')) {
+        // If table doesn't exist or not in schema cache, show helpful message
+        if (unlikeError.code === '42P01' || 
+            unlikeError.message?.includes('does not exist') ||
+            unlikeError.message?.includes('schema cache') ||
+            unlikeError.code === 'PGRST116') {
           throw new Error('Likes feature is not available yet. Please run the database migration.')
         }
         throw unlikeError
@@ -231,8 +368,11 @@ const toggleLike = async () => {
         })
 
       if (likeError) {
-        // If table doesn't exist, show helpful message
-        if (likeError.code === '42P01' || likeError.message?.includes('does not exist')) {
+        // If table doesn't exist or not in schema cache, show helpful message
+        if (likeError.code === '42P01' || 
+            likeError.message?.includes('does not exist') ||
+            likeError.message?.includes('schema cache') ||
+            likeError.code === 'PGRST116') {
           throw new Error('Likes feature is not available yet. Please run the database migration.')
         }
         // If it's a unique constraint error, the like already exists
@@ -259,47 +399,11 @@ const toggleLike = async () => {
   }
 }
 
-const sharePost = async () => {
-  if (!post.value) return
-
-  const shareData = {
-    title: post.value.title,
-    text: post.value.excerpt || post.value.title,
-    url: window.location.href
-  }
-
-  // Try Web Share API first (mobile/desktop browsers that support it)
-  if (navigator.share) {
-    try {
-      await navigator.share(shareData)
-      store.dispatch('addNotification', {
-        type: 'success',
-        message: 'Article shared successfully'
-      })
-      return
-    } catch (err: any) {
-      // User cancelled sharing or error occurred
-      if (err.name !== 'AbortError') {
-        console.error('Error sharing:', err)
-      }
-      // Fall through to clipboard fallback
-    }
-  }
-
-  // Fallback: copy to clipboard
-  try {
-    await navigator.clipboard.writeText(window.location.href)
-    store.dispatch('addNotification', {
-      type: 'success',
-      message: 'Link copied to clipboard!'
-    })
-  } catch (err) {
-    console.error('Error copying to clipboard:', err)
-    store.dispatch('addNotification', {
-      type: 'error',
-      message: 'Failed to copy link. Please try again.'
-    })
-  }
+const handleShareCopied = () => {
+  store.dispatch('addNotification', {
+    type: 'success',
+    message: 'Link copied to clipboard!'
+  })
 }
 
 // Fetch blog post function
@@ -353,8 +457,11 @@ const fetchBlogPost = async (slug: string) => {
           .eq('user_id', currentUserId)
           .maybeSingle()
         
-        // If table doesn't exist, likeCheckError will be set, but we'll continue
-        if (!likeCheckError || likeCheckError.code !== 'PGRST116') {
+        // If table doesn't exist or not in schema cache, likeCheckError will be set, but we'll continue
+        if (!likeCheckError || 
+            (likeCheckError.code !== 'PGRST116' && 
+             !likeCheckError.message?.includes('schema cache') &&
+             likeCheckError.code !== '42P01')) {
           userLiked = !!likeData
         }
       }
@@ -365,8 +472,16 @@ const fetchBlogPost = async (slug: string) => {
         .select('*', { count: 'exact', head: true })
         .eq('blog_id', data.id)
 
-      // If table doesn't exist, countError will be set, but we'll use 0
+      // If table doesn't exist or not in schema cache, countError will be set, but we'll use 0
       if (!countError) {
+        likeCountValue = count || 0
+      } else if (countError.message?.includes('schema cache') || 
+                 countError.code === '42P01' ||
+                 countError.code === 'PGRST116') {
+        // Table doesn't exist or not in schema cache - use 0
+        likeCountValue = 0
+      } else {
+        // Other error - still try to use count if available
         likeCountValue = count || 0
       }
     } catch (err) {
@@ -392,12 +507,282 @@ const fetchBlogPost = async (slug: string) => {
     }
 
     likeCount.value = likeCountValue
+
+    // Fetch comments after post is loaded
+    await fetchComments(data.id)
   } catch (err: any) {
     console.error('Error fetching blog post:', err)
     error.value = err.message || 'Failed to load article. Please try again later.'
   } finally {
     loading.value = false
   }
+}
+
+// Fetch comments function
+const fetchComments = async (blogId: string) => {
+  if (!blogId) return
+
+  try {
+    loadingComments.value = true
+
+    const { data, error: commentsError } = await supabase
+      .from('blog_comments')
+      .select(`
+        *,
+        user:users!user_id (
+          id,
+          display_name,
+          email,
+          photo_url
+        )
+      `)
+      .eq('blog_id', blogId)
+      .order('created_at', { ascending: true })
+
+    if (commentsError) {
+      // If table doesn't exist, that's okay - just use empty array
+      if (commentsError.code === '42P01' || 
+          commentsError.message?.includes('does not exist') ||
+          commentsError.message?.includes('schema cache') ||
+          commentsError.code === 'PGRST116') {
+        comments.value = []
+        commentCount.value = 0
+        return
+      }
+      throw commentsError
+    }
+
+    comments.value = (data || []).map((comment: any) => ({
+      id: comment.id,
+      blog_id: comment.blog_id,
+      user_id: comment.user_id,
+      parent_id: comment.parent_id,
+      content: comment.content,
+      created_at: comment.created_at,
+      updated_at: comment.updated_at,
+      user: comment.user ? {
+        id: comment.user.id,
+        display_name: comment.user.display_name,
+        email: comment.user.email,
+        photo_url: comment.user.photo_url
+      } : null
+    }))
+
+    // Count only top-level comments (not replies)
+    commentCount.value = comments.value.filter(c => !c.parent_id).length
+  } catch (err: any) {
+    console.error('Error fetching comments:', err)
+    comments.value = []
+    commentCount.value = 0
+  } finally {
+    loadingComments.value = false
+  }
+}
+
+// Submit new comment
+const submitComment = async () => {
+  if (!isAuthenticated.value || !post.value || !newCommentContent.value.trim()) {
+    return
+  }
+
+  const userId = currentUser.value?.uid
+  if (!userId) {
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: 'Please sign in to comment'
+    })
+    return
+  }
+
+  try {
+    isSubmittingComment.value = true
+
+    const { data, error: insertError } = await supabase
+      .from('blog_comments')
+      .insert({
+        blog_id: post.value.id,
+        user_id: userId,
+        parent_id: replyingToComment.value?.id || null,
+        content: newCommentContent.value.trim()
+      })
+      .select(`
+        *,
+        user:users!user_id (
+          id,
+          display_name,
+          email,
+          photo_url
+        )
+      `)
+      .single()
+
+    if (insertError) {
+      if (insertError.code === '42P01' || 
+          insertError.message?.includes('does not exist') ||
+          insertError.message?.includes('schema cache') ||
+          insertError.code === 'PGRST116') {
+        throw new Error('Comments feature is not available yet. Please run the database migration.')
+      }
+      throw insertError
+    }
+
+    // Add new comment to list
+    const newComment = {
+      id: data.id,
+      blog_id: data.blog_id,
+      user_id: data.user_id,
+      parent_id: data.parent_id,
+      content: data.content,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      user: data.user ? {
+        id: data.user.id,
+        display_name: data.user.display_name,
+        email: data.user.email,
+        photo_url: data.user.photo_url
+      } : null
+    }
+
+    comments.value.push(newComment)
+    // Update count - only count top-level comments
+    commentCount.value = comments.value.filter(c => !c.parent_id).length
+    newCommentContent.value = ''
+    replyingToComment.value = null
+
+    store.dispatch('addNotification', {
+      type: 'success',
+      message: 'Comment posted successfully'
+    })
+  } catch (err: any) {
+    console.error('Error submitting comment:', err)
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: err.message || 'Failed to post comment. Please try again.'
+    })
+  } finally {
+    isSubmittingComment.value = false
+  }
+}
+
+// Update comment
+const updateComment = async () => {
+  if (!editingComment.value || !newCommentContent.value.trim()) {
+    return
+  }
+
+  try {
+    isSubmittingComment.value = true
+
+    const { error: updateError } = await supabase
+      .from('blog_comments')
+      .update({
+        content: newCommentContent.value.trim(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', editingComment.value.id)
+
+    if (updateError) {
+      throw updateError
+    }
+
+    // Update comment in list
+    const commentIndex = comments.value.findIndex(c => c.id === editingComment.value.id)
+    if (commentIndex !== -1) {
+      comments.value[commentIndex].content = newCommentContent.value.trim()
+      comments.value[commentIndex].updated_at = new Date().toISOString()
+    }
+
+    newCommentContent.value = ''
+    editingComment.value = null
+
+    store.dispatch('addNotification', {
+      type: 'success',
+      message: 'Comment updated successfully'
+    })
+  } catch (err: any) {
+    console.error('Error updating comment:', err)
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: err.message || 'Failed to update comment. Please try again.'
+    })
+  } finally {
+    isSubmittingComment.value = false
+  }
+}
+
+// Delete comment
+const handleDelete = async (commentId: string) => {
+  if (!confirm('Are you sure you want to delete this comment?')) {
+    return
+  }
+
+  try {
+    const { error: deleteError } = await supabase
+      .from('blog_comments')
+      .delete()
+      .eq('id', commentId)
+
+    if (deleteError) {
+      throw deleteError
+    }
+
+    // Remove comment and all its children from list
+    const removeCommentAndChildren = (id: string) => {
+      comments.value = comments.value.filter(c => c.id !== id)
+      const children = comments.value.filter(c => c.parent_id === id)
+      children.forEach(child => removeCommentAndChildren(child.id))
+    }
+
+    removeCommentAndChildren(commentId)
+    // Update count - only count top-level comments
+    commentCount.value = comments.value.filter(c => !c.parent_id).length
+
+    store.dispatch('addNotification', {
+      type: 'success',
+      message: 'Comment deleted successfully'
+    })
+  } catch (err: any) {
+    console.error('Error deleting comment:', err)
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: err.message || 'Failed to delete comment. Please try again.'
+    })
+  }
+}
+
+// Handle reply
+const handleReply = (comment: any) => {
+  replyingToComment.value = comment
+  editingComment.value = null
+  newCommentContent.value = ''
+  // Scroll to comment form
+  nextTick(() => {
+    const formElement = document.querySelector('.comment-form')
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+  })
+}
+
+// Handle edit
+const handleEdit = (comment: any) => {
+  editingComment.value = comment
+  replyingToComment.value = null
+  newCommentContent.value = comment.content
+  // Scroll to comment form
+  nextTick(() => {
+    const formElement = document.querySelector('.comment-form')
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+  })
+}
+
+// Cancel edit
+const cancelEdit = () => {
+  editingComment.value = null
+  replyingToComment.value = null
+  newCommentContent.value = ''
 }
 
 // Fetch on mount

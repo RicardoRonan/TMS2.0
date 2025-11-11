@@ -359,6 +359,99 @@ CREATE INDEX IF NOT EXISTS idx_blog_likes_user_id ON public.blog_likes(user_id);
 CREATE INDEX IF NOT EXISTS idx_blog_likes_blog_user ON public.blog_likes(blog_id, user_id);
 
 -- ============================================
+-- PART 7.6: BLOG COMMENTS TABLE
+-- ============================================
+
+-- Create blog_comments table (with failsafe)
+CREATE TABLE IF NOT EXISTS public.blog_comments (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  blog_id UUID NOT NULL REFERENCES public.blogs(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  parent_id UUID REFERENCES public.blog_comments(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable Row Level Security for blog_comments (idempotent)
+ALTER TABLE public.blog_comments ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist (failsafe)
+DROP POLICY IF EXISTS "Users can view comments on published blogs" ON public.blog_comments;
+DROP POLICY IF EXISTS "Authenticated users can create comments" ON public.blog_comments;
+DROP POLICY IF EXISTS "Users can update their own comments" ON public.blog_comments;
+DROP POLICY IF EXISTS "Users can delete their own comments" ON public.blog_comments;
+DROP POLICY IF EXISTS "Admins can delete any comment" ON public.blog_comments;
+
+-- Create policies for blog_comments table
+-- Everyone can view comments on published blogs
+CREATE POLICY "Users can view comments on published blogs"
+  ON public.blog_comments
+  FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.blogs
+      WHERE blogs.id = blog_comments.blog_id
+      AND blogs.published = TRUE
+    )
+  );
+
+-- Authenticated users can create comments
+CREATE POLICY "Authenticated users can create comments"
+  ON public.blog_comments
+  FOR INSERT
+  WITH CHECK (
+    auth.uid() IS NOT NULL
+    AND auth.uid() = user_id
+    AND EXISTS (
+      SELECT 1 FROM public.blogs
+      WHERE blogs.id = blog_comments.blog_id
+      AND blogs.published = TRUE
+    )
+  );
+
+-- Users can update their own comments
+CREATE POLICY "Users can update their own comments"
+  ON public.blog_comments
+  FOR UPDATE
+  USING (
+    auth.uid() = user_id
+  )
+  WITH CHECK (
+    auth.uid() = user_id
+  );
+
+-- Users can delete their own comments
+CREATE POLICY "Users can delete their own comments"
+  ON public.blog_comments
+  FOR DELETE
+  USING (
+    auth.uid() = user_id
+  );
+
+-- Admins can delete any comment
+CREATE POLICY "Admins can delete any comment"
+  ON public.blog_comments
+  FOR DELETE
+  USING (
+    public.is_admin()
+  );
+
+-- Create trigger for blog_comments updated_at
+DROP TRIGGER IF EXISTS set_blog_comments_updated_at ON public.blog_comments;
+
+CREATE TRIGGER set_blog_comments_updated_at
+  BEFORE UPDATE ON public.blog_comments
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_updated_at();
+
+-- Create indexes for blog_comments (IF NOT EXISTS is failsafe)
+CREATE INDEX IF NOT EXISTS idx_blog_comments_blog_id ON public.blog_comments(blog_id);
+CREATE INDEX IF NOT EXISTS idx_blog_comments_user_id ON public.blog_comments(user_id);
+CREATE INDEX IF NOT EXISTS idx_blog_comments_parent_id ON public.blog_comments(parent_id);
+CREATE INDEX IF NOT EXISTS idx_blog_comments_created_at ON public.blog_comments(created_at DESC);
+
+-- ============================================
 -- PART 8: TUTORIALS TABLE
 -- ============================================
 
