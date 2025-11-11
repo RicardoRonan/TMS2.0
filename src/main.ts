@@ -68,7 +68,13 @@ import {
   faAward,
   faLightbulb,
   faHeart,
-  faBook
+  faBook,
+  faDatabase,
+  faLaptopCode,
+  faRobot,
+  faGears,
+  faFileCode,
+  faCircleNodes
 } from '@fortawesome/free-solid-svg-icons'
 
 import {
@@ -142,6 +148,12 @@ library.add(
   faLightbulb,
   faHeart,
   faBook,
+  faDatabase,
+  faLaptopCode,
+  faRobot,
+  faGears,
+  faFileCode,
+  faCircleNodes,
   faTwitter,
   faGithub,
   faLinkedin,

@@ -141,7 +141,7 @@
       <div class="container mx-auto px-4">
         <div class="max-w-4xl mx-auto text-center">
           <h2 class="text-3xl md:text-4xl font-bold text-text-primary mb-6">
-            Join Our Growing Community
+            Join Our Community
           </h2>
           <p class="text-lg text-text-secondary mb-8">
             Connect with thousands of developers, designers, and creators who are building the future together.
@@ -149,15 +149,15 @@
           
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             <div class="text-center">
-              <div class="text-4xl font-bold text-primary-500 mb-2">10K+</div>
+              <div class="text-4xl font-bold text-primary-500 mb-2">{{ formatCount(stats.activeMembers) }}</div>
               <div class="text-text-secondary">Active Members</div>
             </div>
             <div class="text-center">
-              <div class="text-4xl font-bold text-primary-500 mb-2">500+</div>
+              <div class="text-4xl font-bold text-primary-500 mb-2">{{ formatCount(stats.publishedArticles) }}</div>
               <div class="text-text-secondary">Published Articles</div>
             </div>
             <div class="text-center">
-              <div class="text-4xl font-bold text-primary-500 mb-2">100+</div>
+              <div class="text-4xl font-bold text-primary-500 mb-2">{{ formatCount(stats.curatedTools) }}</div>
               <div class="text-text-secondary">Curated Tools</div>
             </div>
           </div>
@@ -177,7 +177,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { 
   faCodeBranch, 
@@ -189,6 +189,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import HIGCard from '../components/hig/HIGCard.vue'
 import HIGButton from '../components/hig/HIGButton.vue'
+import { supabase } from '../supabase'
 
 // Values data
 const values = ref([
@@ -258,6 +259,75 @@ const team = ref([
   }
 ])
 
+// Stats
+const stats = ref({
+  activeMembers: 0,
+  publishedArticles: 0,
+  curatedTools: 0
+})
+
+// Format count for display
+const formatCount = (count: number): string => {
+  if (count >= 1000) {
+    const k = Math.floor(count / 1000)
+    return `${k}K+`
+  }
+  return `${count}+`
+}
+
+// Fetch stats from database
+const fetchStats = async () => {
+  try {
+    await supabase.auth.getSession()
+    
+    // Fetch users count (may fail due to RLS, that's okay)
+    try {
+      const { count: usersCount, error: usersError } = await supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true })
+      
+      if (!usersError && usersCount !== null) {
+        stats.value.activeMembers = usersCount
+      }
+    } catch (err) {
+      console.log('Could not fetch users count (RLS may be blocking):', err)
+      // Keep default value
+    }
+    
+    // Fetch published blogs count
+    try {
+      const { count: blogsCount, error: blogsError } = await supabase
+        .from('blogs')
+        .select('*', { count: 'exact', head: true })
+        .eq('published', true)
+      
+      if (!blogsError && blogsCount !== null) {
+        stats.value.publishedArticles = blogsCount
+      }
+    } catch (err) {
+      console.log('Could not fetch blogs count:', err)
+      // Keep default value
+    }
+    
+    // Fetch tools count
+    try {
+      const { count: toolsCount, error: toolsError } = await supabase
+        .from('tools')
+        .select('*', { count: 'exact', head: true })
+      
+      if (!toolsError && toolsCount !== null) {
+        stats.value.curatedTools = toolsCount
+      }
+    } catch (err) {
+      console.log('Could not fetch tools count:', err)
+      // Keep default value
+    }
+  } catch (error) {
+    console.error('Error fetching stats:', error)
+    // Keep default values of 0 if fetch fails
+  }
+}
+
 // Methods
 const scrollToContact = () => {
   // This would scroll to contact section if it exists
@@ -267,5 +337,9 @@ const scrollToContact = () => {
 const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
+
+onMounted(() => {
+  fetchStats()
+})
 </script>
 

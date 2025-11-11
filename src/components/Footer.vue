@@ -39,10 +39,10 @@
         <div class="space-y-4">
           <h3 class="text-sm font-semibold text-text-primary uppercase tracking-wider">Community</h3>
           <ul class="space-y-2">
-            <li><a href="#" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Discord</a></li>
-            <li><a href="#" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">GitHub</a></li>
-            <li><a href="#" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Newsletter</a></li>
-            <li><a href="#" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Support</a></li>
+            <li><router-link to="/coming-soon" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Discord</router-link></li>
+            <li><router-link to="/coming-soon" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">GitHub</router-link></li>
+            <li><router-link to="/coming-soon" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Newsletter</router-link></li>
+            <li><router-link to="/coming-soon" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Support</router-link></li>
           </ul>
         </div>
 
@@ -50,10 +50,10 @@
         <div class="space-y-4">
           <h3 class="text-sm font-semibold text-text-primary uppercase tracking-wider">Legal</h3>
           <ul class="space-y-2">
-            <li><a href="#" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Privacy Policy</a></li>
-            <li><a href="#" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Terms of Service</a></li>
-            <li><a href="#" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Cookie Policy</a></li>
-            <li><a href="#" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">DMCA</a></li>
+            <li><router-link to="/legal/privacy-policy" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Privacy Policy</router-link></li>
+            <li><router-link to="/legal/terms-of-service" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Terms of Service</router-link></li>
+            <li><router-link to="/legal/cookie-policy" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Cookie Policy</router-link></li>
+            <li><router-link to="/legal/dmca" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">DMCA</router-link></li>
           </ul>
         </div>
       </div>

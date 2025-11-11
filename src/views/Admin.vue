@@ -124,42 +124,61 @@
                   <p class="text-text-secondary mt-4">Loading pages...</p>
                 </div>
                 <div v-else-if="pages.length > 0" class="space-y-4">
-                  <HIGCard v-for="page in pages" :key="page.id" class="hover:shadow-hig-lg transition-shadow">
-                    <div class="p-4 md:p-6">
-                      <div class="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4">
-                        <div class="flex-1 min-w-0">
-                          <div class="flex flex-wrap items-center gap-2 mb-2">
-                            <h4 class="text-base sm:text-lg font-semibold text-text-primary break-words">{{ page.title }}</h4>
-                            <span 
-                              :class="[
-                                'px-2 py-1 rounded text-xs font-medium whitespace-nowrap',
-                                page.published 
-                                  ? 'bg-success-500/20 text-success-500' 
-                                  : 'bg-warning-500/20 text-warning-500'
-                              ]"
-                            >
-                              {{ page.published ? 'Published' : 'Draft' }}
-                            </span>
-                          </div>
-                          <div class="flex flex-wrap items-center gap-2 text-sm text-text-tertiary mb-2">
-                            <span>Category: {{ getCategoryName(page.category_id) }}</span>
-                            <span>•</span>
-                            <span>Order: {{ page.page_order }}</span>
-                            <span>•</span>
-                            <span>{{ formatDate(page.created_at) }}</span>
-                          </div>
-                        </div>
-                        <div class="flex items-center space-x-2 sm:ml-4 w-full sm:w-auto">
-                          <HIGButton variant="tertiary" size="sm" @click="editPage(page)" class="flex-1 sm:flex-none">
-                            Edit
-                          </HIGButton>
-                          <HIGButton variant="danger" size="sm" @click="confirmDeletePage(page)" class="flex-1 sm:flex-none">
-                            Delete
-                          </HIGButton>
-                        </div>
+                  <div v-for="category in categoriesWithPages" :key="category.category_id" class="category-pages-group">
+                    <button
+                      @click="toggleCategory(category.category_id)"
+                      class="w-full flex items-center justify-between p-4 bg-bg-secondary hover:bg-bg-tertiary rounded-lg transition-colors mb-2"
+                    >
+                      <div class="flex items-center gap-3">
+                        <span class="text-lg font-semibold text-text-primary">{{ category.title }}</span>
+                        <span class="text-sm text-text-tertiary">({{ getCategoryPages(category.category_id).length }} pages)</span>
                       </div>
+                      <svg
+                        :class="['w-5 h-5 text-text-tertiary transition-transform', { 'rotate-180': expandedCategories[category.category_id] }]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    <div v-if="expandedCategories[category.category_id]" class="space-y-2 ml-4">
+                      <HIGCard v-for="page in getCategoryPages(category.category_id)" :key="page.id" class="hover:shadow-hig-lg transition-shadow">
+                        <div class="p-4 md:p-6">
+                          <div class="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4">
+                            <div class="flex-1 min-w-0">
+                              <div class="flex flex-wrap items-center gap-2 mb-2">
+                                <h4 class="text-base sm:text-lg font-semibold text-text-primary break-words">{{ page.title }}</h4>
+                                <span 
+                                  :class="[
+                                    'px-2 py-1 rounded text-xs font-medium whitespace-nowrap',
+                                    page.published 
+                                      ? 'bg-success-500/20 text-success-500' 
+                                      : 'bg-warning-500/20 text-warning-500'
+                                  ]"
+                                >
+                                  {{ page.published ? 'Published' : 'Draft' }}
+                                </span>
+                              </div>
+                              <div class="flex flex-wrap items-center gap-2 text-sm text-text-tertiary mb-2">
+                                <span>Order: {{ page.page_order }}</span>
+                                <span>•</span>
+                                <span>{{ formatDate(page.created_at) }}</span>
+                              </div>
+                            </div>
+                            <div class="flex items-center space-x-2 sm:ml-4 w-full sm:w-auto">
+                              <HIGButton variant="tertiary" size="sm" @click="editPage(page)" class="flex-1 sm:flex-none">
+                                Edit
+                              </HIGButton>
+                              <HIGButton variant="danger" size="sm" @click="confirmDeletePage(page)" class="flex-1 sm:flex-none">
+                                Delete
+                              </HIGButton>
+                            </div>
+                          </div>
+                        </div>
+                      </HIGCard>
                     </div>
-                  </HIGCard>
+                  </div>
                 </div>
                 <HIGCard v-else>
                   <div class="p-6 text-center py-12 text-text-secondary">
@@ -905,6 +924,7 @@ const categories = ref<any[]>([])
 const pages = ref<any[]>([])
 const tools = ref<any[]>([])
 const users = ref<any[]>([])
+const expandedCategories = ref<Record<string, boolean>>({})
 
 // Search and filters
 const blogSearchQuery = ref('')
@@ -1094,6 +1114,29 @@ const formatDate = (dateString: string) => {
 const getCategoryName = (categoryId: string) => {
   const category = categories.value.find(c => c.category_id === categoryId)
   return category ? category.title : 'Unknown'
+}
+
+const getCategoryPages = (categoryId: string) => {
+  return pages.value
+    .filter(page => page.category_id === categoryId)
+    .sort((a, b) => (a.page_order || 0) - (b.page_order || 0))
+}
+
+const categoriesWithPages = computed(() => {
+  return categories.value
+    .filter(cat => {
+      const categoryPages = pages.value.filter(page => page.category_id === cat.category_id)
+      return categoryPages.length > 0
+    })
+    .sort((a, b) => {
+      const aName = a.title || ''
+      const bName = b.title || ''
+      return aName.localeCompare(bName)
+    })
+})
+
+const toggleCategory = (categoryId: string) => {
+  expandedCategories.value[categoryId] = !expandedCategories.value[categoryId]
 }
 
 // Fetch functions

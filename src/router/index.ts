@@ -16,6 +16,11 @@ const Profile = () => import('../views/Profile.vue')
 const Settings = () => import('../views/Settings.vue')
 const AuthCallback = () => import('../views/AuthCallback.vue')
 const NotFound = () => import('../views/NotFound.vue')
+const ComingSoon = () => import('../views/ComingSoon.vue')
+const PrivacyPolicy = () => import('../views/PrivacyPolicy.vue')
+const TermsOfService = () => import('../views/TermsOfService.vue')
+const CookiePolicy = () => import('../views/CookiePolicy.vue')
+const DMCA = () => import('../views/DMCA.vue')
 
 const routes = [
   {
@@ -105,6 +110,36 @@ const routes = [
     name: 'AuthCallback',
     component: AuthCallback,
     meta: { title: 'Signing in...' }
+  },
+  {
+    path: '/coming-soon',
+    name: 'ComingSoon',
+    component: ComingSoon,
+    meta: { title: 'Coming Soon - MetaStack' }
+  },
+  {
+    path: '/legal/privacy-policy',
+    name: 'PrivacyPolicy',
+    component: PrivacyPolicy,
+    meta: { title: 'Privacy Policy - MetaStack' }
+  },
+  {
+    path: '/legal/terms-of-service',
+    name: 'TermsOfService',
+    component: TermsOfService,
+    meta: { title: 'Terms of Service - MetaStack' }
+  },
+  {
+    path: '/legal/cookie-policy',
+    name: 'CookiePolicy',
+    component: CookiePolicy,
+    meta: { title: 'Cookie Policy - MetaStack' }
+  },
+  {
+    path: '/legal/dmca',
+    name: 'DMCA',
+    component: DMCA,
+    meta: { title: 'DMCA Policy - MetaStack' }
   },
   {
     path: '/:pathMatch(.*)*',

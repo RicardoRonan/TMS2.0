@@ -106,21 +106,11 @@
                       </div>
                       <div>
                         <h3 class="font-semibold text-text-primary mb-1">Email</h3>
-                        <a href="mailto:contact@metastack.com" class="text-text-secondary hover:text-primary-500 transition-colors">
-                          contact@metastack.com
-                        </a>
-                      </div>
-                    </div>
-                    
-                    <div class="flex items-start space-x-4">
-                      <div class="w-12 h-12 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Icon name="phone" :size="24" class="text-white" />
-                      </div>
-                      <div>
-                        <h3 class="font-semibold text-text-primary mb-1">Phone</h3>
-                        <a href="tel:+1234567890" class="text-text-secondary hover:text-primary-500 transition-colors">
-                          +1 (234) 567-890
-                        </a>
+                        <div class="space-y-1">
+                          <a href="mailto:metastackdev@gmail.com" class="block text-text-secondary hover:text-primary-500 transition-colors">
+                            metastackdev@gmail.com
+                          </a>
+                        </div>
                       </div>
                     </div>
                     
@@ -131,9 +121,8 @@
                       <div>
                         <h3 class="font-semibold text-text-primary mb-1">Address</h3>
                         <p class="text-text-secondary">
-                          123 Developer Street<br>
-                          Tech City, TC 12345<br>
-                          United States
+                          Cape Town<br>
+                          South Africa
                         </p>
                       </div>
                     </div>
@@ -144,18 +133,27 @@
               <!-- Social Links -->
               <HIGCard>
                 <div class="p-6">
-                  <h2 class="text-2xl font-bold text-text-primary mb-6">Follow Us</h2>
+                  <h2 class="text-2xl font-bold text-text-primary mb-6">Follow the Creators</h2>
                   
-                  <div class="flex space-x-4">
-                    <a href="#" class="w-12 h-12 bg-bg-tertiary rounded-lg flex items-center justify-center text-text-tertiary hover:text-primary-500 hover:bg-primary-50 transition-colors" aria-label="Twitter">
-                      <Icon name="twitter" :size="24" />
-                    </a>
-                    <a href="#" class="w-12 h-12 bg-bg-tertiary rounded-lg flex items-center justify-center text-text-tertiary hover:text-primary-500 hover:bg-primary-50 transition-colors" aria-label="GitHub">
-                      <Icon name="github" :size="24" />
-                    </a>
-                    <a href="#" class="w-12 h-12 bg-bg-tertiary rounded-lg flex items-center justify-center text-text-tertiary hover:text-primary-500 hover:bg-primary-50 transition-colors" aria-label="LinkedIn">
-                      <Icon name="linkedin" :size="24" />
-                    </a>
+                  <div class="space-y-4">
+                    <div>
+                      <a href="https://www.linkedin.com/in/the-dev-ricardo/" target="_blank" rel="noopener noreferrer" class="font-semibold text-text-primary">
+                        Ricardo Moses
+                      </a>
+                      <div class="text-sm text-text-secondary">Co-Founder and Full-Stack Developer</div>
+                    </div>
+                    <div>
+                      <a href="https://www.linkedin.com/in/jesse-spence-83606b210/" target="_blank" rel="noopener noreferrer" class="font-semibold text-text-primary">
+                        Jesse Spence
+                      </a>
+                      <div class="text-sm text-text-secondary">Co-Founder and SEO Specialist</div>
+                    </div>
+                    <div>
+                      <a href="https://www.linkedin.com/in/abdus-samad-charles-75036b210/" target="_blank" rel="noopener noreferrer" class="font-semibold text-text-primary">
+                        Abdus-Samad Charles
+                      </a>
+                      <div class="text-sm text-text-secondary">Co-Founder and SEO Specialist</div>
+                    </div>
                   </div>
                 </div>
               </HIGCard>

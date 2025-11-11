@@ -14,57 +14,85 @@
       </div>
     </section>
 
-    <!-- Categories and Pages -->
-    <section class="py-16">
+    <!-- Categories and Pages View -->
+    <section class="py-8">
       <div class="container mx-auto px-4">
-        <div v-if="loading" class="space-y-12">
-          <div v-for="n in 3" :key="n" class="animate-pulse">
-            <div class="h-8 bg-bg-tertiary rounded w-1/4 mb-6"></div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div v-for="m in 3" :key="m" class="h-24 bg-bg-tertiary rounded"></div>
-            </div>
+        <div v-if="loading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div v-for="n in 8" :key="n" class="animate-pulse">
+            <div class="aspect-square bg-bg-tertiary rounded-lg"></div>
           </div>
         </div>
 
-        <div v-else class="space-y-12">
-          <div v-for="category in categories" :key="category.category_id" class="mb-12">
-            <!-- Category Header -->
-            <div class="mb-6">
-              <h2 class="text-2xl font-bold text-text-primary">{{ category.title }}</h2>
-              <p class="text-text-secondary">{{ category.description }}</p>
-              <div class="flex items-center space-x-4 mt-2 text-sm text-text-tertiary">
-                <span>{{ category.level }}</span>
-                <span>•</span>
-                <span>{{ category.duration }} min</span>
-              </div>
-            </div>
+        <!-- Category Detail View (when a category is selected) -->
+        <div v-else-if="selectedCategory" class="max-w-4xl mx-auto">
+          <button
+            @click="selectedCategory = null"
+            class="mb-6 text-primary-500 hover:text-primary-600 transition-colors"
+          >
+            ← Back to Categories
+          </button>
+          <h2 class="text-3xl font-bold text-text-primary mb-8">{{ selectedCategory.title }}</h2>
+          <div class="space-y-2">
+            <a
+              v-for="(page, index) in getCategoryPages(selectedCategory.category_id)"
+              :key="page.id"
+              @click.prevent="openPage(selectedCategory, page)"
+              class="lesson-link"
+            >
+              {{ index + 1 }}. {{ page.title }}
+            </a>
+          </div>
+        </div>
 
-            <!-- Pages Card -->
-            <div v-if="getCategoryPages(category.category_id).length > 0" class="tutorial-card-container">
-              <div class="tutorial-card">
-                <p
-                  v-for="page in getCategoryPages(category.category_id)"
-                  :key="page.id"
-                  @click="openPage(category, page)"
-                  class="lesson-box"
+        <!-- Categories Grid View -->
+        <div v-else class="space-y-12">
+          <!-- Grouped by Top-Level Group -->
+          <template v-for="group in topLevelGroups" :key="group.id">
+            <div v-if="getGroupCategories(group.id).length > 0">
+              <!-- Category Heading -->
+              <h2 class="text-2xl font-bold text-text-primary mb-6">{{ group.title }}</h2>
+              
+              <!-- Categories Grid -->
+              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-12">
+                <div
+                  v-for="category in getGroupCategories(group.id)"
+                  :key="category.category_id"
+                  @click="selectCategory(category)"
+                  class="category-square"
                 >
-                  <span class="lesson-title">{{ page.title }}</span>
-                  <span class="lesson-description">{{ getPagePreview(page) }}</span>
-                </p>
+                  <FontAwesomeIcon 
+                    :icon="getCategoryIcon(category.icon)" 
+                    class="category-icon"
+                  />
+                  <h3 class="category-square-title">{{ category.title }}</h3>
+                </div>
               </div>
             </div>
-            <HIGCard v-else>
-              <div class="p-6 text-center py-12 text-text-secondary">
-                <p>No pages available for this category yet.</p>
+          </template>
+
+          <!-- Categories without a group -->
+          <div v-if="getUncategorizedCategories().length > 0">
+            <h2 class="text-2xl font-bold text-text-primary mb-6">Other Tutorials</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div
+                v-for="category in getUncategorizedCategories()"
+                :key="category.category_id"
+                @click="selectCategory(category)"
+                class="category-square"
+              >
+                <FontAwesomeIcon 
+                  :icon="getCategoryIcon(category.icon)" 
+                  class="category-icon"
+                />
+                <h3 class="category-square-title">{{ category.title }}</h3>
               </div>
-            </HIGCard>
+            </div>
           </div>
 
-          <HIGCard v-if="categories.length === 0">
-            <div class="p-6 text-center py-12 text-text-secondary">
-              <p>No tutorial categories available yet.</p>
-            </div>
-          </HIGCard>
+          <!-- Empty State -->
+          <div v-if="categories.length === 0" class="text-center py-12 text-text-secondary">
+            <p>No tutorial categories available yet.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -74,13 +102,26 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import HIGCard from '../components/hig/HIGCard.vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { 
+  faBook, 
+  faCode, 
+  faDatabase, 
+  faLaptopCode, 
+  faRobot, 
+  faGears,
+  faGraduationCap,
+  faFileCode,
+  faCircleNodes
+} from '@fortawesome/free-solid-svg-icons'
 import { supabase } from '../supabase'
 
 const router = useRouter()
 const loading = ref(true)
+const topLevelGroups = ref<any[]>([])
 const categories = ref<any[]>([])
 const pages = ref<any[]>([])
+const selectedCategory = ref<any>(null)
 
 // Dummy data - will be replaced with real data from Supabase
 const dummyCategories = [
@@ -90,7 +131,7 @@ const dummyCategories = [
     description: 'Learn the fundamentals of Vue 3 including components, reactivity, and directives.',
     level: 'Beginner',
     duration: 30,
-    icon: '📚',
+    icon: 'book',
     slug: 'vue-3-basics'
   },
   {
@@ -99,7 +140,7 @@ const dummyCategories = [
     description: 'Master TypeScript integration with Vue 3 for type-safe applications.',
     level: 'Intermediate',
     duration: 45,
-    icon: '🔷',
+    icon: 'code',
     slug: 'typescript-vue'
   },
   {
@@ -108,7 +149,7 @@ const dummyCategories = [
     description: 'Understand how to manage application state using Vuex in Vue 3.',
     level: 'Intermediate',
     duration: 40,
-    icon: '🗄️',
+    icon: 'database',
     slug: 'state-management'
   }
 ]
@@ -370,15 +411,88 @@ const getCategoryPages = (categoryId: string) => {
   return matchedPages
 }
 
-const getPagePreview = (page: any) => {
-  if (page.content) {
-    return page.content.substring(0, 150) + '...'
-  }
-  return 'Click to read this tutorial page.'
-}
-
 const openPage = (category: any, page: any) => {
   router.push(`/tutorials/${category.slug}/${page.slug}`)
+}
+
+const selectCategory = (category: any) => {
+  selectedCategory.value = category
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+const getGroupCategories = (groupId: string) => {
+  return categories.value
+    .filter(cat => cat.top_level_group_id === groupId)
+    .sort((a, b) => (a.created_at || '').localeCompare(b.created_at || ''))
+}
+
+const getUncategorizedCategories = () => {
+  return categories.value
+    .filter(cat => !cat.top_level_group_id)
+    .sort((a, b) => (a.created_at || '').localeCompare(b.created_at || ''))
+}
+
+// Map category icons to FontAwesome icons
+const getCategoryIcon = (iconName: string | null | undefined) => {
+  if (!iconName) return faBook
+  
+  const iconMap: Record<string, any> = {
+    '📚': faBook,
+    '🔷': faCode,
+    '🗄️': faDatabase,
+    '💻': faLaptopCode,
+    '⚙️': faGears,
+    '🤖': faRobot,
+    '🎓': faGraduationCap,
+    '📄': faFileCode,
+    '🔗': faCircleNodes,
+    // Also handle icon names directly
+    'book': faBook,
+    'code': faCode,
+    'database': faDatabase,
+    'laptop': faLaptopCode,
+    'gears': faGears,
+    'robot': faRobot,
+    'graduation': faGraduationCap,
+    'file': faFileCode,
+    'nodes': faCircleNodes
+  }
+  
+  return iconMap[iconName.toLowerCase()] || faBook
+}
+
+const fetchTopLevelGroups = async () => {
+  try {
+    await supabase.auth.getSession()
+    const { data, error } = await supabase
+      .from('tutorial_top_level_groups')
+      .select('*')
+      .eq('published', true)
+      .order('display_order', { ascending: true })
+
+    if (error) {
+      // Check if table doesn't exist (PGRST205 error)
+      if (error.code === 'PGRST205') {
+        console.warn('tutorial_top_level_groups table does not exist. Categories will be shown without grouping.')
+        topLevelGroups.value = []
+        return
+      }
+      console.error('Error fetching top-level groups:', error)
+      topLevelGroups.value = []
+      return
+    }
+    
+    if (data && data.length > 0) {
+      console.log('Fetched top-level groups from Supabase:', data.length)
+      topLevelGroups.value = data
+    } else {
+      console.log('No top-level groups found in Supabase')
+      topLevelGroups.value = []
+    }
+  } catch (error: any) {
+    console.error('Error fetching top-level groups:', error)
+    topLevelGroups.value = []
+  }
 }
 
 const fetchCategories = async () => {
@@ -443,134 +557,65 @@ const fetchPages = async () => {
 
 onMounted(async () => {
   loading.value = true
-  await Promise.all([fetchCategories(), fetchPages()])
+  await Promise.all([fetchTopLevelGroups(), fetchCategories(), fetchPages()])
   loading.value = false
 })
 </script>
 
 <style scoped>
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.tutorial-card-container {
-  display: flex;
-  justify-content: center;
-  margin: 2rem 0;
-}
-
-.tutorial-card {
-  width: 100%;
-  max-width: 800px;
-  min-height: 400px;
-  border-radius: 12px;
-  background: linear-gradient(145deg, var(--color-bg-secondary), var(--color-bg-tertiary));
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 0.6em;
-  box-shadow: 0 4px 12px var(--shadow-color-hig);
-  overflow: hidden;
+/* Category Square */
+.category-square {
+  aspect-ratio: 1;
+  background-color: var(--color-bg-tertiary);
   border: 1px solid var(--color-border-primary);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.tutorial-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px var(--shadow-color-hig);
-}
-
-.tutorial-card p.lesson-box {
-  flex: 1;
-  overflow: hidden;
-  cursor: pointer;
   border-radius: 8px;
-  transition: flex 0.5s ease;
-  background: linear-gradient(145deg, var(--color-bg-tertiary), var(--color-bg-secondary));
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  margin: 0;
-  position: relative;
-  border: 1px solid var(--color-border-primary);
-  min-height: 60px;
-  padding: 1em;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.tutorial-card p.lesson-box:hover {
-  flex: 4;
+.category-square:hover {
+  background-color: var(--color-bg-elevated);
   border-color: var(--color-primary-500);
-  box-shadow: 0 2px 8px rgba(235, 94, 40, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(235, 94, 40, 0.2);
 }
 
-.tutorial-card p.lesson-box .lesson-title {
-  padding: 0.4em;
-  text-align: center;
-  transform: rotate(-0deg);
-  transition: transform 0.5s ease, color 0.3s, opacity 0.3s;
-  text-transform: none;
+.category-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
   color: var(--color-text-primary);
+}
+
+.category-square-title {
+  font-size: 16px;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  position: relative;
-  z-index: 1;
-  font-size: 0.9rem;
-  line-height: 1.4;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  display: block;
-}
-
-.tutorial-card p.lesson-box:hover .lesson-title {
-  transform: rotate(0);
-  color: var(--color-primary-500);
-  margin-bottom: 0.5em;
-}
-
-.tutorial-card p.lesson-box .lesson-description {
-  padding: 0.4em;
+  color: var(--color-text-primary);
   text-align: center;
-  color: var(--color-text-secondary);
-  font-weight: 400;
-  font-size: 0.85rem;
-  line-height: 1.5;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  position: relative;
-  z-index: 1;
-  opacity: 0;
-  max-height: 0;
-  overflow: hidden;
-  transition: opacity 0.5s ease, max-height 0.5s ease, margin 0.5s ease;
-  margin: 0;
+  line-height: 1.3;
 }
 
-.tutorial-card p.lesson-box:hover .lesson-description {
-  opacity: 1;
-  max-height: 200px;
-  margin-top: 0.5em;
+/* Lesson Link */
+.lesson-link {
+  display: block;
+  padding: 12px 0;
+  color: var(--color-primary-500);
+  text-decoration: none;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
 }
 
-.tutorial-card p.lesson-box::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(235, 94, 40, 0.1), rgba(235, 94, 40, 0.05));
-  z-index: 0;
-  transition: opacity 0.5s ease;
-  pointer-events: none;
-  opacity: 0;
-  border-radius: 8px;
-}
-
-.tutorial-card p.lesson-box:hover::before {
-  opacity: 1;
+.lesson-link:hover {
+  color: var(--color-primary-600);
+  border-bottom-color: var(--color-primary-500);
+  padding-left: 8px;
 }
 </style>
