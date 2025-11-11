@@ -154,7 +154,8 @@ export function useAuth() {
         options: {
           data: {
             display_name: displayName
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`
         }
       })
 
@@ -219,7 +220,7 @@ export function useAuth() {
       const { data, error: authError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: 'https://the-ms.netlify.app/auth/callback'
+          redirectTo: `${window.location.origin}/auth/callback`
         }
       })
 

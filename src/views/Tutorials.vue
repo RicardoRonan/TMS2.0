@@ -609,13 +609,12 @@ onMounted(async () => {
   text-decoration: none;
   font-size: 16px;
   transition: all 0.2s ease;
-  border-bottom: 1px solid transparent;
   cursor: pointer;
 }
 
 .lesson-link:hover {
   color: var(--color-primary-600);
-  border-bottom-color: var(--color-primary-500);
+  text-decoration: underline;
   padding-left: 8px;
 }
 </style>

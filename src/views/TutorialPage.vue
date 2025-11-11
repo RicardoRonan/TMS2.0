@@ -917,7 +917,7 @@ onBeforeRouteUpdate((to, from, next) => {
 }
 
 .markdown-content :deep(a) {
-  @apply text-primary-500 hover:text-primary-600 underline transition-colors;
+  @apply text-primary-500 hover:text-primary-600 no-underline hover:underline transition-colors;
 }
 
 .markdown-content :deep(img) {
