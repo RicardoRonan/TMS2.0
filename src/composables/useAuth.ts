@@ -17,6 +17,16 @@ export function initializeAuthListener(store: any) {
   
   isListenerInitialized = true
 
+  // Check if Supabase is properly configured
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('⚠️ Cannot initialize auth: Supabase environment variables are missing')
+    console.error('Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables')
+    return
+  }
+
   // Check for existing session (with longer timeout for better reliability)
   // The INITIAL_SESSION event from onAuthStateChange will also handle this,
   // but we check here as a backup

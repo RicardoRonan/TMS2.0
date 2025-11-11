@@ -5,6 +5,16 @@ import type { User } from '@supabase/supabase-js'
 
 export async function initializeAuth(store: any): Promise<void> {
   try {
+    // Check if Supabase is properly configured
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('⚠️ Cannot initialize auth: Supabase environment variables are missing')
+      console.error('Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables')
+      return
+    }
+
     // Check for existing session (with longer timeout for better reliability)
     // This is a backup - the auth listener's INITIAL_SESSION event is the primary handler
     const sessionPromise = supabase.auth.getSession()
