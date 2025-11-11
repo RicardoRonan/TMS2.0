@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed top-4 right-4 z-toast space-y-2">
+  <div class="fixed top-4 left-1/2 -translate-x-1/2 right-4 md:left-auto md:translate-x-0 md:right-4 z-toast space-y-2 max-w-sm w-[calc(100%-2rem)] md:w-auto">
     <TransitionGroup name="toast" tag="div">
       <div
         v-for="notification in notifications"
@@ -43,7 +43,7 @@ const store = useStore()
 const notifications = computed(() => store.getters.notifications)
 
 const toastClasses = (type: string) => [
-  'max-w-sm w-full bg-bg-secondary border rounded-lg shadow-hig p-4',
+  'w-full bg-bg-secondary border rounded-lg shadow-hig p-4',
   {
     'border-success': type === 'success',
     'border-warning': type === 'warning',
@@ -73,14 +73,26 @@ const removeNotification = (id: number) => {
   transition: all 0.3s ease;
 }
 
+/* Mobile: slide down from top */
 .toast-enter-from {
   opacity: 0;
-  transform: translateX(100%);
+  transform: translateY(-100%);
 }
 
 .toast-leave-to {
   opacity: 0;
-  transform: translateX(100%);
+  transform: translateY(-100%);
+}
+
+/* Desktop: slide in from right */
+@media (min-width: 768px) {
+  .toast-enter-from {
+    transform: translateX(100%);
+  }
+  
+  .toast-leave-to {
+    transform: translateX(100%);
+  }
 }
 
 .toast-move {

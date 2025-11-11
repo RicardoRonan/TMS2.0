@@ -20,6 +20,9 @@
     
     <!-- Loading Overlay -->
     <LoadingOverlay v-if="isLoading" />
+    
+    <!-- Cookie Consent Banner -->
+    <CookieConsentBanner />
   </div>
 </template>
 
@@ -31,6 +34,7 @@ import NavBar from './components/NavBar.vue'
 import Footer from './components/Footer.vue'
 import NotificationContainer from './components/NotificationContainer.vue'
 import LoadingOverlay from './components/LoadingOverlay.vue'
+import CookieConsentBanner from './components/CookieConsentBanner.vue'
 import type { User } from '@supabase/supabase-js'
 
 const store = useStore()

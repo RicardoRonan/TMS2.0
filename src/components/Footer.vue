@@ -53,6 +53,14 @@
             <li><router-link to="/legal/privacy-policy" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Privacy Policy</router-link></li>
             <li><router-link to="/legal/terms-of-service" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Terms of Service</router-link></li>
             <li><router-link to="/legal/cookie-policy" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Cookie Policy</router-link></li>
+            <li>
+              <button 
+                @click="openCookiePreferences" 
+                class="text-text-secondary hover:text-primary-500 transition-colors text-sm text-left"
+              >
+                Cookie Preferences
+              </button>
+            </li>
             <li><router-link to="/legal/dmca" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">DMCA</router-link></li>
           </ul>
         </div>
@@ -73,9 +81,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import Icon from './Icon.vue'
 
 const currentYear = computed(() => new Date().getFullYear())
+
+// Try to get the openCookiePreferences function, fallback to window method
+const openCookiePreferences = inject<() => void>('openCookiePreferences', () => {
+  // Fallback: try window method
+  if (typeof window !== 'undefined' && (window as any).openCookiePreferences) {
+    (window as any).openCookiePreferences()
+  }
+})
 </script>
 
