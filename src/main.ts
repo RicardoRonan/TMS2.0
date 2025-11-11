@@ -227,7 +227,11 @@ app.use(router)
 // This ensures users stay logged in after page reload
 async function initializeApp() {
   try {
-    // Initialize auth state first (restore session)
+    // Initialize auth listener first (this sets up the global auth state listener)
+    const { initializeAuthListener } = await import('./composables/useAuth')
+    initializeAuthListener(store)
+    
+    // Also initialize auth state (restore session)
     const { initializeAuth } = await import('./utils/initAuth')
     await initializeAuth(store)
   } catch (err) {

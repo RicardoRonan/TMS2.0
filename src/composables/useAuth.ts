@@ -9,6 +9,110 @@ let isListenerInitialized = false
 let lastTokenRefreshTime = 0
 const TOKEN_REFRESH_DEBOUNCE_MS = 60000 // Only reload user data once per minute for token refreshes
 
+// Initialize auth listener immediately (called from main.ts)
+export function initializeAuthListener(store: any) {
+  if (isListenerInitialized) {
+    return // Already initialized
+  }
+  
+  isListenerInitialized = true
+
+  // Check for existing session (with timeout to prevent hanging)
+  const sessionPromise = supabase.auth.getSession()
+  const timeoutPromise = new Promise((resolve) => 
+    setTimeout(() => resolve({ data: { session: null } }), 5000)
+  )
+  
+  Promise.race([sessionPromise, timeoutPromise]).then((result: any) => {
+    const { data: { session } } = result || { data: { session: null } }
+    if (session?.user) {
+      loadUserDataForStore(session.user, store)
+    }
+  }).catch(() => {
+    // Silently fail - session check is not critical
+  })
+
+  // Listen for auth changes - handle all events properly
+  authListener = supabase.auth.onAuthStateChange(async (event, session) => {
+    switch (event) {
+      case 'SIGNED_IN':
+        if (session?.user) {
+          await loadUserDataForStore(session.user, store)
+        }
+        break
+      
+      case 'TOKEN_REFRESHED':
+        // Debounce token refresh events to prevent excessive reloads
+        const now = Date.now()
+        if (now - lastTokenRefreshTime > TOKEN_REFRESH_DEBOUNCE_MS) {
+          lastTokenRefreshTime = now
+          // Only reload if user data might have changed (skip if same user)
+          const currentUser = store.getters.currentUser
+          if (!currentUser || currentUser.uid !== session?.user?.id) {
+            if (session?.user) {
+              await loadUserDataForStore(session.user, store)
+            }
+          }
+        }
+        break
+      
+      case 'SIGNED_OUT':
+        store.dispatch('setUser', null)
+        break
+      
+      case 'USER_UPDATED':
+        if (session?.user) {
+          await loadUserDataForStore(session.user, store)
+        }
+        break
+      
+      default:
+        // For other events, check if we have a session
+        if (session?.user) {
+          await loadUserDataForStore(session.user, store)
+        } else {
+          store.dispatch('setUser', null)
+        }
+    }
+  })
+}
+
+// Helper function to load user data (used by both initializeAuthListener and useAuth)
+async function loadUserDataForStore(supabaseUser: User, store: any) {
+  try {
+    const { data: userData, error: profileError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', supabaseUser.id)
+      .single()
+
+    if (profileError && profileError.code !== 'PGRST116') {
+      // PGRST116 is "not found" - user might not have profile yet
+    }
+
+    store.dispatch('setUser', {
+      uid: supabaseUser.id,
+      email: supabaseUser.email,
+      displayName: userData?.display_name || supabaseUser.user_metadata?.display_name || 'User',
+      photoURL: userData?.photo_url || supabaseUser.user_metadata?.avatar_url,
+      isAdmin: userData?.is_admin || false,
+      createdAt: userData?.created_at || supabaseUser.created_at,
+      lastLoginAt: userData?.last_login_at || new Date().toISOString()
+    })
+  } catch (err) {
+    // Fallback to auth user data
+    store.dispatch('setUser', {
+      uid: supabaseUser.id,
+      email: supabaseUser.email,
+      displayName: supabaseUser.user_metadata?.display_name || 'User',
+      photoURL: supabaseUser.user_metadata?.avatar_url,
+      isAdmin: false,
+      createdAt: supabaseUser.created_at,
+      lastLoginAt: new Date().toISOString()
+    })
+  }
+}
+
 // Export cleanup function for app unmount
 export function cleanupAuthListener() {
   if (authListener?.data?.subscription) {
@@ -331,71 +435,10 @@ export function useAuth() {
     }
   }
 
-  // Initialize auth state listener (singleton pattern - only initialize once)
+  // Auth listener is now initialized at app startup in main.ts
+  // No need to initialize here - it's already set up globally
   onMounted(() => {
-    // Only initialize the listener once globally
-    if (!isListenerInitialized) {
-      isListenerInitialized = true
-
-      // Check for existing session (with timeout to prevent hanging)
-      const sessionPromise = supabase.auth.getSession()
-      const timeoutPromise = new Promise((resolve) => 
-        setTimeout(() => resolve({ data: { session: null } }), 5000)
-      )
-      
-      Promise.race([sessionPromise, timeoutPromise]).then((result: any) => {
-        const { data: { session } } = result || { data: { session: null } }
-        if (session?.user) {
-          loadUserData(session.user)
-        }
-      }).catch(() => {
-        // Silently fail - session check is not critical
-      })
-
-      // Listen for auth changes - handle all events properly
-      authListener = supabase.auth.onAuthStateChange(async (event, session) => {
-        switch (event) {
-          case 'SIGNED_IN':
-            if (session?.user) {
-              await loadUserData(session.user)
-            }
-            break
-          
-          case 'TOKEN_REFRESHED':
-            // Debounce token refresh events to prevent excessive reloads
-            const now = Date.now()
-            if (now - lastTokenRefreshTime > TOKEN_REFRESH_DEBOUNCE_MS) {
-              lastTokenRefreshTime = now
-              // Only reload if user data might have changed (skip if same user)
-              const currentUser = store.getters.currentUser
-              if (!currentUser || currentUser.uid !== session?.user?.id) {
-                if (session?.user) {
-                  await loadUserData(session.user)
-                }
-              }
-            }
-            break
-          
-          case 'SIGNED_OUT':
-            store.dispatch('setUser', null)
-            break
-          
-          case 'USER_UPDATED':
-            if (session?.user) {
-              await loadUserData(session.user)
-            }
-            break
-          
-          default:
-            // For other events, check if we have a session
-            if (session?.user) {
-              await loadUserData(session.user)
-            } else {
-              store.dispatch('setUser', null)
-            }
-        }
-      })
-    }
+    // Listener is already initialized, nothing to do here
   })
 
   onUnmounted(() => {
@@ -403,40 +446,9 @@ export function useAuth() {
     // It will be cleaned up when the app unmounts
   })
 
-  // Helper function to load user data
+  // Helper function to load user data (uses the shared function)
   const loadUserData = async (supabaseUser: User) => {
-    try {
-      const { data: userData, error: profileError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', supabaseUser.id)
-        .single()
-
-      if (profileError && profileError.code !== 'PGRST116') {
-        // PGRST116 is "not found" - user might not have profile yet
-      }
-
-      store.dispatch('setUser', {
-        uid: supabaseUser.id,
-        email: supabaseUser.email,
-        displayName: userData?.display_name || supabaseUser.user_metadata?.display_name || 'User',
-        photoURL: userData?.photo_url || supabaseUser.user_metadata?.avatar_url,
-        isAdmin: userData?.is_admin || false,
-        createdAt: userData?.created_at || supabaseUser.created_at,
-        lastLoginAt: userData?.last_login_at || new Date().toISOString()
-      })
-    } catch (err) {
-      // Fallback to auth user data
-      store.dispatch('setUser', {
-        uid: supabaseUser.id,
-        email: supabaseUser.email,
-        displayName: supabaseUser.user_metadata?.display_name || 'User',
-        photoURL: supabaseUser.user_metadata?.avatar_url,
-        isAdmin: false,
-        createdAt: supabaseUser.created_at,
-        lastLoginAt: new Date().toISOString()
-      })
-    }
+    await loadUserDataForStore(supabaseUser, store)
   }
 
   // Helper function to get user-friendly error messages
