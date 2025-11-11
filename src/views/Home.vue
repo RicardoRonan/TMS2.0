@@ -37,15 +37,22 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <HIGCard v-for="feature in features" :key="feature.id" class="text-center">
-            <div class="p-6">
-              <div class="w-16 h-16 bg-primary-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Icon :name="feature.icon.toLowerCase()" :size="32" class="text-white" />
+          <router-link 
+            v-for="feature in features" 
+            :key="feature.id" 
+            :to="feature.route"
+            class="block"
+          >
+            <HIGCard class="text-center hover:shadow-hig-lg transition-all cursor-pointer h-full">
+              <div class="p-6">
+                <div class="w-16 h-16 bg-primary-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Icon :name="feature.icon.toLowerCase()" :size="32" class="text-white" />
+                </div>
+                <h3 class="text-xl font-semibold text-text-primary mb-3">{{ feature.title }}</h3>
+                <p class="text-text-secondary">{{ feature.description }}</p>
               </div>
-              <h3 class="text-xl font-semibold text-text-primary mb-3">{{ feature.title }}</h3>
-              <p class="text-text-secondary">{{ feature.description }}</p>
-            </div>
-          </HIGCard>
+            </HIGCard>
+          </router-link>
         </div>
       </div>
     </section>
@@ -220,25 +227,29 @@ const features = ref([
     id: 1,
     title: 'Blog & Articles',
     description: 'Share knowledge through detailed articles, tutorials, and insights from industry experts.',
-    icon: 'DocumentTextIcon'
+    icon: 'DocumentTextIcon',
+    route: '/blog'
   },
   {
     id: 2,
     title: 'Tool Directory',
     description: 'Discover and share essential development tools, libraries, and resources.',
-    icon: 'WrenchScrewdriverIcon'
+    icon: 'WrenchScrewdriverIcon',
+    route: '/tools'
   },
   {
     id: 3,
     title: 'Interactive Tutorials',
     description: 'Learn with hands-on tutorials and code playgrounds for practical experience.',
-    icon: 'AcademicCapIcon'
+    icon: 'AcademicCapIcon',
+    route: '/tutorials'
   },
   // {
   //   id: 4,
   //   title: 'Project Showcase',
   //   description: 'Showcase your projects and get feedback from the community.',
-  //   icon: 'FolderIcon'
+  //   icon: 'FolderIcon',
+  //   route: '/projects'
   // }
 ])
 
