@@ -17,26 +17,51 @@ export function initializeAuthListener(store: any) {
   
   isListenerInitialized = true
 
-  // Check for existing session (with timeout to prevent hanging)
+  // Check for existing session (with longer timeout for better reliability)
+  // The INITIAL_SESSION event from onAuthStateChange will also handle this,
+  // but we check here as a backup
   const sessionPromise = supabase.auth.getSession()
   const timeoutPromise = new Promise((resolve) => 
-    setTimeout(() => resolve({ data: { session: null } }), 5000)
+    setTimeout(() => resolve({ data: { session: null } }), 10000)
   )
   
   Promise.race([sessionPromise, timeoutPromise]).then((result: any) => {
-    const { data: { session } } = result || { data: { session: null } }
-    if (session?.user) {
-      loadUserDataForStore(session.user, store)
+    const { data: { session }, error } = result || { data: { session: null }, error: null }
+    if (error) {
+      console.warn('Session check error:', error)
+      return
     }
-  }).catch(() => {
-    // Silently fail - session check is not critical
+    if (session?.user) {
+      console.log('Session found on initialization, loading user data')
+      loadUserDataForStore(session.user, store)
+    } else {
+      console.log('No session found on initialization')
+      store.dispatch('setUser', null)
+    }
+  }).catch((err) => {
+    console.warn('Session check failed:', err)
+    // Silently fail - session check is not critical, INITIAL_SESSION event will handle it
   })
 
   // Listen for auth changes - handle all events properly
   authListener = supabase.auth.onAuthStateChange(async (event, session) => {
+    console.log('Auth state change:', event, session?.user?.id)
+    
     switch (event) {
+      case 'INITIAL_SESSION':
+        // This event fires when the app loads and a session is found in storage
+        if (session?.user) {
+          console.log('Initial session found, loading user data')
+          await loadUserDataForStore(session.user, store)
+        } else {
+          console.log('No initial session found')
+          store.dispatch('setUser', null)
+        }
+        break
+        
       case 'SIGNED_IN':
         if (session?.user) {
+          console.log('User signed in, loading user data')
           await loadUserDataForStore(session.user, store)
         }
         break
@@ -57,6 +82,7 @@ export function initializeAuthListener(store: any) {
         break
       
       case 'SIGNED_OUT':
+        console.log('User signed out')
         store.dispatch('setUser', null)
         break
       

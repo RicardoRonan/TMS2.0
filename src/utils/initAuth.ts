@@ -5,26 +5,32 @@ import type { User } from '@supabase/supabase-js'
 
 export async function initializeAuth(store: any): Promise<void> {
   try {
-    // Check for existing session (with timeout to prevent hanging)
+    // Check for existing session (with longer timeout for better reliability)
+    // This is a backup - the auth listener's INITIAL_SESSION event is the primary handler
     const sessionPromise = supabase.auth.getSession()
     const timeoutPromise = new Promise((resolve) => 
-      setTimeout(() => resolve({ data: { session: null } }), 5000)
+      setTimeout(() => resolve({ data: { session: null } }), 10000)
     )
     
     const result = await Promise.race([sessionPromise, timeoutPromise]) as any
     const { data: { session }, error } = result || { data: { session: null }, error: null }
     
     if (error) {
+      console.warn('Auth initialization error:', error)
       return
     }
     
     if (session?.user) {
+      console.log('Session found during auth init, loading user data')
       await loadUserData(session.user, store)
     } else {
+      console.log('No session found during auth init')
       store.dispatch('setUser', null)
     }
   } catch (err: any) {
+    console.warn('Auth initialization failed:', err)
     // Don't throw - allow app to continue loading
+    // The auth listener will handle session restoration
   }
 }
 

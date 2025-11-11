@@ -27,7 +27,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     storageKey: 'supabase.auth.token',
     // Add flow type to help with token refresh
-    flowType: 'pkce'
+    flowType: 'pkce',
+    // Ensure session persists - localStorage is already set above, this is just for clarity
   },
   db: {
     schema: 'public'
