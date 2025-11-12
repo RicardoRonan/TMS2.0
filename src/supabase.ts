@@ -1,8 +1,73 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-// Lazy initialization: client is created when first accessed
-// This ensures environment variables are always checked fresh
+// Track the credentials used to create the current instance
+// This ensures we only recreate when credentials actually change
 let supabaseInstance: SupabaseClient | null = null
+let currentSupabaseUrl: string | null = null
+let currentSupabaseKey: string | null = null
+
+// Initialize client immediately if env vars are available
+// This ensures session can be restored from localStorage right away
+function initializeClientIfNeeded() {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+  const hasValidEnv = !!(supabaseUrl && supabaseAnonKey && 
+    supabaseUrl !== 'https://placeholder.supabase.co' && 
+    supabaseAnonKey !== 'placeholder-key')
+
+  if (hasValidEnv && !supabaseInstance) {
+    // Create client immediately if we have valid env vars
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+        storageKey: 'supabase.auth.token',
+        flowType: 'pkce',
+        storageType: 'localStorage',
+        debug: import.meta.env.DEV,
+      },
+      db: {
+        schema: 'public'
+      },
+      global: {
+        headers: {
+          'x-client-info': 'tms2.0'
+        },
+        fetch: (url, options = {}) => {
+          const controller = new AbortController()
+          const timeoutId = setTimeout(() => controller.abort(), 30000)
+          
+          return fetch(url, {
+            ...options,
+            signal: controller.signal
+          }).catch(err => {
+            if (err.name === 'AbortError' || err.name === 'TimeoutError') {
+              throw new Error('Request timeout - please check your connection')
+            }
+            throw err
+          }).finally(() => {
+            clearTimeout(timeoutId)
+          })
+        }
+      },
+      realtime: {
+        params: {
+          eventsPerSecond: 10
+        }
+      }
+    })
+    currentSupabaseUrl = supabaseUrl
+    currentSupabaseKey = supabaseAnonKey
+  }
+}
+
+// Initialize immediately if env vars are available
+if (typeof window !== 'undefined') {
+  initializeClientIfNeeded()
+}
 
 function getSupabaseClient(): SupabaseClient {
   // Always check environment variables fresh (not cached)
@@ -14,15 +79,23 @@ function getSupabaseClient(): SupabaseClient {
     supabaseUrl !== 'https://placeholder.supabase.co' && 
     supabaseAnonKey !== 'placeholder-key')
 
-  // Check if current instance is a dummy client
-  const currentIsDummy = supabaseInstance && 
-    (supabaseInstance as any).supabaseUrl === 'https://placeholder.supabase.co'
+  // Check if credentials have changed from what we used to create the current instance
+  const credentialsChanged = 
+    currentSupabaseUrl !== supabaseUrl || 
+    currentSupabaseKey !== supabaseAnonKey
 
   // Recreate client if:
   // 1. No client exists yet
-  // 2. We have valid env vars but current client is dummy
-  // 3. We don't have valid env vars but current client is not dummy
-  if (!supabaseInstance || (hasValidEnv && currentIsDummy) || (!hasValidEnv && !currentIsDummy)) {
+  // 2. Credentials have changed (env vars updated)
+  // 3. We have valid env vars but current client was created with invalid ones
+  // 4. We don't have valid env vars but current client was created with valid ones
+  const needsRecreation = 
+    !supabaseInstance || 
+    credentialsChanged ||
+    (hasValidEnv && (!currentSupabaseUrl || currentSupabaseUrl === 'https://placeholder.supabase.co')) ||
+    (!hasValidEnv && currentSupabaseUrl && currentSupabaseUrl !== 'https://placeholder.supabase.co')
+
+  if (needsRecreation) {
     if (!hasValidEnv) {
       const missing = []
       if (!supabaseUrl) missing.push('VITE_SUPABASE_URL')
@@ -43,6 +116,8 @@ function getSupabaseClient(): SupabaseClient {
           }
         }
       )
+      currentSupabaseUrl = 'https://placeholder.supabase.co'
+      currentSupabaseKey = 'placeholder-key'
     } else {
       // Create a real supabase client with valid credentials
       supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
@@ -90,6 +165,9 @@ function getSupabaseClient(): SupabaseClient {
           }
         }
       })
+      // Track the credentials we used
+      currentSupabaseUrl = supabaseUrl
+      currentSupabaseKey = supabaseAnonKey
     }
   }
   
