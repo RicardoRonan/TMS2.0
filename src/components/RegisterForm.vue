@@ -21,25 +21,57 @@
         @blur="validateField('email')"
       />
       
-      <HIGInput
-        v-model="form.password"
-        type="password"
-        label="Password"
-        placeholder="Create a password"
-        :error="errors.password"
-        required
-        @blur="validateField('password')"
-      />
+      <div class="relative">
+        <HIGInput
+          v-model="form.password"
+          :type="showPassword ? 'text' : 'password'"
+          label="Password"
+          placeholder="Create a password"
+          :error="errors.password"
+          required
+          @blur="validateField('password')"
+          class="pr-10"
+        />
+        <button
+          type="button"
+          @click="showPassword = !showPassword"
+          class="absolute right-3 text-text-tertiary hover:text-text-primary transition-colors focus:outline-none z-10"
+          tabindex="-1"
+          aria-label="Toggle password visibility"
+          style="top: 2rem; height: 2.5rem; display: flex; align-items: center;"
+        >
+          <FontAwesomeIcon
+            :icon="showPassword ? faEyeSlash : faEye"
+            class="h-5 w-5"
+          />
+        </button>
+      </div>
       
-      <HIGInput
-        v-model="form.confirmPassword"
-        type="password"
-        label="Confirm Password"
-        placeholder="Confirm your password"
-        :error="errors.confirmPassword"
-        required
-        @blur="validateField('confirmPassword')"
-      />
+      <div class="relative">
+        <HIGInput
+          v-model="form.confirmPassword"
+          :type="showConfirmPassword ? 'text' : 'password'"
+          label="Confirm Password"
+          placeholder="Confirm your password"
+          :error="errors.confirmPassword"
+          required
+          @blur="validateField('confirmPassword')"
+          class="pr-10"
+        />
+        <button
+          type="button"
+          @click="showConfirmPassword = !showConfirmPassword"
+          class="absolute right-3 text-text-tertiary hover:text-text-primary transition-colors focus:outline-none z-10"
+          tabindex="-1"
+          aria-label="Toggle password visibility"
+          style="top: 2rem; height: 2.5rem; display: flex; align-items: center;"
+        >
+          <FontAwesomeIcon
+            :icon="showConfirmPassword ? faEyeSlash : faEye"
+            class="h-5 w-5"
+          />
+        </button>
+      </div>
     </div>
 
     <div class="space-y-3">
@@ -125,6 +157,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
 import { useAuth } from '../composables/useAuth'
 import { supabase } from '../supabase'
 import HIGInput from './hig/HIGInput.vue'
@@ -151,6 +185,8 @@ const form = ref({
 const errors = ref<Record<string, string>>({})
 const loading = ref(false)
 const googleLoading = ref(false)
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
 
 // Validation
 const isFormValid = computed(() => {

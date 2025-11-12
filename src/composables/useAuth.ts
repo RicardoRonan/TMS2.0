@@ -11,12 +11,22 @@ const TOKEN_REFRESH_DEBOUNCE_MS = 60000 // Only reload user data once per minute
 
 // Initialize auth listener immediately (called from main.ts)
 export async function initializeAuthListener(store: any) {
-  if (isListenerInitialized) {
-    return // Already initialized
+  // Always re-initialize on reload to ensure connection is fresh
+  // Clean up existing listener if it exists
+  if (authListener?.data?.subscription) {
+    try {
+      authListener.data.subscription.unsubscribe()
+    } catch (err) {
+      // Ignore errors during cleanup
+    }
+    authListener = null
   }
   
+  // Reset initialization flag to allow re-initialization
+  isListenerInitialized = false
+  
   // Check if Supabase is configured before initializing listener
-  const { isSupabaseConfigured } = await import('../supabase')
+  const { isSupabaseConfigured, supabase } = await import('../supabase')
   
   if (!isSupabaseConfigured()) {
     console.error('⚠️ Cannot initialize auth listener: Supabase environment variables are missing')
@@ -149,26 +159,53 @@ export async function initializeAuthListener(store: any) {
     }
   })
 
-  // Also check for existing session as a backup (with shorter timeout)
+  // Also check for existing session as a backup (with longer timeout for production)
   // This runs after the listener is set up, so INITIAL_SESSION should handle it first
   // This ensures Supabase session and store are always in sync
+  // Use a longer timeout on reload to account for network delays
   const sessionPromise = supabase.auth.getSession()
   const timeoutPromise = new Promise((resolve) => 
-    setTimeout(() => resolve({ data: { session: null } }), 5000)
+    setTimeout(() => resolve({ data: { session: null } }), 10000)
   )
   
-  Promise.race([sessionPromise, timeoutPromise]).then((result: any) => {
-    const { data: { session }, error } = result || { data: { session: null }, error: null }
-    const currentUser = store.getters.currentUser
-    
-    // Sync check: Ensure Supabase session matches store state
-    if (!error && session?.user) {
-      // We have a Supabase session
-      if (!currentUser || currentUser.uid !== session.user.id) {
-        // Store is out of sync - update it
+  Promise.race([sessionPromise, timeoutPromise]).then(async (result: any) => {
+    try {
+      const { data: { session }, error } = result || { data: { session: null }, error: null }
+      const currentUser = store.getters.currentUser
+      
+      // Sync check: Ensure Supabase session matches store state
+      if (!error && session?.user) {
+        // We have a Supabase session - verify it's still valid
         try {
-          loadUserDataForStore(session.user, store).catch(() => {
-            // If loading fails, set basic auth data to keep user logged in
+          // Verify session is still valid by checking token
+          const { data: { user } } = await supabase.auth.getUser()
+          
+          if (user && user.id === session.user.id) {
+            // Session is valid - sync store
+            if (!currentUser || currentUser.uid !== session.user.id) {
+              // Store is out of sync - update it
+              try {
+                await loadUserDataForStore(session.user, store)
+              } catch (loadErr) {
+                // If loading fails, set basic auth data to keep user logged in
+                store.dispatch('setUser', {
+                  uid: session.user.id,
+                  email: session.user.email,
+                  displayName: session.user.user_metadata?.display_name || 'User',
+                  photoURL: session.user.user_metadata?.avatar_url,
+                  isAdmin: false,
+                  createdAt: session.user.created_at || new Date().toISOString(),
+                  lastLoginAt: new Date().toISOString()
+                })
+              }
+            }
+          } else {
+            // Session is invalid - clear store
+            store.dispatch('setUser', null)
+          }
+        } catch (verifyErr) {
+          // If verification fails, still try to use the session we have
+          if (!currentUser || currentUser.uid !== session.user.id) {
             store.dispatch('setUser', {
               uid: session.user.id,
               email: session.user.email,
@@ -178,22 +215,18 @@ export async function initializeAuthListener(store: any) {
               createdAt: session.user.created_at || new Date().toISOString(),
               lastLoginAt: new Date().toISOString()
             })
-          })
-        } catch (err) {
-          // Even setting basic data failed - set minimal user data
-          store.dispatch('setUser', {
-            uid: session.user.id,
-            email: session.user.email,
-            displayName: 'User',
-            isAdmin: false
-          })
+          }
+        }
+      } else {
+        // No Supabase session - clear store if it has a user
+        if (currentUser) {
+          store.dispatch('setUser', null)
         }
       }
-    } else {
-      // No Supabase session - clear store if it has a user
-      if (currentUser) {
-        store.dispatch('setUser', null)
-      }
+    } catch (err) {
+      // If session check fails completely, don't break the app
+      // The auth listener will handle state changes
+      console.warn('Session check failed (non-critical):', err)
     }
   }).catch((err) => {
     // If session check fails completely, don't break the app

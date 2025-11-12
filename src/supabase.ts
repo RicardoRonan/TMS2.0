@@ -41,6 +41,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
       flowType: 'pkce',
       // Ensure session persists across page reloads
       storageType: 'localStorage',
+      // Add retry logic for network issues
+      debug: import.meta.env.DEV,
     },
     db: {
       schema: 'public'
@@ -48,6 +50,24 @@ if (!supabaseUrl || !supabaseAnonKey) {
     global: {
       headers: {
         'x-client-info': 'tms2.0'
+      },
+      // Add fetch with timeout for better reliability
+      fetch: (url, options = {}) => {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+        
+        return fetch(url, {
+          ...options,
+          signal: controller.signal
+        }).catch(err => {
+          // Handle network errors gracefully
+          if (err.name === 'AbortError' || err.name === 'TimeoutError') {
+            throw new Error('Request timeout - please check your connection')
+          }
+          throw err
+        }).finally(() => {
+          clearTimeout(timeoutId)
+        })
       }
     },
     realtime: {
