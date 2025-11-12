@@ -278,15 +278,12 @@ const formatCount = (count: number): string => {
 // Fetch stats from database
 const fetchStats = async () => {
   try {
-    // Supabase session is automatically managed - no need to call getSession()
-    
     // Fetch users count using database function
     try {
       const { data: usersCount, error: usersError } = await supabase
         .rpc('get_user_count')
       
       if (usersError) {
-        console.error('Error fetching users count:', usersError)
         // Try alternative: count users directly
         const { count: directCount, error: directError } = await supabase
           .from('users')
@@ -294,14 +291,11 @@ const fetchStats = async () => {
         
         if (!directError && directCount !== null && directCount !== undefined) {
           stats.value.activeMembers = directCount
-        } else {
-          console.error('Error fetching users count (direct):', directError)
         }
       } else if (usersCount !== null && usersCount !== undefined) {
         stats.value.activeMembers = usersCount
       }
     } catch (err) {
-      console.error('Exception fetching users count:', err)
       // Keep default value
     }
     
@@ -312,13 +306,10 @@ const fetchStats = async () => {
         .select('*', { count: 'exact', head: true })
         .eq('published', true)
       
-      if (blogsError) {
-        console.error('Error fetching blogs count:', blogsError)
-      } else if (blogsCount !== null && blogsCount !== undefined) {
+      if (!blogsError && blogsCount !== null && blogsCount !== undefined) {
         stats.value.publishedArticles = blogsCount
       }
     } catch (err) {
-      console.error('Exception fetching blogs count:', err)
       // Keep default value
     }
     
@@ -328,17 +319,13 @@ const fetchStats = async () => {
         .from('tools')
         .select('*', { count: 'exact', head: true })
       
-      if (toolsError) {
-        console.error('Error fetching tools count:', toolsError)
-      } else if (toolsCount !== null && toolsCount !== undefined) {
+      if (!toolsError && toolsCount !== null && toolsCount !== undefined) {
         stats.value.curatedTools = toolsCount
       }
     } catch (err) {
-      console.error('Exception fetching tools count:', err)
       // Keep default value
     }
   } catch (error) {
-    console.error('Error fetching stats:', error)
     // Keep default values of 0 if fetch fails
   }
 }

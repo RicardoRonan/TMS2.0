@@ -8,6 +8,8 @@ interface ImportMetaEnv {
   readonly VITE_APP_DESCRIPTION?: string
   readonly VITE_API_BASE_URL?: string
   readonly VITE_CHAT_WEBHOOK_URL?: string
+  readonly VITE_IMGBB_API_KEY?: string
+  readonly VITE_BRANDFETCH_CLIENT_ID?: string
   readonly VITE_GOOGLE_ANALYTICS_ID?: string
 }
 
