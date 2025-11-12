@@ -3,6 +3,11 @@
   command = "npm run build"
   # Directory to publish (Vite's default output directory)
   publish = "dist"
+  # Environment variables are automatically available during build
+  # Set them in Netlify Dashboard: Site configuration → Environment variables
+  # Required variables:
+  #   - VITE_SUPABASE_URL
+  #   - VITE_SUPABASE_ANON_KEY
 
 [[redirects]]
   # Redirect all routes to index.html for SPA routing
