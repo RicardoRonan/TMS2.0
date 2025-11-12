@@ -29,21 +29,50 @@ export function initializeAuthListener(store: any) {
   // Set up the auth state change listener FIRST
   // This ensures INITIAL_SESSION event is captured immediately
   authListener = supabase.auth.onAuthStateChange(async (event, session) => {
-    switch (event) {
-      case 'INITIAL_SESSION':
-        // This is the primary way sessions are restored on page reload
-        if (session?.user) {
-          await loadUserDataForStore(session.user, store)
-        } else {
-          store.dispatch('setUser', null)
-        }
-        break
+    try {
+      switch (event) {
+        case 'INITIAL_SESSION':
+          // This is the primary way sessions are restored on page reload
+          if (session?.user) {
+            try {
+              await loadUserDataForStore(session.user, store)
+            } catch (err: any) {
+              // If loading user data fails, still set basic auth data
+              // This ensures the user stays logged in even if profile fetch fails
+              store.dispatch('setUser', {
+                uid: session.user.id,
+                email: session.user.email,
+                displayName: session.user.user_metadata?.display_name || 'User',
+                photoURL: session.user.user_metadata?.avatar_url,
+                isAdmin: false,
+                createdAt: session.user.created_at || new Date().toISOString(),
+                lastLoginAt: new Date().toISOString()
+              })
+            }
+          } else {
+            // No session - ensure store is cleared
+            store.dispatch('setUser', null)
+          }
+          break
         
-      case 'SIGNED_IN':
-        if (session?.user) {
-          await loadUserDataForStore(session.user, store)
-        }
-        break
+        case 'SIGNED_IN':
+          if (session?.user) {
+            try {
+              await loadUserDataForStore(session.user, store)
+            } catch (err: any) {
+              // Fallback to basic auth data if profile load fails
+              store.dispatch('setUser', {
+                uid: session.user.id,
+                email: session.user.email,
+                displayName: session.user.user_metadata?.display_name || 'User',
+                photoURL: session.user.user_metadata?.avatar_url,
+                isAdmin: false,
+                createdAt: session.user.created_at || new Date().toISOString(),
+                lastLoginAt: new Date().toISOString()
+              })
+            }
+          }
+          break
       
       case 'TOKEN_REFRESHED':
         // Debounce token refresh events to prevent excessive reloads
@@ -61,6 +90,7 @@ export function initializeAuthListener(store: any) {
         break
       
       case 'SIGNED_OUT':
+        // Clear store when signed out
         store.dispatch('setUser', null)
         break
       
@@ -73,15 +103,55 @@ export function initializeAuthListener(store: any) {
       default:
         // For other events, check if we have a session
         if (session?.user) {
-          await loadUserDataForStore(session.user, store)
+          try {
+            await loadUserDataForStore(session.user, store)
+          } catch (err: any) {
+            // Fallback to basic auth data
+            store.dispatch('setUser', {
+              uid: session.user.id,
+              email: session.user.email,
+              displayName: session.user.user_metadata?.display_name || 'User',
+              photoURL: session.user.user_metadata?.avatar_url,
+              isAdmin: false,
+              createdAt: session.user.created_at || new Date().toISOString(),
+              lastLoginAt: new Date().toISOString()
+            })
+          }
         } else {
           store.dispatch('setUser', null)
         }
+      }
+    } catch (err: any) {
+      // If any error occurs in auth state change handler, log it but don't break
+      // This ensures the app continues to work even if session restoration fails
+      console.error('Auth state change error:', err)
+      
+      // If we have a session but error occurred, try to set basic user data
+      if (session?.user) {
+        try {
+          store.dispatch('setUser', {
+            uid: session.user.id,
+            email: session.user.email,
+            displayName: session.user.user_metadata?.display_name || 'User',
+            photoURL: session.user.user_metadata?.avatar_url,
+            isAdmin: false,
+            createdAt: session.user.created_at || new Date().toISOString(),
+            lastLoginAt: new Date().toISOString()
+          })
+        } catch (storeErr) {
+          // If even setting basic data fails, clear the store
+          store.dispatch('setUser', null)
+        }
+      } else {
+        // No session - ensure store is cleared
+        store.dispatch('setUser', null)
+      }
     }
   })
 
   // Also check for existing session as a backup (with shorter timeout)
   // This runs after the listener is set up, so INITIAL_SESSION should handle it first
+  // This ensures Supabase session and store are always in sync
   const sessionPromise = supabase.auth.getSession()
   const timeoutPromise = new Promise((resolve) => 
     setTimeout(() => resolve({ data: { session: null } }), 5000)
@@ -89,54 +159,107 @@ export function initializeAuthListener(store: any) {
   
   Promise.race([sessionPromise, timeoutPromise]).then((result: any) => {
     const { data: { session }, error } = result || { data: { session: null }, error: null }
-    
-    // Only update if we don't already have a user (INITIAL_SESSION might have already loaded it)
     const currentUser = store.getters.currentUser
-    if (!currentUser) {
-      if (!error && session?.user) {
-        loadUserDataForStore(session.user, store)
-      } else {
+    
+    // Sync check: Ensure Supabase session matches store state
+    if (!error && session?.user) {
+      // We have a Supabase session
+      if (!currentUser || currentUser.uid !== session.user.id) {
+        // Store is out of sync - update it
+        try {
+          loadUserDataForStore(session.user, store).catch(() => {
+            // If loading fails, set basic auth data to keep user logged in
+            store.dispatch('setUser', {
+              uid: session.user.id,
+              email: session.user.email,
+              displayName: session.user.user_metadata?.display_name || 'User',
+              photoURL: session.user.user_metadata?.avatar_url,
+              isAdmin: false,
+              createdAt: session.user.created_at || new Date().toISOString(),
+              lastLoginAt: new Date().toISOString()
+            })
+          })
+        } catch (err) {
+          // Even setting basic data failed - set minimal user data
+          store.dispatch('setUser', {
+            uid: session.user.id,
+            email: session.user.email,
+            displayName: 'User',
+            isAdmin: false
+          })
+        }
+      }
+    } else {
+      // No Supabase session - clear store if it has a user
+      if (currentUser) {
         store.dispatch('setUser', null)
       }
     }
-  }).catch(() => {
-    // Silently fail - INITIAL_SESSION event should have handled it
+  }).catch((err) => {
+    // If session check fails completely, don't break the app
+    // The auth listener will handle state changes
+    console.warn('Session check failed (non-critical):', err)
   })
 }
 
 // Helper function to load user data (used by both initializeAuthListener and useAuth)
+// This function ensures Supabase session and store are always in sync
 async function loadUserDataForStore(supabaseUser: User, store: any) {
+  // First, verify we still have a valid Supabase session
+  // This prevents stale data from being loaded
   try {
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    
+    if (sessionError || !session || session.user.id !== supabaseUser.id) {
+      // Session is invalid or changed - clear store
+      store.dispatch('setUser', null)
+      return
+    }
+  } catch (sessionCheckErr) {
+    // If we can't verify session, still try to load user data
+    // But this is a warning sign
+    console.warn('Could not verify session during user data load')
+  }
+
+  try {
+    // Try to get user profile from database
     const { data: userData, error: profileError } = await supabase
       .from('users')
       .select('*')
       .eq('id', supabaseUser.id)
       .single()
 
+    // PGRST116 is "not found" - user might not have profile yet, that's okay
     if (profileError && profileError.code !== 'PGRST116') {
-      // PGRST116 is "not found" - user might not have profile yet
+      // Other errors are logged but we continue with auth data
+      console.warn('Profile fetch error (non-critical):', profileError.message)
     }
 
+    // Update store with complete user data
     store.dispatch('setUser', {
       uid: supabaseUser.id,
       email: supabaseUser.email,
       displayName: userData?.display_name || supabaseUser.user_metadata?.display_name || 'User',
       photoURL: userData?.photo_url || supabaseUser.user_metadata?.avatar_url,
       isAdmin: userData?.is_admin || false,
-      createdAt: userData?.created_at || supabaseUser.created_at,
+      createdAt: userData?.created_at || supabaseUser.created_at || new Date().toISOString(),
       lastLoginAt: userData?.last_login_at || new Date().toISOString()
     })
-  } catch (err) {
-    // Fallback to auth user data
+  } catch (err: any) {
+    // If anything fails, fallback to basic auth user data
+    // This ensures the user stays logged in even if profile fetch fails
     store.dispatch('setUser', {
       uid: supabaseUser.id,
       email: supabaseUser.email,
       displayName: supabaseUser.user_metadata?.display_name || 'User',
       photoURL: supabaseUser.user_metadata?.avatar_url,
       isAdmin: false,
-      createdAt: supabaseUser.created_at,
+      createdAt: supabaseUser.created_at || new Date().toISOString(),
       lastLoginAt: new Date().toISOString()
     })
+    
+    // Re-throw so caller knows there was an error (but user is still logged in)
+    throw err
   }
 }
 
@@ -389,10 +512,20 @@ export function useAuth() {
       store.dispatch('setUser', null)
 
       // Try to sign out from Supabase (non-blocking)
-      await supabase.auth.signOut()
+      const { error: signOutError } = await supabase.auth.signOut()
+      
+      if (signOutError) {
+        // Log error but don't throw - user is already logged out locally
+        console.warn('Sign out error (non-critical):', signOutError)
+      }
+      
+      // Ensure store is cleared regardless of Supabase response
+      store.dispatch('setUser', null)
     } catch (err: any) {
       // Even if there's an error, user is already logged out locally
       error.value = getErrorMessage(err)
+      // Ensure store is cleared
+      store.dispatch('setUser', null)
       // Don't throw - logout should succeed locally even if server call fails
     } finally {
       loading.value = false
