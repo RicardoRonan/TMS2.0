@@ -10,17 +10,17 @@ let lastTokenRefreshTime = 0
 const TOKEN_REFRESH_DEBOUNCE_MS = 60000 // Only reload user data once per minute for token refreshes
 
 // Initialize auth listener immediately (called from main.ts)
-export function initializeAuthListener(store: any) {
+export async function initializeAuthListener(store: any) {
   if (isListenerInitialized) {
     return // Already initialized
   }
   
   // Check if Supabase is configured before initializing listener
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+  const { isSupabaseConfigured } = await import('../supabase')
   
-  if (!supabaseUrl || !supabaseAnonKey) {
+  if (!isSupabaseConfigured()) {
     console.error('⚠️ Cannot initialize auth listener: Supabase environment variables are missing')
+    console.error('💡 Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Netlify environment variables')
     return
   }
   
@@ -223,14 +223,25 @@ async function loadUserDataForStore(supabaseUser: User, store: any) {
 
   try {
     // Try to get user profile from database
-    const { data: userData, error: profileError } = await supabase
+    // Use a timeout to prevent hanging
+    const profilePromise = supabase
       .from('users')
       .select('*')
       .eq('id', supabaseUser.id)
       .single()
+    
+    const timeoutPromise = new Promise((resolve) => 
+      setTimeout(() => resolve({ data: null, error: { code: 'TIMEOUT', message: 'Profile fetch timeout' } }), 5000)
+    )
+    
+    const { data: userData, error: profileError } = await Promise.race([
+      profilePromise,
+      timeoutPromise
+    ]) as any
 
     // PGRST116 is "not found" - user might not have profile yet, that's okay
-    if (profileError && profileError.code !== 'PGRST116') {
+    // TIMEOUT means the query took too long - continue with auth data
+    if (profileError && profileError.code !== 'PGRST116' && profileError.code !== 'TIMEOUT') {
       // Other errors are logged but we continue with auth data
       console.warn('Profile fetch error (non-critical):', profileError.message)
     }

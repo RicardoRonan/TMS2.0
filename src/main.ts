@@ -71,26 +71,48 @@ app.use(router)
 // This is critical for session persistence on page reload
 async function initializeApp() {
   try {
-    // Initialize auth listener FIRST (before mounting)
-    // This ensures INITIAL_SESSION event is captured as soon as possible
-    const { initializeAuthListener } = await import('./composables/useAuth')
-    initializeAuthListener(store)
+    // Check if Supabase is configured before initializing
+    const { isSupabaseConfigured } = await import('./supabase')
     
-    // Small delay to let INITIAL_SESSION event fire
-    await new Promise(resolve => setTimeout(resolve, 100))
-  } catch (err) {
-    // Continue even if auth init fails
+    if (isSupabaseConfigured()) {
+      // Initialize auth listener FIRST (before mounting)
+      // This ensures INITIAL_SESSION event is captured as soon as possible
+      const { initializeAuthListener } = await import('./composables/useAuth')
+      await initializeAuthListener(store)
+      
+      // Small delay to let INITIAL_SESSION event fire
+      await new Promise(resolve => setTimeout(resolve, 100))
+    } else {
+      // Supabase not configured - show notification but don't break app
+      console.warn('⚠️ Supabase not configured - auth features disabled')
+      setTimeout(() => {
+        store.dispatch('addNotification', {
+          type: 'error',
+          message: 'Supabase not configured. Set environment variables in Netlify.',
+          duration: 15000
+        })
+      }, 2000)
+    }
+  } catch (err: any) {
+    // Continue even if auth init fails - don't break the app
+    console.error('Auth initialization error (non-critical):', err?.message)
   }
   
-  // Mount app after auth listener is initialized
+  // Mount app - always mount even if auth init failed
   app.mount('#app')
   
   // Test Supabase connection after mount (non-blocking)
   Promise.resolve().then(async () => {
     try {
-      const { supabase } = await import('./supabase')
+      const { supabase, isSupabaseConfigured } = await import('./supabase')
+      
+      if (!isSupabaseConfigured()) {
+        return // Skip test if not configured
+      }
+      
       const { error } = await supabase.from('blogs').select('id').limit(1)
       if (error && error.code !== 'PGRST116') {
+        // Only show error if it's not a "not found" error
         store.dispatch('addNotification', {
           type: 'error',
           message: `Supabase connection error: ${error.message || error.code}`,
@@ -99,6 +121,7 @@ async function initializeApp() {
       }
     } catch (testErr: any) {
       // Silently fail - connection test is not critical
+      console.warn('Connection test failed (non-critical):', testErr?.message)
     }
   })
 }
