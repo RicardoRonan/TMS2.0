@@ -17,17 +17,7 @@ export function initializeAuthListener(store: any) {
   
   isListenerInitialized = true
 
-  // Check if Supabase is properly configured
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-  
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('⚠️ Cannot initialize auth: Supabase environment variables are missing')
-    console.error('Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables')
-    return
-  }
-
-  // Check for existing session (with longer timeout for better reliability)
+  // Check for existing session (with timeout for reliability)
   // The INITIAL_SESSION event from onAuthStateChange will also handle this,
   // but we check here as a backup
   const sessionPromise = supabase.auth.getSession()
@@ -37,41 +27,28 @@ export function initializeAuthListener(store: any) {
   
   Promise.race([sessionPromise, timeoutPromise]).then((result: any) => {
     const { data: { session }, error } = result || { data: { session: null }, error: null }
-    if (error) {
-      console.warn('Session check error:', error)
-      return
-    }
-    if (session?.user) {
-      console.log('Session found on initialization, loading user data')
+    if (!error && session?.user) {
       loadUserDataForStore(session.user, store)
     } else {
-      console.log('No session found on initialization')
       store.dispatch('setUser', null)
     }
-  }).catch((err) => {
-    console.warn('Session check failed:', err)
+  }).catch(() => {
     // Silently fail - session check is not critical, INITIAL_SESSION event will handle it
   })
 
   // Listen for auth changes - handle all events properly
   authListener = supabase.auth.onAuthStateChange(async (event, session) => {
-    console.log('Auth state change:', event, session?.user?.id)
-    
     switch (event) {
       case 'INITIAL_SESSION':
-        // This event fires when the app loads and a session is found in storage
         if (session?.user) {
-          console.log('Initial session found, loading user data')
           await loadUserDataForStore(session.user, store)
         } else {
-          console.log('No initial session found')
           store.dispatch('setUser', null)
         }
         break
         
       case 'SIGNED_IN':
         if (session?.user) {
-          console.log('User signed in, loading user data')
           await loadUserDataForStore(session.user, store)
         }
         break
@@ -92,7 +69,6 @@ export function initializeAuthListener(store: any) {
         break
       
       case 'SIGNED_OUT':
-        console.log('User signed out')
         store.dispatch('setUser', null)
         break
       
@@ -372,7 +348,7 @@ export function useAuth() {
       loading.value = true
       error.value = null
 
-      const { data, error: authError } = await supabase.auth.signInWithOAuth({
+      const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`
@@ -398,11 +374,7 @@ export function useAuth() {
       store.dispatch('setUser', null)
 
       // Try to sign out from Supabase (non-blocking)
-      const { error: authError } = await supabase.auth.signOut()
-      if (authError) {
-        // Log error but don't throw - user is already logged out locally
-        console.warn('Sign out error (non-critical):', authError)
-      }
+      await supabase.auth.signOut()
     } catch (err: any) {
       // Even if there's an error, user is already logged out locally
       error.value = getErrorMessage(err)
@@ -481,11 +453,6 @@ export function useAuth() {
     // Don't unsubscribe here - the listener is global and should persist
     // It will be cleaned up when the app unmounts
   })
-
-  // Helper function to load user data (uses the shared function)
-  const loadUserData = async (supabaseUser: User) => {
-    await loadUserDataForStore(supabaseUser, store)
-  }
 
   // Helper function to get user-friendly error messages
   const getErrorMessage = (error: AuthError | Error | string): string => {

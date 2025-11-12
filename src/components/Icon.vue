@@ -9,9 +9,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { getIconMapping } from '../utils/iconMap'
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
+import { getIconAsync } from '../utils/iconMap'
 
 interface Props {
   name: string
@@ -25,8 +26,27 @@ const props = withDefaults(defineProps<Props>(), {
   variant: 'solid'
 })
 
-const mapping = computed(() => getIconMapping(props.name))
-const iconDefinition = computed(() => mapping.value?.icon || null)
+const iconDefinition = ref<IconDefinition | null>(null)
+
+// Load icon asynchronously
+const loadIcon = async () => {
+  try {
+    const icon = await getIconAsync(props.name)
+    iconDefinition.value = icon
+  } catch (error) {
+    console.warn(`Failed to load icon: ${props.name}`, error)
+    iconDefinition.value = null
+  }
+}
+
+// Load icon when component mounts or name changes
+onMounted(() => {
+  loadIcon()
+})
+
+watch(() => props.name, () => {
+  loadIcon()
+})
 
 const iconClasses = computed(() => [
   'icon',

@@ -155,11 +155,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onActivated } from 'vue'
+import { useStore } from 'vuex'
 import { supabase } from '../supabase'
 import HIGCard from '../components/hig/HIGCard.vue'
 import HIGButton from '../components/hig/HIGButton.vue'
 import HIGInput from '../components/hig/HIGInput.vue'
 import Icon from '../components/Icon.vue'
+
+const store = useStore()
 
 // State
 const loading = ref(true)
@@ -276,8 +279,8 @@ const fetchBlogs = async (force = false) => {
   try {
     loading.value = true
     
-    // Supabase session is automatically managed - no need to call getSession()
-    const { data, error } = await supabase
+    // Try fetching with author join first
+    let { data, error } = await supabase
       .from('blogs')
       .select(`
         *,
@@ -291,7 +294,25 @@ const fetchBlogs = async (force = false) => {
       .eq('published', true)
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    // If the join fails (e.g., RLS on users table), try without the join
+    if (error) {
+      const { data: blogsData, error: blogsError } = await supabase
+        .from('blogs')
+        .select('*')
+        .eq('published', true)
+        .order('created_at', { ascending: false })
+      
+      if (blogsError) {
+        throw blogsError
+      }
+      
+      data = blogsData
+      error = null
+    }
+
+    if (error) {
+      throw error
+    }
 
     posts.value = (data || []).map(blog => ({
       id: blog.id,
@@ -319,8 +340,13 @@ const fetchBlogs = async (force = false) => {
     categories.value = Array.from(uniqueCategories)
     lastFetchTime.value = now
   } catch (error: any) {
-    console.error('Error fetching blogs:', error)
     posts.value = []
+    const errorMessage = error?.message || error?.code || 'Failed to load blog posts'
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: `Error loading blogs: ${errorMessage}`,
+      duration: 8000
+    })
   } finally {
     loading.value = false
   }

@@ -1,206 +1,167 @@
 /**
  * Icon mapping utility for FontAwesome Icons
  * Maps common icon names to FontAwesome icon names
+ * Uses dynamic imports for lazy loading
  */
 
-import { 
-  faHome, 
-  faBars, 
-  faXmark, 
-  faChevronDown, 
-  faChevronUp, 
-  faChevronLeft, 
-  faChevronRight,
-  faMagnifyingGlass,
-  faArrowUpRightFromSquare,
-  faHeart,
-  faStar,
-  faBookmark,
-  faShare,
-  faDownload,
-  faUpload,
-  faPen,
-  faTrash,
-  faCopy,
-  faGear,
-  faFilter,
-  faUser,
-  faUserCircle,
-  faRightToBracket,
-  faRightFromBracket,
-  faIdCard,
-  faFile,
-  faFileLines,
-  faNewspaper,
-  faFolder,
-  faComments,
-  faEnvelope,
-  faBell,
-  faToolbox,
-  faWrench,
-  faCode,
-  faGraduationCap,
-  faCheck,
-  faArrowRight,
-  faArrowLeft,
-  faPlus,
-  faMinus,
-  faCircleInfo,
-  faTriangleExclamation,
-  faCheckCircle,
-  faImage,
-  faVideo,
-  faMusic,
-  faCalendar,
-  faClock,
-  faTag,
-  faLink,
-  faPhone,
-  faLocationDot,
-  faSun,
-  faMoon,
-  faMaximize,
-  faBold,
-  faItalic,
-  faStrikethrough,
-  faList,
-  faListOl,
-  faSquareCheck,
-  faQuoteLeft,
-  faTable,
-  faEye
-} from '@fortawesome/free-solid-svg-icons'
-
-import {
-  faTwitter,
-  faGithub,
-  faLinkedin,
-  faFacebook,
-  faPinterest,
-  faReddit
-} from '@fortawesome/free-brands-svg-icons'
-
-import { IconDefinition } from '@fortawesome/fontawesome-svg-core'
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 
 export interface IconMapping {
   icon: IconDefinition
 }
 
-/**
- * Maps common icon names to FontAwesome icon definitions
- */
-export const iconMap: Record<string, IconMapping> = {
+// Icon import map - maps icon names to their dynamic import paths
+const iconImportMap: Record<string, () => Promise<{ default: IconDefinition }>> = {
   // Navigation
-  'home': { icon: faHome },
-  'menu': { icon: faBars },
-  'close': { icon: faXmark },
-  'chevron-down': { icon: faChevronDown },
-  'chevron-up': { icon: faChevronUp },
-  'chevron-left': { icon: faChevronLeft },
-  'chevron-right': { icon: faChevronRight },
+  'home': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faHome })),
+  'menu': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faBars })),
+  'close': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faXmark })),
+  'chevron-down': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faChevronDown })),
+  'chevron-up': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faChevronUp })),
+  'chevron-left': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faChevronLeft })),
+  'chevron-right': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faChevronRight })),
   
   // Actions
-  'search': { icon: faMagnifyingGlass },
-  'external-link': { icon: faArrowUpRightFromSquare },
-  'heart': { icon: faHeart },
-  'favorite': { icon: faStar },
-  'bookmark': { icon: faBookmark },
-  'share': { icon: faShare },
-  'download': { icon: faDownload },
-  'upload': { icon: faUpload },
-  'edit': { icon: faPen },
-  'delete': { icon: faTrash },
-  'copy': { icon: faCopy },
-  'settings': { icon: faGear },
-  'cogicon': { icon: faGear },
-  'cog': { icon: faGear },
-  'filter': { icon: faFilter },
+  'search': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faMagnifyingGlass })),
+  'external-link': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faArrowUpRightFromSquare })),
+  'heart': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faHeart })),
+  'favorite': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faStar })),
+  'bookmark': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faBookmark })),
+  'share': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faShare })),
+  'download': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faDownload })),
+  'upload': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faUpload })),
+  'edit': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faPen })),
+  'delete': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faTrash })),
+  'copy': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faCopy })),
+  'settings': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faGear })),
+  'cogicon': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faGear })),
+  'cog': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faGear })),
+  'filter': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faFilter })),
   
   // User
-  'user': { icon: faUser },
-  'user-circle': { icon: faUserCircle },
-  'login': { icon: faRightToBracket },
-  'logout': { icon: faRightFromBracket },
-  'profile': { icon: faIdCard },
+  'user': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faUser })),
+  'user-circle': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faUserCircle })),
+  'login': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faRightToBracket })),
+  'logout': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faRightFromBracket })),
+  'profile': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faIdCard })),
   
   // Content
-  'document': { icon: faFile },
-  'documenttexticon': { icon: faFileLines },
-  'article': { icon: faFileLines },
-  'blog': { icon: faNewspaper },
-  'folder': { icon: faFolder },
-  'foldericon': { icon: faFolder },
-  'file': { icon: faFile },
+  'document': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faFile })),
+  'documenttexticon': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faFileLines })),
+  'article': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faFileLines })),
+  'blog': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faNewspaper })),
+  'folder': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faFolder })),
+  'foldericon': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faFolder })),
+  'file': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faFile })),
   
   // Communication
-  'chat': { icon: faComments },
-  'chatbubbleleftrighticon': { icon: faComments },
-  'message': { icon: faComments },
-  'mail': { icon: faEnvelope },
-  'notification': { icon: faBell },
+  'chat': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faComments })),
+  'chatbubbleleftrighticon': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faComments })),
+  'message': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faComments })),
+  'mail': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faEnvelope })),
+  'notification': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faBell })),
   
   // Tools & Development
-  'tool': { icon: faToolbox },
-  'wrench': { icon: faWrench },
-  'wrenchscrewdrivericon': { icon: faWrench },
-  'code': { icon: faCode },
-  'tutorial': { icon: faGraduationCap },
-  'academic': { icon: faGraduationCap },
-  'academiccapicon': { icon: faGraduationCap },
+  'tool': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faToolbox })),
+  'wrench': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faWrench })),
+  'wrenchscrewdrivericon': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faWrench })),
+  'code': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faCode })),
+  'tutorial': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faGraduationCap })),
+  'academic': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faGraduationCap })),
+  'academiccapicon': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faGraduationCap })),
   
   // UI Elements
-  'check': { icon: faCheck },
-  'close-x': { icon: faXmark },
-  'arrow-right': { icon: faArrowRight },
-  'arrow-left': { icon: faArrowLeft },
-  'plus': { icon: faPlus },
-  'minus': { icon: faMinus },
-  'info': { icon: faCircleInfo },
-  'warning': { icon: faTriangleExclamation },
-  'error': { icon: faTriangleExclamation },
-  'success': { icon: faCheckCircle },
+  'check': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faCheck })),
+  'close-x': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faXmark })),
+  'arrow-right': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faArrowRight })),
+  'arrow-left': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faArrowLeft })),
+  'plus': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faPlus })),
+  'minus': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faMinus })),
+  'info': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faCircleInfo })),
+  'warning': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faTriangleExclamation })),
+  'error': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faTriangleExclamation })),
+  'success': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faCheckCircle })),
   
   // Social
-  'twitter': { icon: faTwitter },
-  'facebook': { icon: faFacebook },
-  'github': { icon: faGithub },
-  'pinterest': { icon: faPinterest },
-  'linkedin': { icon: faLinkedin },
-  'reddit': { icon: faReddit },
+  'twitter': () => import('@fortawesome/free-brands-svg-icons').then(m => ({ default: m.faTwitter })),
+  'facebook': () => import('@fortawesome/free-brands-svg-icons').then(m => ({ default: m.faFacebook })),
+  'github': () => import('@fortawesome/free-brands-svg-icons').then(m => ({ default: m.faGithub })),
+  'pinterest': () => import('@fortawesome/free-brands-svg-icons').then(m => ({ default: m.faPinterest })),
+  'linkedin': () => import('@fortawesome/free-brands-svg-icons').then(m => ({ default: m.faLinkedin })),
+  'reddit': () => import('@fortawesome/free-brands-svg-icons').then(m => ({ default: m.faReddit })),
   
   // Media
-  'image': { icon: faImage },
-  'video': { icon: faVideo },
-  'music': { icon: faMusic },
+  'image': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faImage })),
+  'video': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faVideo })),
+  'music': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faMusic })),
   
   // Other
-  'calendar': { icon: faCalendar },
-  'clock': { icon: faClock },
-  'star': { icon: faStar },
-  'tag': { icon: faTag },
-  'link': { icon: faLink },
-  'phone': { icon: faPhone },
-  'location': { icon: faLocationDot },
-  'sun': { icon: faSun },
-  'moon': { icon: faMoon },
-  'expand': { icon: faMaximize },
+  'calendar': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faCalendar })),
+  'clock': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faClock })),
+  'star': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faStar })),
+  'tag': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faTag })),
+  'link': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faLink })),
+  'phone': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faPhone })),
+  'location': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faLocationDot })),
+  'sun': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faSun })),
+  'moon': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faMoon })),
+  'expand': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faMaximize })),
   
   // Markdown Editor Icons
-  'bold': { icon: faBold },
-  'italic': { icon: faItalic },
-  'strikethrough': { icon: faStrikethrough },
-  'list': { icon: faList },
-  'list-ordered': { icon: faListOl },
-  'checkbox': { icon: faSquareCheck },
-  'quote': { icon: faQuoteLeft },
-  'table': { icon: faTable },
-  'eye': { icon: faEye },
-  'code-block': { icon: faCode },
+  'bold': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faBold })),
+  'italic': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faItalic })),
+  'strikethrough': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faStrikethrough })),
+  'list': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faList })),
+  'list-ordered': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faListOl })),
+  'checkbox': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faSquareCheck })),
+  'quote': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faQuoteLeft })),
+  'table': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faTable })),
+  'eye': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faEye })),
+  'code-block': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faCode })),
+}
+
+// Cache for loaded icons
+const iconCache = new Map<string, IconDefinition>()
+
+/**
+ * Gets the icon mapping for a given icon name (async)
+ * Returns a promise that resolves to the icon definition
+ */
+export async function getIconAsync(iconName: string): Promise<IconDefinition | null> {
+  const key = iconName.toLowerCase()
+  
+  // Check cache first
+  if (iconCache.has(key)) {
+    return iconCache.get(key)!
+  }
+  
+  // Get import function
+  const importFn = iconImportMap[key]
+  if (!importFn) {
+    return null
+  }
+  
+  try {
+    // Dynamically import the icon
+    const module = await importFn()
+    const icon = module.default
+    
+    // Cache it
+    iconCache.set(key, icon)
+    
+    return icon
+  } catch (error) {
+    console.warn(`Failed to load icon: ${iconName}`, error)
+    return null
+  }
 }
 
 /**
- * Gets the icon mapping for a given icon name
+ * Gets the icon mapping for a given icon name (synchronous, deprecated)
+ * @deprecated Use getIconAsync instead
  */
 export function getIconMapping(iconName: string): IconMapping | null {
-  return iconMap[iconName.toLowerCase()] || null
+  // This is kept for backward compatibility but will return null
+  // Components should use getIconAsync instead
+  return null
 }

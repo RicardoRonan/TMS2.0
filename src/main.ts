@@ -1,165 +1,9 @@
 import { createApp } from 'vue'
 import { createStore } from 'vuex'
-import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import App from './App.vue'
 import router from './router'
 import './styles/main.css'
-
-// Import all FontAwesome icons used in the app
-import { 
-  faHome, 
-  faBars, 
-  faXmark, 
-  faChevronDown, 
-  faChevronUp, 
-  faChevronLeft, 
-  faChevronRight,
-  faMagnifyingGlass,
-  faArrowUpRightFromSquare,
-  faHeart,
-  faStar,
-  faBookmark,
-  faShare,
-  faDownload,
-  faUpload,
-  faPen,
-  faTrash,
-  faCopy,
-  faGear,
-  faFilter,
-  faUser,
-  faUserCircle,
-  faRightToBracket,
-  faRightFromBracket,
-  faIdCard,
-  faFile,
-  faFileLines,
-  faNewspaper,
-  faFolder,
-  faComments,
-  faEnvelope,
-  faBell,
-  faToolbox,
-  faWrench,
-  faCode,
-  faGraduationCap,
-  faCheck,
-  faArrowRight,
-  faArrowLeft,
-  faPlus,
-  faMinus,
-  faCircleInfo,
-  faTriangleExclamation,
-  faCheckCircle,
-  faImage,
-  faVideo,
-  faMusic,
-  faCalendar,
-  faClock,
-  faTag,
-  faLink,
-  faPhone,
-  faLocationDot,
-  faSun,
-  faMoon,
-  faCodeBranch,
-  faUsers,
-  faAward,
-  faLightbulb,
-  faHeart,
-  faBook,
-  faDatabase,
-  faLaptopCode,
-  faRobot,
-  faGears,
-  faFileCode,
-  faCircleNodes
-} from '@fortawesome/free-solid-svg-icons'
-
-import {
-  faTwitter,
-  faGithub,
-  faLinkedin,
-  faFacebook,
-  faPinterest
-} from '@fortawesome/free-brands-svg-icons'
-
-// Add icons to the library
-library.add(
-  faHome, 
-  faBars, 
-  faXmark, 
-  faChevronDown, 
-  faChevronUp, 
-  faChevronLeft, 
-  faChevronRight,
-  faMagnifyingGlass,
-  faArrowUpRightFromSquare,
-  faHeart,
-  faStar,
-  faBookmark,
-  faShare,
-  faDownload,
-  faUpload,
-  faPen,
-  faTrash,
-  faCopy,
-  faGear,
-  faFilter,
-  faUser,
-  faUserCircle,
-  faRightToBracket,
-  faRightFromBracket,
-  faIdCard,
-  faFile,
-  faFileLines,
-  faNewspaper,
-  faFolder,
-  faComments,
-  faEnvelope,
-  faBell,
-  faToolbox,
-  faWrench,
-  faCode,
-  faGraduationCap,
-  faCheck,
-  faArrowRight,
-  faArrowLeft,
-  faPlus,
-  faMinus,
-  faCircleInfo,
-  faTriangleExclamation,
-  faCheckCircle,
-  faImage,
-  faVideo,
-  faMusic,
-  faCalendar,
-  faClock,
-  faTag,
-  faLink,
-  faPhone,
-  faLocationDot,
-  faSun,
-  faMoon,
-  faCodeBranch,
-  faUsers,
-  faAward,
-  faLightbulb,
-  faHeart,
-  faBook,
-  faDatabase,
-  faLaptopCode,
-  faRobot,
-  faGears,
-  faFileCode,
-  faCircleNodes,
-  faTwitter,
-  faGithub,
-  faLinkedin,
-  faFacebook,
-  faPinterest
-)
 
 // Create Vuex store
 const store = createStore({
@@ -223,48 +67,35 @@ app.component('FontAwesomeIcon', FontAwesomeIcon)
 app.use(store)
 app.use(router)
 
-// Initialize auth state before mounting app (restore session on reload)
-// This ensures users stay logged in after page reload
-async function initializeApp() {
+// Mount app immediately - don't wait for auth initialization
+app.mount('#app')
+
+// Initialize auth listener and test Supabase connection asynchronously after mount (non-blocking)
+Promise.resolve().then(async () => {
   try {
-    // Initialize auth listener first (this sets up the global auth state listener)
     const { initializeAuthListener } = await import('./composables/useAuth')
     initializeAuthListener(store)
     
-    // Also initialize auth state (restore session)
-    const { initializeAuth } = await import('./utils/initAuth')
-    await initializeAuth(store)
+    // Test Supabase connection
+    try {
+      const { supabase } = await import('./supabase')
+      const { error } = await supabase.from('blogs').select('id').limit(1)
+      if (error && error.code !== 'PGRST116') {
+        store.dispatch('addNotification', {
+          type: 'error',
+          message: `Supabase connection error: ${error.message || error.code}`,
+          duration: 10000
+        })
+      }
+    } catch (testErr: any) {
+      store.dispatch('addNotification', {
+        type: 'error',
+        message: `Failed to connect to Supabase: ${testErr.message || 'Unknown error'}`,
+        duration: 10000
+      })
+    }
   } catch (err) {
-    console.error('Error initializing auth:', err)
-    // Continue app startup even if auth init fails
+    // Silently fail - auth listener is not critical for app startup
   }
-
-  // Test Supabase connection on startup (in development) - non-blocking
-  if (import.meta.env.DEV) {
-    // Run diagnostic tool first for detailed analysis
-    import('./utils/diagnoseSupabase').then(({ diagnoseSupabase }) => {
-      diagnoseSupabase().catch(err => {
-        console.error('Diagnostic tool error:', err)
-      })
-    }).catch(err => {
-      console.error('Failed to load diagnostic tool:', err)
-    })
-    
-    // Also run the connection test
-    import('./utils/testSupabase').then(({ testSupabaseConnection }) => {
-      // Run test but don't block app startup
-      testSupabaseConnection().catch(err => {
-        console.error('Supabase connection test error:', err)
-      })
-    }).catch(err => {
-      console.error('Failed to load Supabase test utility:', err)
-    })
-  }
-
-  // Mount app after auth is initialized
-  app.mount('#app')
-}
-
-// Start app initialization
-initializeApp()
+})
 

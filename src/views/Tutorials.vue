@@ -102,6 +102,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { 
   faBook, 
@@ -117,6 +118,7 @@ import {
 import { supabase } from '../supabase'
 
 const router = useRouter()
+const store = useStore()
 const loading = ref(true)
 const topLevelGroups = ref<any[]>([])
 const categories = ref<any[]>([])
@@ -463,7 +465,6 @@ const getCategoryIcon = (iconName: string | null | undefined) => {
 
 const fetchTopLevelGroups = async () => {
   try {
-    // Supabase session is automatically managed - no need to call getSession()
     const { data, error } = await supabase
       .from('tutorial_top_level_groups')
       .select('*')
@@ -473,31 +474,31 @@ const fetchTopLevelGroups = async () => {
     if (error) {
       // Check if table doesn't exist (PGRST205 error)
       if (error.code === 'PGRST205') {
-        console.warn('tutorial_top_level_groups table does not exist. Categories will be shown without grouping.')
         topLevelGroups.value = []
         return
       }
-      console.error('Error fetching top-level groups:', error)
       topLevelGroups.value = []
       return
     }
     
     if (data && data.length > 0) {
-      console.log('Fetched top-level groups from Supabase:', data.length)
       topLevelGroups.value = data
     } else {
-      console.log('No top-level groups found in Supabase')
       topLevelGroups.value = []
     }
   } catch (error: any) {
-    console.error('Error fetching top-level groups:', error)
     topLevelGroups.value = []
+    const errorMessage = error?.message || error?.code || 'Failed to load tutorial groups'
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: `Error loading tutorial groups: ${errorMessage}`,
+      duration: 6000
+    })
   }
 }
 
 const fetchCategories = async () => {
   try {
-    // Supabase session is automatically managed - no need to call getSession()
     const { data, error } = await supabase
       .from('tutorials_category')
       .select('*')
@@ -505,29 +506,29 @@ const fetchCategories = async () => {
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Error fetching categories:', error)
       throw error
     }
     
     // Use fetched data if available, otherwise fall back to dummy data
     if (data && data.length > 0) {
-      console.log('Fetched categories from Supabase:', data.length)
       categories.value = data
     } else {
-      console.log('No categories found in Supabase, using dummy data')
       categories.value = dummyCategories
     }
   } catch (error: any) {
-    console.error('Error fetching categories:', error)
     // Use dummy data if fetch fails
-    console.log('Using dummy categories data due to error')
     categories.value = dummyCategories
+    const errorMessage = error?.message || error?.code || 'Failed to load categories'
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: `Error loading categories: ${errorMessage}`,
+      duration: 6000
+    })
   }
 }
 
 const fetchPages = async () => {
   try {
-    // Supabase session is automatically managed - no need to call getSession()
     const { data, error } = await supabase
       .from('tutorial_pages')
       .select('*')
@@ -535,23 +536,24 @@ const fetchPages = async () => {
       .order('page_order', { ascending: true })
 
     if (error) {
-      console.error('Error fetching pages:', error)
       throw error
     }
     
     // Use fetched data if available, otherwise fall back to dummy data
     if (data && data.length > 0) {
-      console.log('Fetched pages from Supabase:', data.length)
       pages.value = data
     } else {
-      console.log('No pages found in Supabase, using dummy data')
       pages.value = dummyPages
     }
   } catch (error: any) {
-    console.error('Error fetching pages:', error)
     // Use dummy data if fetch fails
-    console.log('Using dummy pages data due to error')
     pages.value = dummyPages
+    const errorMessage = error?.message || error?.code || 'Failed to load pages'
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: `Error loading pages: ${errorMessage}`,
+      duration: 6000
+    })
   }
 }
 
