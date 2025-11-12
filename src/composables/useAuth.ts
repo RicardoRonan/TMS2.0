@@ -43,10 +43,14 @@ export async function initializeAuthListener(store: any) {
       switch (event) {
         case 'INITIAL_SESSION':
           // This is the primary way sessions are restored on page reload
+          console.log('🔄 useAuth: INITIAL_SESSION event received')
           if (session?.user) {
+            console.log('✅ useAuth: Session found, user:', session.user.email || session.user.id)
             try {
               await loadUserDataForStore(session.user, store)
+              console.log('✅ useAuth: User data loaded successfully')
             } catch (err: any) {
+              console.warn('⚠️ useAuth: Failed to load user data, using basic auth data:', err?.message)
               // If loading user data fails, still set basic auth data
               // This ensures the user stays logged in even if profile fetch fails
               store.dispatch('setUser', {
@@ -60,6 +64,7 @@ export async function initializeAuthListener(store: any) {
               })
             }
           } else {
+            console.log('ℹ️ useAuth: No session in INITIAL_SESSION event')
             // No session - ensure store is cleared
             store.dispatch('setUser', null)
           }

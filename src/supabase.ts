@@ -190,8 +190,8 @@ function getSupabaseClient(): SupabaseClient {
 // the client will already be created. Otherwise, getSupabaseClient() will handle it.
 const supabase = getSupabaseClient()
 
-// Debug: Log client status in development
-if (import.meta.env.DEV && typeof window !== 'undefined') {
+// Debug: Log client status (both dev and production for debugging)
+if (typeof window !== 'undefined') {
   const url = import.meta.env.VITE_SUPABASE_URL
   const key = import.meta.env.VITE_SUPABASE_ANON_KEY
   const hasEnv = !!(url && key && 
@@ -202,8 +202,10 @@ if (import.meta.env.DEV && typeof window !== 'undefined') {
   
   if (hasEnv) {
     console.log('✅ Supabase client initialized with valid credentials')
+    console.log('📍 Supabase URL:', url.substring(0, 30) + '...')
   } else {
     console.warn('⚠️ Supabase client initialized with placeholder (env vars missing)')
+    console.warn('💡 Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Netlify environment variables')
   }
 }
 
