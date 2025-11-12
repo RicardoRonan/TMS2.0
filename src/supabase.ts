@@ -12,7 +12,12 @@ function initializeClientIfNeeded() {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
+  // Check for valid env vars (also check for empty strings)
   const hasValidEnv = !!(supabaseUrl && supabaseAnonKey && 
+    typeof supabaseUrl === 'string' && 
+    typeof supabaseAnonKey === 'string' &&
+    supabaseUrl.trim() !== '' &&
+    supabaseAnonKey.trim() !== '' &&
     supabaseUrl !== 'https://placeholder.supabase.co' && 
     supabaseAnonKey !== 'placeholder-key')
 
@@ -75,7 +80,12 @@ function getSupabaseClient(): SupabaseClient {
   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
   // Check if we have valid environment variables
+  // Also check for empty strings (which can happen if env vars are set but empty)
   const hasValidEnv = !!(supabaseUrl && supabaseAnonKey && 
+    typeof supabaseUrl === 'string' && 
+    typeof supabaseAnonKey === 'string' &&
+    supabaseUrl.trim() !== '' &&
+    supabaseAnonKey.trim() !== '' &&
     supabaseUrl !== 'https://placeholder.supabase.co' && 
     supabaseAnonKey !== 'placeholder-key')
 
@@ -174,27 +184,43 @@ function getSupabaseClient(): SupabaseClient {
   return supabaseInstance
 }
 
-// Export a Proxy that ensures we always get a valid client
-// This intercepts all property access and ensures lazy initialization
-export const supabase = new Proxy({} as SupabaseClient, {
-  get(target, prop) {
-    const client = getSupabaseClient()
-    const value = (client as any)[prop]
-    
-    // If it's a function, bind it to the client to maintain 'this' context
-    if (typeof value === 'function') {
-      return value.bind(client)
-    }
-    
-    return value
-  }
-})
+// Get the client instance (will create if needed)
+// This ensures we always have a valid client, but keeps the instance stable
+// Note: initializeClientIfNeeded() runs first (above), so if env vars are available,
+// the client will already be created. Otherwise, getSupabaseClient() will handle it.
+const supabase = getSupabaseClient()
 
+// Debug: Log client status in development
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  const url = import.meta.env.VITE_SUPABASE_URL
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY
+  const hasEnv = !!(url && key && 
+    typeof url === 'string' && 
+    typeof key === 'string' &&
+    url.trim() !== '' &&
+    key.trim() !== '')
+  
+  if (hasEnv) {
+    console.log('✅ Supabase client initialized with valid credentials')
+  } else {
+    console.warn('⚠️ Supabase client initialized with placeholder (env vars missing)')
+  }
+}
+
+// Export the client directly (no Proxy)
+// The getSupabaseClient function ensures the instance is stable and only created once
+export { supabase }
 export default supabase
 
 // Helper to check if Supabase is properly configured
 export function isSupabaseConfigured(): boolean {
   const url = import.meta.env.VITE_SUPABASE_URL
   const key = import.meta.env.VITE_SUPABASE_ANON_KEY
-  return !!(url && key && url !== 'https://placeholder.supabase.co' && key !== 'placeholder-key')
+  return !!(url && key && 
+    typeof url === 'string' && 
+    typeof key === 'string' &&
+    url.trim() !== '' &&
+    key.trim() !== '' &&
+    url !== 'https://placeholder.supabase.co' && 
+    key !== 'placeholder-key')
 }
