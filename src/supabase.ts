@@ -32,27 +32,28 @@ if (!supabaseUrl || !supabaseAnonKey) {
 } else {
   // Create a single supabase client for interacting with your database
   supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-    storageKey: 'supabase.auth.token',
-    flowType: 'pkce',
-    // Ensure session persists across page reloads
-    storageType: 'localStorage',
-  },
-  db: {
-    schema: 'public'
-  },
-  global: {
-    headers: {
-      'x-client-info': 'tms2.0'
-    }
-  },
-  realtime: {
-    params: {
-      eventsPerSecond: 10
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      storageKey: 'supabase.auth.token',
+      flowType: 'pkce',
+      // Ensure session persists across page reloads
+      storageType: 'localStorage',
+    },
+    db: {
+      schema: 'public'
+    },
+    global: {
+      headers: {
+        'x-client-info': 'tms2.0'
+      }
+    },
+    realtime: {
+      params: {
+        eventsPerSecond: 10
+      }
     }
   })
 }
