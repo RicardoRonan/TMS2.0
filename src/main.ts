@@ -67,16 +67,26 @@ app.component('FontAwesomeIcon', FontAwesomeIcon)
 app.use(store)
 app.use(router)
 
-// Mount app immediately - don't wait for auth initialization
-app.mount('#app')
-
-// Initialize auth listener and test Supabase connection asynchronously after mount (non-blocking)
-Promise.resolve().then(async () => {
+// Initialize auth BEFORE mounting to ensure session is restored immediately
+// This is critical for session persistence on page reload
+async function initializeApp() {
   try {
+    // Initialize auth listener FIRST (before mounting)
+    // This ensures INITIAL_SESSION event is captured as soon as possible
     const { initializeAuthListener } = await import('./composables/useAuth')
     initializeAuthListener(store)
     
-    // Test Supabase connection
+    // Small delay to let INITIAL_SESSION event fire
+    await new Promise(resolve => setTimeout(resolve, 100))
+  } catch (err) {
+    // Continue even if auth init fails
+  }
+  
+  // Mount app after auth listener is initialized
+  app.mount('#app')
+  
+  // Test Supabase connection after mount (non-blocking)
+  Promise.resolve().then(async () => {
     try {
       const { supabase } = await import('./supabase')
       const { error } = await supabase.from('blogs').select('id').limit(1)
@@ -88,14 +98,11 @@ Promise.resolve().then(async () => {
         })
       }
     } catch (testErr: any) {
-      store.dispatch('addNotification', {
-        type: 'error',
-        message: `Failed to connect to Supabase: ${testErr.message || 'Unknown error'}`,
-        duration: 10000
-      })
+      // Silently fail - connection test is not critical
     }
-  } catch (err) {
-    // Silently fail - auth listener is not critical for app startup
-  }
-})
+  })
+}
+
+// Start app initialization
+initializeApp()
 

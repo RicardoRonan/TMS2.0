@@ -17,6 +17,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     storageKey: 'supabase.auth.token',
     flowType: 'pkce',
+    // Ensure session persists across page reloads
+    storageType: 'localStorage',
   },
   db: {
     schema: 'public'

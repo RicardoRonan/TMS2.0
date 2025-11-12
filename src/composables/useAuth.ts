@@ -15,31 +15,23 @@ export function initializeAuthListener(store: any) {
     return // Already initialized
   }
   
+  // Check if Supabase is configured before initializing listener
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('⚠️ Cannot initialize auth listener: Supabase environment variables are missing')
+    return
+  }
+  
   isListenerInitialized = true
 
-  // Check for existing session (with timeout for reliability)
-  // The INITIAL_SESSION event from onAuthStateChange will also handle this,
-  // but we check here as a backup
-  const sessionPromise = supabase.auth.getSession()
-  const timeoutPromise = new Promise((resolve) => 
-    setTimeout(() => resolve({ data: { session: null } }), 10000)
-  )
-  
-  Promise.race([sessionPromise, timeoutPromise]).then((result: any) => {
-    const { data: { session }, error } = result || { data: { session: null }, error: null }
-    if (!error && session?.user) {
-      loadUserDataForStore(session.user, store)
-    } else {
-      store.dispatch('setUser', null)
-    }
-  }).catch(() => {
-    // Silently fail - session check is not critical, INITIAL_SESSION event will handle it
-  })
-
-  // Listen for auth changes - handle all events properly
+  // Set up the auth state change listener FIRST
+  // This ensures INITIAL_SESSION event is captured immediately
   authListener = supabase.auth.onAuthStateChange(async (event, session) => {
     switch (event) {
       case 'INITIAL_SESSION':
+        // This is the primary way sessions are restored on page reload
         if (session?.user) {
           await loadUserDataForStore(session.user, store)
         } else {
@@ -86,6 +78,29 @@ export function initializeAuthListener(store: any) {
           store.dispatch('setUser', null)
         }
     }
+  })
+
+  // Also check for existing session as a backup (with shorter timeout)
+  // This runs after the listener is set up, so INITIAL_SESSION should handle it first
+  const sessionPromise = supabase.auth.getSession()
+  const timeoutPromise = new Promise((resolve) => 
+    setTimeout(() => resolve({ data: { session: null } }), 5000)
+  )
+  
+  Promise.race([sessionPromise, timeoutPromise]).then((result: any) => {
+    const { data: { session }, error } = result || { data: { session: null }, error: null }
+    
+    // Only update if we don't already have a user (INITIAL_SESSION might have already loaded it)
+    const currentUser = store.getters.currentUser
+    if (!currentUser) {
+      if (!error && session?.user) {
+        loadUserDataForStore(session.user, store)
+      } else {
+        store.dispatch('setUser', null)
+      }
+    }
+  }).catch(() => {
+    // Silently fail - INITIAL_SESSION event should have handled it
   })
 }
 
