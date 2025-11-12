@@ -3,22 +3,12 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
+// Check if environment variables are missing
 if (!supabaseUrl || !supabaseAnonKey) {
-  const errorMsg = `Missing Supabase environment variables. 
-  URL: ${supabaseUrl ? 'OK' : 'MISSING'}
-  Key: ${supabaseAnonKey ? 'OK' : 'MISSING'}
-  
-  Please check your .env file exists in the project root and contains:
-  VITE_SUPABASE_URL=...
-  VITE_SUPABASE_ANON_KEY=...
-  
-  After creating/updating .env, restart your dev server.`
-  
-  throw new Error(errorMsg)
+  throw new Error('Missing Supabase environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set')
 }
 
 // Create a single supabase client for interacting with your database
-// Configuration follows Supabase best practices
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
@@ -26,8 +16,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true,
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     storageKey: 'supabase.auth.token',
-    // Add flow type to help with token refresh
-    flowType: 'pkce'
+    flowType: 'pkce',
   },
   db: {
     schema: 'public'
@@ -37,7 +26,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       'x-client-info': 'tms2.0'
     }
   },
-  // Real-time configuration
   realtime: {
     params: {
       eventsPerSecond: 10
@@ -45,9 +33,4 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 })
 
-// Note: Connection test removed - getSession() can hang in some environments
-// Network connectivity is confirmed via direct fetch tests in diagnoseSupabase
-// The client will work fine for actual auth operations (signIn, signUp, etc.)
-
 export default supabase
-

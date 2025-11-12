@@ -20,7 +20,7 @@ html {
 }
 
 body {
-  font-family: var(--font-family-primary);
+  font-family: var(--font-family-content);
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-normal);
@@ -32,6 +32,7 @@ body {
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-primary);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
   color: var(--color-text-primary);
@@ -40,14 +41,45 @@ h1, h2, h3, h4, h5, h6 {
 
 h1 { font-size: var(--font-size-large-title); }
 h2 { font-size: var(--font-size-title1); }
-h3 { font-size: var(--font-size-title2); }
+h3 { 
+  font-size: var(--font-size-title2);
+  font-family: var(--font-family-content);
+}
 h4 { font-size: var(--font-size-title3); }
 h5 { font-size: var(--font-size-headline); }
 h6 { font-size: var(--font-size-callout); }
 
 p {
+  font-family: var(--font-family-content);
   margin: 0 0 var(--space-4) 0;
   line-height: var(--line-height-relaxed);
+}
+
+/* Content areas use content font */
+.markdown-content,
+article,
+.content {
+  font-family: var(--font-family-content);
+}
+
+/* Headings in content areas still use primary font (except h3 which uses content font) */
+.markdown-content :deep(h1),
+.markdown-content :deep(h2),
+.markdown-content :deep(h4),
+.markdown-content :deep(h5),
+.markdown-content :deep(h6),
+article h1,
+article h2,
+article h4,
+article h5,
+article h6 {
+  font-family: var(--font-family-primary);
+}
+
+/* h3 uses content font everywhere */
+.markdown-content :deep(h3),
+article h3 {
+  font-family: var(--font-family-content);
 }
 
 a {

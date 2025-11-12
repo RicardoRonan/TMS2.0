@@ -37,15 +37,22 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <HIGCard v-for="feature in features" :key="feature.id" class="text-center">
-            <div class="p-6">
-              <div class="w-16 h-16 bg-primary-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Icon :name="feature.icon.toLowerCase()" :size="32" class="text-white" />
+          <router-link 
+            v-for="feature in features" 
+            :key="feature.id" 
+            :to="feature.route"
+            class="block"
+          >
+            <HIGCard class="text-center hover:shadow-hig-lg transition-all cursor-pointer h-full">
+              <div class="p-6">
+                <div class="w-16 h-16 bg-primary-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Icon :name="feature.icon.toLowerCase()" :size="32" class="text-white" />
+                </div>
+                <h3 class="text-xl font-semibold text-text-primary mb-3">{{ feature.title }}</h3>
+                <p class="text-text-secondary">{{ feature.description }}</p>
               </div>
-              <h3 class="text-xl font-semibold text-text-primary mb-3">{{ feature.title }}</h3>
-              <p class="text-text-secondary">{{ feature.description }}</p>
-            </div>
-          </HIGCard>
+            </HIGCard>
+          </router-link>
         </div>
       </div>
     </section>
@@ -206,7 +213,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
+import { useStore } from 'vuex'
 import HIGButton from '../components/hig/HIGButton.vue'
 import HIGCard from '../components/hig/HIGCard.vue'
 import Icon from '../components/Icon.vue'
@@ -214,31 +222,37 @@ import { getBrandfetchLogoUrl } from '../utils/brandfetch'
 import { getLogoBackgroundColor, extractBackgroundColor } from '../utils/logoColors'
 import { supabase } from '../supabase'
 
+const store = useStore()
+
 // Features data
 const features = ref([
   {
     id: 1,
     title: 'Blog & Articles',
     description: 'Share knowledge through detailed articles, tutorials, and insights from industry experts.',
-    icon: 'DocumentTextIcon'
+    icon: 'DocumentTextIcon',
+    route: '/blog'
   },
   {
     id: 2,
     title: 'Tool Directory',
     description: 'Discover and share essential development tools, libraries, and resources.',
-    icon: 'WrenchScrewdriverIcon'
+    icon: 'WrenchScrewdriverIcon',
+    route: '/tools'
   },
   {
     id: 3,
     title: 'Interactive Tutorials',
     description: 'Learn with hands-on tutorials and code playgrounds for practical experience.',
-    icon: 'AcademicCapIcon'
+    icon: 'AcademicCapIcon',
+    route: '/tutorials'
   },
   // {
   //   id: 4,
   //   title: 'Project Showcase',
   //   description: 'Showcase your projects and get feedback from the community.',
-  //   icon: 'FolderIcon'
+  //   icon: 'FolderIcon',
+  //   route: '/projects'
   // }
 ])
 
@@ -323,18 +337,24 @@ const formatCount = (count: number): string => {
 // Fetch stats from database
 const fetchStats = async () => {
   try {
-    // Supabase session is automatically managed - no need to call getSession()
-    
     // Fetch users count using database function
     try {
       const { data: usersCount, error: usersError } = await supabase
         .rpc('get_user_count')
       
-      if (!usersError && usersCount !== null && usersCount !== undefined) {
+      if (usersError) {
+        // Try alternative: count users directly
+        const { count: directCount, error: directError } = await supabase
+          .from('users')
+          .select('*', { count: 'exact', head: true })
+        
+        if (!directError && directCount !== null && directCount !== undefined) {
+          stats.value.activeMembers = directCount
+        }
+      } else if (usersCount !== null && usersCount !== undefined) {
         stats.value.activeMembers = usersCount
       }
     } catch (err) {
-      console.log('Could not fetch users count:', err)
       // Keep default value
     }
     
@@ -345,11 +365,10 @@ const fetchStats = async () => {
         .select('*', { count: 'exact', head: true })
         .eq('published', true)
       
-      if (!blogsError && blogsCount !== null) {
+      if (!blogsError && blogsCount !== null && blogsCount !== undefined) {
         stats.value.publishedArticles = blogsCount
       }
     } catch (err) {
-      console.log('Could not fetch blogs count:', err)
       // Keep default value
     }
     
@@ -359,16 +378,20 @@ const fetchStats = async () => {
         .from('tools')
         .select('*', { count: 'exact', head: true })
       
-      if (!toolsError && toolsCount !== null) {
+      if (!toolsError && toolsCount !== null && toolsCount !== undefined) {
         stats.value.curatedTools = toolsCount
       }
     } catch (err) {
-      console.log('Could not fetch tools count:', err)
       // Keep default value
     }
-  } catch (error) {
-    console.error('Error fetching stats:', error)
+  } catch (error: any) {
     // Keep default values of 0 if fetch fails
+    const errorMessage = error?.message || error?.code || 'Failed to load statistics'
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: `Error loading stats: ${errorMessage}`,
+      duration: 6000
+    })
   }
 }
 
@@ -429,7 +452,14 @@ const handleLogoLoad = async (event: Event, toolId: number, toolName: string) =>
 }
 
 onMounted(() => {
-  fetchStats()
+  // Defer stats fetching to after initial render to improve Time to Interactive
+  // Use nextTick to ensure DOM is rendered first
+  nextTick(() => {
+    // Small delay to ensure initial render is complete
+    setTimeout(() => {
+      fetchStats()
+    }, 100)
+  })
 })
 </script>
 

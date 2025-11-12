@@ -5,8 +5,13 @@
  * Documentation: https://docs.brandfetch.com/docs/logo-api
  */
 
-const BRANDFETCH_CLIENT_ID = '1id3wA510J5w3dLiN0H'
+const BRANDFETCH_CLIENT_ID = import.meta.env.VITE_BRANDFETCH_CLIENT_ID || '1id3wA510J5w3dLiN0H'
 const BRANDFETCH_CDN_BASE = 'https://cdn.brandfetch.io'
+
+// Check if client ID is missing (using default fallback for now)
+if (!import.meta.env.VITE_BRANDFETCH_CLIENT_ID) {
+  console.warn('VITE_BRANDFETCH_CLIENT_ID is not set. Using default client ID.')
+}
 
 /**
  * Extracts domain from a URL

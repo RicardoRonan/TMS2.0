@@ -3,8 +3,13 @@
  * API Documentation: https://api.imgbb.com/
  */
 
-const IMGBB_API_KEY = '13fe6f454789b2df72aff0aa243f5169'
+const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY || ''
 const IMGBB_API_URL = 'https://api.imgbb.com/1/upload'
+
+// Check if API key is missing
+if (!IMGBB_API_KEY) {
+  console.warn('VITE_IMGBB_API_KEY is not set. Image upload functionality may not work.')
+}
 
 export interface ImgBBResponse {
   data: {
