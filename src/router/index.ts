@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useStore } from 'vuex'
+import { setSEO, getCurrentURL, getBaseURL } from '../utils/seo'
 
 // Lazy-loaded views
 const Home = () => import('../views/Home.vue')
@@ -165,10 +166,21 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const store = useStore()
   
-  // Set page title
-  if (to.meta.title) {
-    document.title = to.meta.title as string
-  }
+  // Set SEO meta tags
+  const title = (to.meta.title as string) || 'MetaStack - Developer Community Platform'
+  const description = (to.meta.description as string) || 'Digital community platform for developers, designers, and creators'
+  const url = getCurrentURL()
+  const image = `${getBaseURL()}/logo.png`
+  
+  setSEO({
+    title,
+    description,
+    url,
+    image,
+    type: 'website',
+    siteName: 'MetaStack',
+    twitterCard: 'summary'
+  })
   
   // Check for pending changes in admin mode
   if (store.getters.isAdminMode && store.getters.hasPendingChanges && from.name) {

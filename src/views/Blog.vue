@@ -46,15 +46,9 @@
     <section class="py-16">
       <div class="container mx-auto px-4">
         <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <HIGCard v-for="n in 6" :key="n" class="animate-pulse">
+          <HIGCard v-for="n in 6" :key="n">
             <div class="p-6">
-              <div class="aspect-video bg-bg-tertiary rounded-lg mb-4"></div>
-              <div class="space-y-3">
-                <div class="h-4 bg-bg-tertiary rounded w-1/4"></div>
-                <div class="h-6 bg-bg-tertiary rounded w-3/4"></div>
-                <div class="h-4 bg-bg-tertiary rounded w-full"></div>
-                <div class="h-4 bg-bg-tertiary rounded w-2/3"></div>
-              </div>
+              <HIGSkeleton type="blog-card" />
             </div>
           </HIGCard>
         </div>
@@ -160,6 +154,7 @@ import { supabase } from '../supabase'
 import HIGCard from '../components/hig/HIGCard.vue'
 import HIGButton from '../components/hig/HIGButton.vue'
 import HIGInput from '../components/hig/HIGInput.vue'
+import HIGSkeleton from '../components/hig/HIGSkeleton.vue'
 import Icon from '../components/Icon.vue'
 
 const store = useStore()

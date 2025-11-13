@@ -1,0 +1,49 @@
+# Auto detect text files and perform LF normalization
+* text=auto eol=lf
+
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.vue text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.cjs text eol=lf
+*.mjs text eol=lf
+*.config.js text eol=lf
+*.config.ts text eol=lf
+
+# Denote all files that are truly binary and should not be modified
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary
+*.zip binary
+*.tar.gz binary
+
+# Export ignore patterns for git archive
+/.github export-ignore
+/.vscode export-ignore
+/node_modules export-ignore
+/dist export-ignore
+/build export-ignore
+/coverage export-ignore
+/.env export-ignore
+/.env.* export-ignore
+*.log export-ignore
+

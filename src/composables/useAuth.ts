@@ -336,24 +336,44 @@ export function useAuth() {
       loading.value = true
       error.value = null
 
+      // Check if Supabase is configured before attempting sign-in
+      const { isSupabaseConfigured } = await import('../supabase')
+      if (!isSupabaseConfigured()) {
+        const errorMsg = 'Supabase is not configured. Please check your environment variables (VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY).'
+        console.error('❌ Sign-in failed:', errorMsg)
+        throw new Error(errorMsg)
+      }
+
+      console.log('🔐 Attempting sign-in for:', email)
+      
       // Add timeout to prevent hanging
+      // Use 35 seconds to match the fetch timeout (30s) plus a buffer
       const signInPromise = supabase.auth.signInWithPassword({
         email,
         password
       })
       
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Sign-in request timed out after 15 seconds. This usually means requests are not reaching Supabase. Check your network connection and Supabase project status.')), 15000)
+        setTimeout(() => {
+          const errorMsg = 'Sign-in request timed out after 35 seconds. This usually means requests are not reaching Supabase. Check your network connection and Supabase project status.'
+          console.error('⏱️ Sign-in timeout:', errorMsg)
+          reject(new Error(errorMsg))
+        }, 35000)
       )
       
-      const { data, error: authError } = await Promise.race([
+      const result = await Promise.race([
         signInPromise,
         timeoutPromise
       ]) as any
+      
+      const { data, error: authError } = result || { data: null, error: null }
 
       if (authError) {
+        console.error('❌ Sign-in error:', authError)
         throw authError
       }
+      
+      console.log('✅ Sign-in successful')
 
       if (!data.user) {
         throw new Error('No user data returned from authentication')
@@ -676,7 +696,11 @@ export function useAuth() {
       'Invalid email': 'Please enter a valid email address.',
       'User not found': 'No account found with this email address.',
       'Email rate limit exceeded': 'Too many password reset requests. Please try again later.',
-      'Network request failed': 'Network error. Please check your connection.'
+      'Network request failed': 'Network error. Please check your connection.',
+      'Request timeout': 'Request timeout - please check your connection.',
+      'timed out': 'The request took too long. Please check your network connection and try again.',
+      'not configured': 'Supabase is not configured. Please contact support.',
+      'not reaching Supabase': 'Unable to connect to Supabase. Please check your network connection and try again.'
     }
 
     // Check for exact matches first

@@ -46,12 +46,9 @@
     <section class="py-16">
       <div class="container mx-auto px-4">
         <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <HIGCard v-for="n in 8" :key="n" class="animate-pulse">
-            <div class="p-6 text-center">
-              <div class="w-20 h-20 bg-bg-tertiary rounded-xl mx-auto mb-4"></div>
-              <div class="h-4 bg-bg-tertiary rounded w-3/4 mx-auto mb-2"></div>
-              <div class="h-3 bg-bg-tertiary rounded w-full mb-4"></div>
-              <div class="h-6 bg-bg-tertiary rounded w-1/3 mx-auto"></div>
+          <HIGCard v-for="n in 8" :key="n">
+            <div class="p-6">
+              <HIGSkeleton type="tool-card" />
             </div>
           </HIGCard>
         </div>
@@ -80,6 +77,7 @@
                   :src="getBrandfetchLogoUrl(tool.name, tool.url, { size: 80 })" 
                   :alt="`${tool.name} logo`"
                   class="max-w-full max-h-full w-auto h-auto object-contain"
+                  loading="lazy"
                   @error="handleLogoError"
                   @load="(e) => handleLogoLoad(e, tool.id, tool.name)"
                 />
@@ -163,9 +161,11 @@ import HIGCard from '../components/hig/HIGCard.vue'
 import HIGButton from '../components/hig/HIGButton.vue'
 import HIGInput from '../components/hig/HIGInput.vue'
 import HIGBadge from '../components/hig/HIGBadge.vue'
+import HIGSkeleton from '../components/hig/HIGSkeleton.vue'
 import Icon from '../components/Icon.vue'
 import { getBrandfetchLogoUrl } from '../utils/brandfetch'
 import { getLogoBackgroundColor, extractBackgroundColor } from '../utils/logoColors'
+import { setSafeInnerHTML } from '../utils/sanitize'
 
 // State
 const loading = ref(true)
@@ -371,7 +371,11 @@ const handleLogoError = (event: Event) => {
   const img = event.target as HTMLImageElement
   if (img && img.parentElement) {
     const toolName = img.alt.replace(' logo', '')
-    img.parentElement.innerHTML = `<span class="text-primary-500 font-bold text-2xl">${toolName[0]}</span>`
+    const firstLetter = toolName[0] || '?'
+    setSafeInnerHTML(
+      img.parentElement,
+      `<span class="text-primary-500 font-bold text-2xl">${firstLetter}</span>`
+    )
     img.parentElement.classList.add('bg-primary-100')
   }
 }

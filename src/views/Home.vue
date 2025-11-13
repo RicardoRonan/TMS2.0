@@ -141,6 +141,7 @@
                   :src="getBrandfetchLogoUrl(tool.name, tool.url, { size: 80 })" 
                   :alt="`${tool.name} logo`"
                   class="max-w-full max-h-full w-auto h-auto object-contain"
+                  loading="lazy"
                   @error="handleLogoError"
                   @load="(e) => handleLogoLoad(e, tool.id, tool.name)"
                 />
@@ -221,6 +222,7 @@ import Icon from '../components/Icon.vue'
 import { getBrandfetchLogoUrl } from '../utils/brandfetch'
 import { getLogoBackgroundColor, extractBackgroundColor } from '../utils/logoColors'
 import { supabase } from '../supabase'
+import { setSafeInnerHTML } from '../utils/sanitize'
 
 const store = useStore()
 
@@ -426,7 +428,11 @@ const handleLogoError = (event: Event) => {
   const img = event.target as HTMLImageElement
   if (img && img.parentElement) {
     const toolName = img.alt.replace(' logo', '')
-    img.parentElement.innerHTML = `<span class="text-primary-500 font-bold text-2xl">${toolName[0]}</span>`
+    const firstLetter = toolName[0] || '?'
+    setSafeInnerHTML(
+      img.parentElement,
+      `<span class="text-primary-500 font-bold text-2xl">${firstLetter}</span>`
+    )
     img.parentElement.classList.add('bg-primary-100')
   }
 }

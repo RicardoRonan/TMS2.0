@@ -4,7 +4,7 @@
     <NavBar />
     
     <!-- Main Content -->
-    <main class="min-h-screen">
+    <main id="main-content" class="min-h-screen">
       <router-view v-slot="{ Component, route }">
         <transition name="page" mode="out-in">
           <component :is="Component" :key="route.path" />
@@ -100,6 +100,28 @@ onUnmounted(() => {
 .page-leave-to {
   opacity: 0;
   transform: translateY(-20px);
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .page-enter-active,
+  .page-leave-active {
+    transition: none;
+  }
+
+  .page-enter-from,
+  .page-leave-to {
+    transform: none;
+  }
 }
 </style>
 

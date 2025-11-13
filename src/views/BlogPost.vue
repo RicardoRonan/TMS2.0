@@ -52,6 +52,7 @@
                   :src="post.authorPhotoUrl" 
                   :alt="post.author"
                   class="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </div>
               <div v-else class="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center">
@@ -147,6 +148,7 @@
                   :src="currentUser.photoURL" 
                   :alt="currentUser.displayName || 'User'"
                   class="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </div>
               <div v-else class="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0">

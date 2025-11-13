@@ -275,6 +275,26 @@
     @apply h-10 w-10 rounded-full;
   }
 
+  .skeleton-badge {
+    @apply h-5;
+  }
+
+  .skeleton-button {
+    @apply h-4;
+  }
+
+  .skeleton-logo-container {
+    @apply border border-border-primary;
+  }
+
+  .skeleton-blog-card {
+    @apply w-full;
+  }
+
+  .skeleton-tool-card {
+    @apply w-full;
+  }
+
   /* HIG Loading Spinner */
   .spinner {
     display: inline-block;
