@@ -43,15 +43,35 @@
                   <div v-if="currentUser?.isAdmin" class="pt-4 border-t border-border-primary">
                     <div class="flex items-center space-x-2 mb-4">
                       <span class="badge badge-primary">Admin</span>
+                      <span v-if="isAdminMode" class="badge badge-success">Admin Mode: ON</span>
                     </div>
                     <p class="text-text-secondary text-sm mb-4">
                       You have administrative privileges. Access the admin panel to manage content.
                     </p>
-                    <router-link to="/admin">
-                      <HIGButton variant="primary">
-                        Go to Admin Panel
-                      </HIGButton>
-                    </router-link>
+                    <div class="space-y-3">
+                      <div class="flex items-center justify-between p-3 bg-bg-secondary rounded-lg border border-border-primary">
+                        <div>
+                          <p class="text-sm font-medium text-text-primary">Admin Mode</p>
+                          <p class="text-xs text-text-secondary">
+                            {{ isAdminMode ? 'Enabled - You can edit content throughout the site' : 'Disabled - Enable to edit content' }}
+                          </p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            :checked="isAdminMode"
+                            @change="toggleAdminMode"
+                            class="sr-only peer"
+                          />
+                          <div class="w-11 h-6 bg-bg-tertiary peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"></div>
+                        </label>
+                      </div>
+                      <router-link to="/admin">
+                        <HIGButton variant="primary" full-width>
+                          Go to Admin Panel
+                        </HIGButton>
+                      </router-link>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -310,6 +330,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
+import { useAdminMode } from '../composables/useAdminMode'
 import { supabase } from '../supabase'
 import HIGCard from '../components/hig/HIGCard.vue'
 import HIGButton from '../components/hig/HIGButton.vue'
@@ -320,6 +341,7 @@ import Icon from '../components/Icon.vue'
 const store = useStore()
 const router = useRouter()
 const { logout, updateProfile } = useAuth()
+const { isAdminMode, toggleAdminMode } = useAdminMode()
 
 const showEditModal = ref(false)
 const updating = ref(false)

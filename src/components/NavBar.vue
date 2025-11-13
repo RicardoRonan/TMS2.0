@@ -80,6 +80,15 @@
 
         <!-- User Menu / Auth Buttons -->
         <div class="hidden md:flex items-center space-x-4">
+          <!-- Admin Mode Indicator -->
+          <span
+            v-if="isAdminMode && currentUser?.isAdmin"
+            class="px-2 py-1 text-xs font-semibold rounded-full bg-success-500/20 text-success-500 border border-success-500/30"
+            title="Admin Mode is active"
+          >
+            Admin Mode
+          </span>
+          
           <template v-if="isAuthenticated">
             <div 
               class="relative" 
@@ -283,6 +292,9 @@ const route = useRoute()
 const router = useRouter()
 const store = useStore()
 const { logout } = useAuth()
+
+// Admin mode state
+const isAdminMode = computed(() => store.getters.isAdminMode)
 
 // State
 const showMobileMenu = ref(false)

@@ -23,6 +23,9 @@
     
     <!-- Cookie Consent Banner -->
     <CookieConsentBanner />
+    
+    <!-- Admin Bottom Navigation -->
+    <AdminBottomNav />
   </div>
 </template>
 
@@ -35,14 +38,19 @@ import Footer from './components/Footer.vue'
 import NotificationContainer from './components/NotificationContainer.vue'
 import LoadingOverlay from './components/LoadingOverlay.vue'
 import CookieConsentBanner from './components/CookieConsentBanner.vue'
+import AdminBottomNav from './components/AdminBottomNav.vue'
+import { useKeyboardShortcuts } from './composables/useKeyboardShortcuts'
 
 const store = useStore()
+
+// Initialize keyboard shortcuts for admin mode
+useKeyboardShortcuts()
 
 const isLoading = computed(() => store.getters.isLoading)
 // Track session state for debugging and UI reactivity
 const session = ref<any>(null)
 // Store auth subscription for cleanup
-let authSubscription: any = null
+// Auth subscription is now handled globally by useAuth.ts
 
 onMounted(async () => {
   // Initialize theme from localStorage
@@ -60,84 +68,17 @@ onMounted(async () => {
     store.dispatch('setLoading', false)
   }
 
-  // Explicitly restore session from localStorage on page load / refresh
-  // This is a backup to ensure session is restored even if the auth listener hasn't fired yet
-  try {
-    console.log('🔄 App.vue: Restoring session from localStorage...')
-    const { data, error } = await supabase.auth.getSession()
-    
-    if (error) {
-      console.error('❌ App.vue: Error getting session:', error.message)
-      session.value = null
-      // Don't clear store here - let the auth listener handle it
-    } else if (data.session) {
-      session.value = data.session
-      console.log('✅ App.vue: Session restored:', data.session.user?.email || 'no email')
-      console.log('📋 App.vue: Session user ID:', data.session.user?.id)
-      
-      // If store doesn't have user but we have a session, sync it
-      if (!store.getters.currentUser && data.session.user) {
-        console.log('🔄 App.vue: Syncing session to store...')
-        store.dispatch('setUser', {
-          uid: data.session.user.id,
-          email: data.session.user.email,
-          displayName: data.session.user.user_metadata?.display_name || 'User',
-          photoURL: data.session.user.user_metadata?.avatar_url,
-          isAdmin: false,
-          createdAt: data.session.user.created_at || new Date().toISOString(),
-          lastLoginAt: new Date().toISOString()
-        })
-      }
-    } else {
-      session.value = null
-      console.log('ℹ️ App.vue: No session found')
-    }
-  } catch (err: any) {
-    console.error('❌ App.vue: Exception during session restore:', err?.message)
-    session.value = null
-  }
-
-  // Listen for any future auth changes (login, logout, token refresh)
-  // This ensures we stay in sync with auth state changes
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
-    console.log('🔄 App.vue: Auth state changed:', event, newSession?.user?.email || 'logged out')
-    session.value = newSession
-    
-    // Sync to store if session exists
-    if (newSession?.user) {
-      if (!store.getters.currentUser || store.getters.currentUser.uid !== newSession.user.id) {
-        console.log('🔄 App.vue: Syncing new session to store...')
-        store.dispatch('setUser', {
-          uid: newSession.user.id,
-          email: newSession.user.email,
-          displayName: newSession.user.user_metadata?.display_name || 'User',
-          photoURL: newSession.user.user_metadata?.avatar_url,
-          isAdmin: false,
-          createdAt: newSession.user.created_at || new Date().toISOString(),
-          lastLoginAt: new Date().toISOString()
-        })
-      }
-    } else {
-      // Session is null - clear store
-      if (store.getters.currentUser) {
-        console.log('🔄 App.vue: Clearing store (user logged out)')
-        store.dispatch('setUser', null)
-      }
-    }
-  })
-  authSubscription = subscription
+  // Auth listener is now handled globally by useAuth.ts
+  // No need for redundant session restoration or auth listeners here
 })
 
 onUnmounted(() => {
-  // Cleanup auth subscription
-  if (authSubscription) {
-    authSubscription.unsubscribe()
-    console.log('🧹 App.vue: Auth listener cleaned up')
-  }
-  
+  // Auth listener cleanup is handled by useAuth.ts cleanupAuthListener()
+  // No need to cleanup here as it's managed globally
+
   // Safety: Reset body overflow on unmount
   document.body.style.overflow = ''
-  
+
   // Safety: Reset loading state
   store.dispatch('setLoading', false)
 })

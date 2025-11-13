@@ -557,6 +557,17 @@ export function useAuth() {
       loading.value = true
       error.value = null
 
+      // Check for pending changes in admin mode
+      if (store.getters.isAdminMode && store.getters.hasPendingChanges) {
+        const confirmed = window.confirm(
+          'You have unsaved changes in admin mode. Are you sure you want to sign out? All unsaved changes will be lost.'
+        )
+        if (!confirmed) {
+          loading.value = false
+          return
+        }
+      }
+
       // Always clear local state first, even if signOut fails
       store.dispatch('setUser', null)
 

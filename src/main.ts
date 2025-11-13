@@ -11,7 +11,12 @@ const store = createStore({
     user: null,
     theme: 'dark',
     loading: false,
-    notifications: []
+    notifications: [],
+    // Admin mode state
+    adminMode: false,
+    editHistory: [],
+    currentHistoryIndex: -1,
+    pendingChanges: {} // Map of entityId -> { type, entityId, changes: { field: { oldValue, newValue } } }
   },
   mutations: {
     SET_USER(state, user) {
@@ -28,11 +33,85 @@ const store = createStore({
     },
     REMOVE_NOTIFICATION(state, id) {
       state.notifications = state.notifications.filter(n => n.id !== id)
+    },
+    // Admin mode mutations
+    SET_ADMIN_MODE(state, enabled) {
+      state.adminMode = enabled
+      localStorage.setItem('adminMode', String(enabled))
+    },
+    ADD_EDIT_HISTORY(state, edit) {
+      // Remove any edits after current index (when undoing and then making new edit)
+      if (state.currentHistoryIndex < state.editHistory.length - 1) {
+        state.editHistory = state.editHistory.slice(0, state.currentHistoryIndex + 1)
+      }
+      // Add new edit
+      state.editHistory.push(edit)
+      state.currentHistoryIndex = state.editHistory.length - 1
+      // Limit history size to 50
+      if (state.editHistory.length > 50) {
+        state.editHistory.shift()
+        state.currentHistoryIndex = state.editHistory.length - 1
+      }
+    },
+    UNDO_EDIT(state) {
+      if (state.currentHistoryIndex >= 0) {
+        const edit = state.editHistory[state.currentHistoryIndex]
+        // Revert the change in pendingChanges
+        const key = `${edit.type}:${edit.entityId}`
+        if (state.pendingChanges[key]) {
+          state.pendingChanges[key].changes[edit.field] = {
+            oldValue: state.pendingChanges[key].changes[edit.field].oldValue,
+            newValue: edit.oldValue
+          }
+        }
+        state.currentHistoryIndex--
+      }
+    },
+    REDO_EDIT(state) {
+      if (state.currentHistoryIndex < state.editHistory.length - 1) {
+        state.currentHistoryIndex++
+        const edit = state.editHistory[state.currentHistoryIndex]
+        // Apply the change in pendingChanges
+        const key = `${edit.type}:${edit.entityId}`
+        if (state.pendingChanges[key]) {
+          state.pendingChanges[key].changes[edit.field] = {
+            oldValue: state.pendingChanges[key].changes[edit.field].oldValue,
+            newValue: edit.newValue
+          }
+        }
+      }
+    },
+    CLEAR_PENDING_CHANGES(state) {
+      state.pendingChanges = {}
+      state.editHistory = []
+      state.currentHistoryIndex = -1
+    },
+    UPDATE_PENDING_CHANGE(state, { type, entityId, field, oldValue, newValue }) {
+      const key = `${type}:${entityId}`
+      if (!state.pendingChanges[key]) {
+        state.pendingChanges[key] = {
+          type,
+          entityId,
+          changes: {}
+        }
+      }
+      // If this is the first edit to this field, store the oldValue
+      if (!state.pendingChanges[key].changes[field]) {
+        state.pendingChanges[key].changes[field] = { oldValue, newValue }
+      } else {
+        // Update the newValue
+        state.pendingChanges[key].changes[field].newValue = newValue
+      }
     }
   },
   actions: {
     setUser({ commit }, user) {
       commit('SET_USER', user)
+      // Clear admin mode if user logs out
+      if (!user) {
+        commit('SET_ADMIN_MODE', false)
+        commit('CLEAR_PENDING_CHANGES')
+      }
     },
     setTheme({ commit }, theme) {
       commit('SET_THEME', theme)
@@ -48,6 +127,50 @@ const store = createStore({
       setTimeout(() => {
         commit('REMOVE_NOTIFICATION', id)
       }, 5000)
+    },
+    // Admin mode actions
+    toggleAdminMode({ commit, state }) {
+      const newState = !state.adminMode
+      commit('SET_ADMIN_MODE', newState)
+      if (!newState) {
+        // Clear pending changes when disabling admin mode
+        commit('CLEAR_PENDING_CHANGES')
+      }
+    },
+    recordEdit({ commit }, { type, entityId, field, oldValue, newValue }) {
+      // Skip if value hasn't actually changed
+      if (oldValue === newValue) return
+      
+      // Update pending changes
+      commit('UPDATE_PENDING_CHANGE', { type, entityId, field, oldValue, newValue })
+      
+      // Add to history
+      commit('ADD_EDIT_HISTORY', {
+        type,
+        entityId,
+        field,
+        oldValue,
+        newValue,
+        timestamp: Date.now()
+      })
+    },
+    undoEdit({ commit, state }) {
+      if (state.currentHistoryIndex >= 0) {
+        commit('UNDO_EDIT')
+      }
+    },
+    redoEdit({ commit, state }) {
+      if (state.currentHistoryIndex < state.editHistory.length - 1) {
+        commit('REDO_EDIT')
+      }
+    },
+    saveChanges({ commit, state }) {
+      // This will be implemented in the composable with actual DB operations
+      // For now, just clear pending changes
+      commit('CLEAR_PENDING_CHANGES')
+    },
+    cancelChanges({ commit }) {
+      commit('CLEAR_PENDING_CHANGES')
     }
   },
   getters: {
@@ -55,7 +178,14 @@ const store = createStore({
     currentUser: state => state.user,
     currentTheme: state => state.theme,
     isLoading: state => state.loading,
-    notifications: state => state.notifications
+    notifications: state => state.notifications,
+    // Admin mode getters
+    isAdminMode: state => state.adminMode,
+    canUndo: state => state.currentHistoryIndex >= 0,
+    canRedo: state => state.currentHistoryIndex < state.editHistory.length - 1,
+    hasPendingChanges: state => Object.keys(state.pendingChanges).length > 0,
+    pendingChanges: state => state.pendingChanges,
+    editHistory: state => state.editHistory
   }
 })
 
@@ -96,6 +226,12 @@ async function initializeApp() {
   } catch (err: any) {
     // Continue even if auth init fails - don't break the app
     console.error('Auth initialization error (non-critical):', err?.message)
+  }
+  
+  // Load admin mode state from localStorage
+  const savedAdminMode = localStorage.getItem('adminMode') === 'true'
+  if (savedAdminMode) {
+    store.commit('SET_ADMIN_MODE', savedAdminMode)
   }
   
   // Mount app - always mount even if auth init failed

@@ -275,9 +275,10 @@ const handleSubmit = async () => {
       // Email confirmation required
       store.dispatch('addNotification', {
         type: 'success',
-        message: 'Account created! Please check your email to confirm your account before signing in.'
+        message: 'Please check your email to verify your account, then sign in.'
       })
-      // Don't emit success - user needs to confirm email first
+      // Emit success to close the modal - user can sign in after verifying email
+      emit('success')
     }
   } catch (error: any) {
     // Error is already handled by useAuth, but show notification

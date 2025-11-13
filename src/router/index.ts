@@ -170,6 +170,17 @@ router.beforeEach(async (to, from, next) => {
     document.title = to.meta.title as string
   }
   
+  // Check for pending changes in admin mode
+  if (store.getters.isAdminMode && store.getters.hasPendingChanges && from.name) {
+    const confirmed = window.confirm(
+      'You have unsaved changes. Are you sure you want to leave this page? All unsaved changes will be lost.'
+    )
+    if (!confirmed) {
+      next(false) // Cancel navigation
+      return
+    }
+  }
+  
   // Supabase session is automatically managed by the auth listener in useAuth
   // No need to call getSession() here - it's unnecessary and can cause delays
   
