@@ -40,6 +40,7 @@ import LoadingOverlay from './components/LoadingOverlay.vue'
 import CookieConsentBanner from './components/CookieConsentBanner.vue'
 import AdminBottomNav from './components/AdminBottomNav.vue'
 import { useKeyboardShortcuts } from './composables/useKeyboardShortcuts'
+import { cleanupAuthListener } from './composables/useAuth'
 
 const store = useStore()
 
@@ -72,9 +73,8 @@ onMounted(async () => {
   // No need for redundant session restoration or auth listeners here
 })
 
-onUnmounted(async () => {
+onUnmounted(() => {
   // Clean up auth listener to prevent memory leaks and duplicate listeners
-  const { cleanupAuthListener } = await import('./composables/useAuth')
   cleanupAuthListener()
 
   // Safety: Reset body overflow on unmount
