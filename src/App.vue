@@ -72,9 +72,10 @@ onMounted(async () => {
   // No need for redundant session restoration or auth listeners here
 })
 
-onUnmounted(() => {
-  // Auth listener cleanup is handled by useAuth.ts cleanupAuthListener()
-  // No need to cleanup here as it's managed globally
+onUnmounted(async () => {
+  // Clean up auth listener to prevent memory leaks and duplicate listeners
+  const { cleanupAuthListener } = await import('./composables/useAuth')
+  cleanupAuthListener()
 
   // Safety: Reset body overflow on unmount
   document.body.style.overflow = ''

@@ -74,8 +74,15 @@ export function useAdminMode() {
       
       // Process each entity type
       const updatePromises: Promise<any>[] = []
-      
+
       Object.entries(grouped).forEach(([type, entities]) => {
+        // Skip 'content' type changes as they are for static page content tracking only
+        // and don't correspond to database tables
+        if (type === 'content') {
+          console.log(`Skipping ${Object.keys(entities).length} 'content' type changes (static page content tracking only)`)
+          return
+        }
+
         const tableName = getTableName(type)
         const idField = getIdField(type)
         
