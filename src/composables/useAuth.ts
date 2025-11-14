@@ -48,11 +48,12 @@ export async function initializeAuthListener(store: any) {
             console.log('✅ useAuth: Session found, user:', session.user.email || session.user.id)
             try {
               await loadUserDataForStore(session.user, store)
-              console.log('✅ useAuth: User data loaded successfully')
+              console.log('✅ useAuth: User data loaded successfully and synced with localStorage')
             } catch (err: any) {
               console.warn('⚠️ useAuth: Failed to load user data, using basic auth data:', err?.message)
               // If loading user data fails, still set basic auth data
               // This ensures the user stays logged in even if profile fetch fails
+              // This will also update localStorage with the fresh session data
               store.dispatch('setUser', {
                 uid: session.user.id,
                 email: session.user.email,
@@ -64,8 +65,9 @@ export async function initializeAuthListener(store: any) {
               })
             }
           } else {
-            console.log('ℹ️ useAuth: No session in INITIAL_SESSION event')
-            // No session - ensure store is cleared
+            console.log('ℹ️ useAuth: No session in INITIAL_SESSION event - clearing user data')
+            // No session - ensure store and localStorage are cleared
+            // This handles the case where localStorage had user data but session expired
             store.dispatch('setUser', null)
           }
           break
@@ -105,7 +107,8 @@ export async function initializeAuthListener(store: any) {
         break
       
       case 'SIGNED_OUT':
-        // Clear store when signed out
+        // Clear store and localStorage when signed out
+        console.log('🔓 useAuth: User signed out - clearing user data')
         store.dispatch('setUser', null)
         break
       
@@ -223,8 +226,10 @@ export async function initializeAuthListener(store: any) {
           }
         }
       } else {
-        // No Supabase session - clear store if it has a user
+        // No Supabase session - clear store and localStorage if it has a user
+        // This ensures localStorage doesn't have stale data when session expires
         if (currentUser) {
+          console.log('ℹ️ useAuth: No Supabase session found - clearing user data from store and localStorage')
           store.dispatch('setUser', null)
         }
       }

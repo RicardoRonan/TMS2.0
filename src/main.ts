@@ -21,6 +21,21 @@ const store = createStore({
   mutations: {
     SET_USER(state, user) {
       state.user = user
+      // Persist user data to localStorage for session restoration
+      if (user) {
+        try {
+          localStorage.setItem('user', JSON.stringify(user))
+        } catch (err) {
+          console.warn('Failed to save user to localStorage:', err)
+        }
+      } else {
+        // Clear user data from localStorage on logout
+        try {
+          localStorage.removeItem('user')
+        } catch (err) {
+          console.warn('Failed to remove user from localStorage:', err)
+        }
+      }
     },
     SET_THEME(state, theme) {
       state.theme = theme
@@ -200,13 +215,33 @@ app.use(router)
 // Initialize auth BEFORE mounting to ensure session is restored immediately
 // This is critical for session persistence on page reload
 async function initializeApp() {
+  // Restore user data from localStorage FIRST (immediate restoration)
+  // This ensures user appears logged in immediately on page reload
+  try {
+    const savedUser = localStorage.getItem('user')
+    if (savedUser) {
+      try {
+        const userData = JSON.parse(savedUser)
+        // Restore user data immediately (before Supabase loads)
+        // This provides instant UI feedback while Supabase session is being verified
+        store.commit('SET_USER', userData)
+        console.log('✅ Restored user from localStorage:', userData.email || userData.uid)
+      } catch (parseErr) {
+        console.warn('Failed to parse saved user data:', parseErr)
+        localStorage.removeItem('user')
+      }
+    }
+  } catch (err) {
+    console.warn('Failed to restore user from localStorage:', err)
+  }
+
   try {
     // Check if Supabase is configured before initializing
     const { isSupabaseConfigured } = await import('./supabase')
     
     if (isSupabaseConfigured()) {
-      // Initialize auth listener FIRST (before mounting)
-      // This ensures INITIAL_SESSION event is captured as soon as possible
+      // Initialize auth listener (this will verify and sync the session)
+      // The listener will update user data from Supabase if session is valid
       const { initializeAuthListener } = await import('./composables/useAuth')
       await initializeAuthListener(store)
       
