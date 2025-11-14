@@ -34,18 +34,66 @@ export async function initializeAuthListener(store: any) {
     return
   }
   
+  // Check for Supabase session in localStorage BEFORE setting up listener
+  // This helps us understand if there's a session that should be restored
+  try {
+    const supabaseSessionStr = localStorage.getItem('supabase.auth.token')
+    if (supabaseSessionStr) {
+      try {
+        const supabaseSession = JSON.parse(supabaseSessionStr)
+        console.log('🔍 Found Supabase session in localStorage:', {
+          hasAccessToken: !!supabaseSession?.access_token,
+          expiresAt: supabaseSession?.expires_at ? new Date(supabaseSession.expires_at * 1000).toISOString() : 'N/A',
+          userId: supabaseSession?.user?.id || 'N/A'
+        })
+      } catch (e) {
+        console.warn('⚠️ Could not parse Supabase session from localStorage:', e)
+      }
+    } else {
+      console.log('ℹ️ No Supabase session found in localStorage')
+    }
+  } catch (err) {
+    console.warn('⚠️ Error checking Supabase session in localStorage:', err)
+  }
+  
   isListenerInitialized = true
 
   // Set up the auth state change listener FIRST
   // This ensures INITIAL_SESSION event is captured immediately
   authListener = supabase.auth.onAuthStateChange(async (event, session) => {
+    console.log(`🔔 Auth state change event: ${event}`, {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      userId: session?.user?.id || 'N/A',
+      email: session?.user?.email || 'N/A'
+    })
     try {
       switch (event) {
         case 'INITIAL_SESSION':
           // This is the primary way sessions are restored on page reload
-          console.log('🔄 useAuth: INITIAL_SESSION event received')
+          console.log('🔄 useAuth: INITIAL_SESSION event received', {
+            hasSession: !!session,
+            hasUser: !!session?.user,
+            sessionExpiresAt: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : 'N/A'
+          })
+          
           if (session?.user) {
             console.log('✅ useAuth: Session found, user:', session.user.email || session.user.id)
+            
+            // Verify session is not expired
+            if (session.expires_at) {
+              const expiresAt = new Date(session.expires_at * 1000)
+              const now = new Date()
+              if (expiresAt < now) {
+                console.warn('⚠️ useAuth: Session expired, clearing user data', {
+                  expiresAt: expiresAt.toISOString(),
+                  now: now.toISOString()
+                })
+                store.dispatch('setUser', null)
+                break
+              }
+            }
+            
             try {
               await loadUserDataForStore(session.user, store)
               console.log('✅ useAuth: User data loaded successfully and synced with localStorage')
@@ -65,10 +113,48 @@ export async function initializeAuthListener(store: any) {
               })
             }
           } else {
-            console.log('ℹ️ useAuth: No session in INITIAL_SESSION event - clearing user data')
-            // No session - ensure store and localStorage are cleared
-            // This handles the case where localStorage had user data but session expired
-            store.dispatch('setUser', null)
+            // Check if we have a stored user in localStorage before clearing
+            // This prevents clearing valid user data if Supabase session hasn't loaded yet
+            const storedUser = localStorage.getItem('user')
+            const storedSupabaseSession = localStorage.getItem('supabase.auth.token')
+            
+            console.log('ℹ️ useAuth: No session in INITIAL_SESSION event', {
+              hasStoredUser: !!storedUser,
+              hasStoredSupabaseSession: !!storedSupabaseSession
+            })
+            
+            // Only clear if we're sure there's no Supabase session
+            // Wait a bit for Supabase to fully initialize
+            setTimeout(async () => {
+              try {
+                const { data: { session: delayedSession } } = await supabase.auth.getSession()
+                if (!delayedSession) {
+                  console.log('ℹ️ useAuth: Confirmed no Supabase session after delay - clearing user data')
+                  store.dispatch('setUser', null)
+                } else {
+                  console.log('✅ useAuth: Found Supabase session after delay, restoring user')
+                  if (delayedSession.user) {
+                    try {
+                      await loadUserDataForStore(delayedSession.user, store)
+                    } catch (err: any) {
+                      store.dispatch('setUser', {
+                        uid: delayedSession.user.id,
+                        email: delayedSession.user.email,
+                        displayName: delayedSession.user.user_metadata?.display_name || 'User',
+                        photoURL: delayedSession.user.user_metadata?.avatar_url,
+                        isAdmin: false,
+                        createdAt: delayedSession.user.created_at || new Date().toISOString(),
+                        lastLoginAt: new Date().toISOString()
+                      })
+                    }
+                  }
+                }
+              } catch (err) {
+                console.warn('⚠️ useAuth: Error checking delayed session:', err)
+                // If we have stored user but can't verify session, keep the user for now
+                // The backup session check will handle this
+              }
+            }, 500) // Wait 500ms for Supabase to fully initialize
           }
           break
         
@@ -180,6 +266,13 @@ export async function initializeAuthListener(store: any) {
     try {
       const { data: { session }, error } = result || { data: { session: null }, error: null }
       const currentUser = store.getters.currentUser
+      
+      console.log('🔍 Backup session check:', {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        hasCurrentUser: !!currentUser,
+        error: error?.message || 'N/A'
+      })
       
       // Sync check: Ensure Supabase session matches store state
       if (!error && session?.user) {

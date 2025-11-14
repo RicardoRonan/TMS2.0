@@ -345,8 +345,8 @@ const handleMouseMove = (e: MouseEvent) => {
       const rect = container.getBoundingClientRect()
       const x = (e.clientX - rect.left - panX.value) / zoom.value
       const y = (e.clientY - rect.top - panY.value) / zoom.value
-      draggedNode.value.position[0] = Math.max(0, x - nodeWidth / 2)
-      draggedNode.value.position[1] = Math.max(0, y - nodeHeight / 2)
+      // Immutably update position array to ensure Vue 3 reactivity
+      draggedNode.value.position = [Math.max(0, x - nodeWidth / 2), Math.max(0, y - nodeHeight / 2)]
     }
   }
 }
