@@ -1,6 +1,6 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
-import { supabase } from '../supabase'
+import { supabase, isSupabaseConfigured } from '../supabase'
 import type { User, AuthError } from '@supabase/supabase-js'
 
 // Singleton pattern to ensure only one auth listener exists
@@ -26,12 +26,24 @@ export async function initializeAuthListener(store: any) {
   isListenerInitialized = false
   
   // Check if Supabase is configured before initializing listener
-  const { isSupabaseConfigured, supabase } = await import('../supabase')
-  
+  // Use static import (already imported at top of file)
   if (!isSupabaseConfigured()) {
     console.error('⚠️ Cannot initialize auth listener: Supabase environment variables are missing')
     console.error('💡 Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Netlify environment variables')
     return
+  }
+
+  // Ensure Supabase client is fully initialized before setting up listener
+  // Wait a moment for the client to be ready (especially important on page reload)
+  await new Promise(resolve => setTimeout(resolve, 50))
+  
+  // Verify client is accessible
+  try {
+    await supabase.auth.getSession()
+  } catch (err) {
+    console.warn('⚠️ Supabase client not ready yet, retrying...', err)
+    // Wait a bit longer and retry
+    await new Promise(resolve => setTimeout(resolve, 100))
   }
   
   // Check for Supabase session in localStorage BEFORE setting up listener

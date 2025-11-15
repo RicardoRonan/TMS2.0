@@ -253,13 +253,20 @@ async function initializeApp() {
     const { isSupabaseConfigured } = await import('./supabase')
     
     if (isSupabaseConfigured()) {
+      // Ensure Supabase client is fully initialized before setting up auth listener
+      // Import supabase module to trigger client initialization
+      await import('./supabase')
+      
+      // Small delay to ensure client is ready
+      await new Promise(resolve => setTimeout(resolve, 50))
+      
       // Initialize auth listener (this will verify and sync the session)
       // The listener will update user data from Supabase if session is valid
       const { initializeAuthListener } = await import('./composables/useAuth')
       await initializeAuthListener(store)
       
-      // Small delay to let INITIAL_SESSION event fire
-      await new Promise(resolve => setTimeout(resolve, 100))
+      // Additional delay to let INITIAL_SESSION event fire and process
+      await new Promise(resolve => setTimeout(resolve, 150))
     } else {
       // Supabase not configured - show notification but don't break app
       console.warn('⚠️ Supabase not configured - auth features disabled')
