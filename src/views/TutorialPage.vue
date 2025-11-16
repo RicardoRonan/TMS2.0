@@ -84,7 +84,7 @@
         </header>
 
         <!-- Page Content -->
-        <div class="markdown-content prose prose-invert max-w-none">
+        <div ref="markdownContentRef" class="markdown-content prose prose-invert max-w-none">
           <EditableField
             v-if="isAdminMode && page"
             :model-value="page.content || ''"
@@ -112,6 +112,9 @@
             v-html="renderedContent"
           ></div>
         </div>
+        
+        <!-- Scroll Indicator -->
+        <ScrollIndicator :content-ref="markdownContentRef" />
 
         <!-- Navigation -->
         <div class="mt-12 pt-8 border-t border-border-primary">
@@ -152,6 +155,7 @@ import HIGButton from '../components/hig/HIGButton.vue'
 import Icon from '../components/Icon.vue'
 import EditableField from '../components/EditableField.vue'
 import Breadcrumb from '../components/Breadcrumb.vue'
+import ScrollIndicator from '../components/ScrollIndicator.vue'
 import { renderMarkdown } from '../utils/markdown'
 import { useAdminMode } from '../composables/useAdminMode'
 import 'highlight.js/styles/vs2015.css'
@@ -166,6 +170,7 @@ const page = ref<any>(null)
 const category = ref<any>(null)
 const allPages = ref<any[]>([])
 const totalPages = ref(0)
+const markdownContentRef = ref<HTMLElement | null>(null)
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', { 

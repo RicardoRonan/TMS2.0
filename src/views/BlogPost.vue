@@ -107,7 +107,7 @@
         </div> -->
 
         <!-- Article Content -->
-        <div class="markdown-content prose prose-invert max-w-none">
+        <div ref="markdownContentRef" class="markdown-content prose prose-invert max-w-none">
           <EditableField
             v-if="isAdminMode && post"
             :model-value="post.content"
@@ -135,6 +135,9 @@
             v-html="renderedContent"
           ></div>
         </div>
+        
+        <!-- Scroll Indicator -->
+        <ScrollIndicator :content-ref="markdownContentRef" />
 
         <!-- Tags -->
         <div v-if="post.tags && post.tags.length" class="mt-12 pt-8 border-t border-border-primary">
@@ -292,6 +295,7 @@ import FullScreenTextarea from '../components/FullScreenTextarea.vue'
 import CommentItem from '../components/CommentItem.vue'
 import EditableField from '../components/EditableField.vue'
 import Breadcrumb from '../components/Breadcrumb.vue'
+import ScrollIndicator from '../components/ScrollIndicator.vue'
 import { renderMarkdown } from '../utils/markdown'
 import { useAdminMode } from '../composables/useAdminMode'
 import 'highlight.js/styles/vs2015.css'
@@ -316,6 +320,7 @@ const isSubmittingComment = ref(false)
 const editingComment = ref<any>(null)
 const replyingToComment = ref<any>(null)
 const commentCount = ref(0)
+const markdownContentRef = ref<HTMLElement | null>(null)
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', { 
