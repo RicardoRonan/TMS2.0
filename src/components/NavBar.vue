@@ -76,6 +76,15 @@
               </div>
             </Transition>
           </div>
+          
+          <!-- Contact -->
+          <router-link
+            to="/contact"
+            :class="navLinkClasses('/contact')"
+            @click="closeMobileMenu"
+          >
+            Contact
+          </router-link>
         </div>
 
         <!-- User Menu / Auth Buttons -->
@@ -223,6 +232,15 @@
                 </div>
               </Transition>
             </div>
+            
+            <!-- Contact -->
+            <router-link
+              to="/contact"
+              :class="mobileNavLinkClasses('/contact')"
+              @click="closeMobileMenu"
+            >
+              Contact
+            </router-link>
           </div>
           
           <div v-if="isAuthenticated" class="mt-4 pt-4 border-t border-border-primary space-y-2">
@@ -317,8 +335,7 @@ const resourcesMenuRef = ref<HTMLElement>()
 const regularNavigationItems = [
   { name: 'Home', href: '/' },
   // { name: 'Projects', href: '/projects' },
-  { name: 'About', href: '/about' },
-  { name: 'Contact', href: '/contact' }
+  { name: 'About', href: '/about' }
 ]
 
 const resourcesItems = [

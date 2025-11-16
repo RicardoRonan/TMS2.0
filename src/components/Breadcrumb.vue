@@ -1,5 +1,5 @@
 <template>
-  <nav class="mb-6">
+  <nav class="mb-6 mt-4">
     <div class="flex items-center space-x-2 text-sm text-text-tertiary">
       <template v-for="(item, index) in items" :key="index">
         <router-link

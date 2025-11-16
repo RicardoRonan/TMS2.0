@@ -3,7 +3,7 @@
     <div class="container mx-auto px-4 py-12">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
         <!-- Brand -->
-        <div class="space-y-4">
+        <div class="space-y-4 mt-4">
           <div class="flex items-center space-x-2">
             <img src="@/assets/meta-stack-logo.png" alt="MetaStack Logo" class="w-8 h-8" />
             <span class="text-xl font-bold text-text-primary">MetaStack</span>
