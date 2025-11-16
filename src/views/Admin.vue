@@ -893,6 +893,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import { supabase } from '../supabase'
 import { useAuth } from '../composables/useAuth'
@@ -907,6 +908,7 @@ import { uploadImageToImgBB } from '../utils/imgbb'
 
 const store = useStore()
 const { user } = useAuth()
+const route = useRoute()
 
 // State
 const activeTab = ref('blog')
@@ -2090,12 +2092,49 @@ onMounted(async () => {
   // Check admin status first
   await checkAdminStatus()
   
-  // Then fetch data
-  fetchBlogs()
-  fetchCategories()
-  fetchPages()
-  fetchTools()
-  fetchUsers()
+  // Handle query parameters for navigation
+  const tabParam = route.query.tab as string
+  const editParam = route.query.edit as string
+  
+  if (tabParam && ['blog', 'tutorials', 'tools', 'users'].includes(tabParam)) {
+    activeTab.value = tabParam
+    
+    // If edit parameter is provided, open the edit modal after data is loaded
+    if (editParam) {
+      // Wait for data to load, then open edit modal
+      if (tabParam === 'blog') {
+        await fetchBlogs()
+        // Find and edit the blog
+        const blogToEdit = blogs.value.find(b => b.id === editParam)
+        if (blogToEdit) {
+          editBlog(blogToEdit)
+        }
+      } else if (tabParam === 'tutorials') {
+        await fetchPages()
+        // Find and edit the page
+        const pageToEdit = pages.value.find(p => p.id === editParam)
+        if (pageToEdit) {
+          editPage(pageToEdit)
+        }
+      }
+    } else {
+      // Just fetch data for the tab
+      if (tabParam === 'blog') fetchBlogs()
+      if (tabParam === 'tutorials') {
+        fetchCategories()
+        fetchPages()
+      }
+      if (tabParam === 'tools') fetchTools()
+      if (tabParam === 'users') fetchUsers()
+    }
+  } else {
+    // Default: fetch all data
+    fetchBlogs()
+    fetchCategories()
+    fetchPages()
+    fetchTools()
+    fetchUsers()
+  }
 })
 </script>
 

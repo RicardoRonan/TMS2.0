@@ -33,6 +33,19 @@
     <!-- Article Content -->
     <article v-else-if="post" class="container mx-auto px-4 py-16">
       <div class="max-w-4xl mx-auto">
+        <!-- Admin Edit Button -->
+        <div v-if="isAdminMode" class="mb-6 flex justify-end">
+          <HIGButton 
+            variant="primary" 
+            size="sm"
+            @click="navigateToEdit"
+            class="flex items-center space-x-2"
+          >
+            <Icon name="edit" :size="16" />
+            <span>Edit Post</span>
+          </HIGButton>
+        </div>
+
         <!-- Header -->
         <header class="mb-12">
           <div class="flex items-center space-x-2 text-sm text-text-tertiary mb-4">
@@ -41,7 +54,20 @@
             <span>{{ post.category }}</span>
           </div>
           
-          <h1 class="text-4xl md:text-5xl font-bold text-text-primary mb-6">
+          <EditableField
+            v-if="isAdminMode && post"
+            :model-value="post.title"
+            entity-type="blog"
+            :entity-id="post.id"
+            field="title"
+            as="input"
+            input-type="text"
+            wrapper-class="mb-6"
+            content-class="text-4xl md:text-5xl font-bold text-text-primary"
+            input-class="text-4xl md:text-5xl font-bold"
+            @update:model-value="handleTitleUpdate"
+          />
+          <h1 v-else class="text-4xl md:text-5xl font-bold text-text-primary mb-6">
             {{ post.title }}
           </h1>
           
@@ -84,7 +110,29 @@
 
         <!-- Article Content -->
         <div class="markdown-content prose prose-invert max-w-none">
+          <EditableField
+            v-if="isAdminMode && post"
+            :model-value="post.content"
+            entity-type="blog"
+            :entity-id="post.id"
+            field="content"
+            as="textarea"
+            :rows="20"
+            wrapper-class="mb-6"
+            content-class="text-lg text-text-secondary leading-relaxed"
+            input-class="text-lg text-text-secondary leading-relaxed"
+            placeholder="Blog content (Markdown supported)..."
+            @update:model-value="handleContentUpdate"
+          >
+            <template #default="{ value }">
+              <div 
+                class="text-lg text-text-secondary leading-relaxed"
+                v-html="renderMarkdown(value || '')"
+              ></div>
+            </template>
+          </EditableField>
           <div 
+            v-else
             class="text-lg text-text-secondary leading-relaxed"
             v-html="renderedContent"
           ></div>
@@ -236,7 +284,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
-import { useRoute, onBeforeRouteUpdate } from 'vue-router'
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import { useStore } from 'vuex'
 import { supabase } from '../supabase'
 import HIGButton from '../components/hig/HIGButton.vue'
@@ -244,11 +292,15 @@ import Icon from '../components/Icon.vue'
 import ShareModal from '../components/ShareModal.vue'
 import FullScreenTextarea from '../components/FullScreenTextarea.vue'
 import CommentItem from '../components/CommentItem.vue'
+import EditableField from '../components/EditableField.vue'
 import { renderMarkdown } from '../utils/markdown'
+import { useAdminMode } from '../composables/useAdminMode'
 import 'highlight.js/styles/vs2015.css'
 
 const route = useRoute()
+const router = useRouter()
 const store = useStore()
+const { isAdminMode } = useAdminMode()
 
 const loading = ref(true)
 const error = ref<string | null>(null)
@@ -866,6 +918,29 @@ const cancelEdit = () => {
   editingComment.value = null
   replyingToComment.value = null
   newCommentContent.value = ''
+}
+
+// Navigate to admin edit page
+const navigateToEdit = () => {
+  if (post.value?.id) {
+    router.push(`/admin?tab=blog&edit=${post.value.id}`)
+  } else {
+    router.push('/admin?tab=blog')
+  }
+}
+
+// Handle title update
+const handleTitleUpdate = (newTitle: string) => {
+  if (post.value) {
+    post.value.title = newTitle
+  }
+}
+
+// Handle content update
+const handleContentUpdate = (newContent: string) => {
+  if (post.value) {
+    post.value.content = newContent
+  }
 }
 
 // Fetch on mount
