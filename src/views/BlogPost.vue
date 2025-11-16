@@ -46,13 +46,11 @@
           </HIGButton>
         </div>
 
+        <!-- Breadcrumb -->
+        <Breadcrumb :items="breadcrumbItems" />
+
         <!-- Header -->
         <header class="mb-12">
-          <div class="flex items-center space-x-2 text-sm text-text-tertiary mb-4">
-            <router-link to="/blog" class="hover:text-primary-500 transition-colors">Blog</router-link>
-            <span>/</span>
-            <span>{{ post.category }}</span>
-          </div>
           
           <EditableField
             v-if="isAdminMode && post"
@@ -293,6 +291,7 @@ import ShareModal from '../components/ShareModal.vue'
 import FullScreenTextarea from '../components/FullScreenTextarea.vue'
 import CommentItem from '../components/CommentItem.vue'
 import EditableField from '../components/EditableField.vue'
+import Breadcrumb from '../components/Breadcrumb.vue'
 import { renderMarkdown } from '../utils/markdown'
 import { useAdminMode } from '../composables/useAdminMode'
 import 'highlight.js/styles/vs2015.css'
@@ -343,6 +342,13 @@ const getInitials = (name: string | null | undefined, email: string | null | und
 const renderedContent = computed(() => {
   if (!post.value?.content) return ''
   return renderMarkdown(post.value.content)
+})
+
+const breadcrumbItems = computed(() => {
+  return [
+    { label: 'Blog', to: '/blog' },
+    { label: post.value?.category || '' }
+  ]
 })
 
 const currentUser = computed(() => store.getters.currentUser)

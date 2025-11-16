@@ -43,10 +43,10 @@
             :to="feature.route"
             class="block"
           >
-            <HIGCard class="text-center hover:shadow-hig-lg transition-all cursor-pointer h-full">
+            <HIGCard class="text-center hover:shadow-hig-lg transition-all cursor-pointer h-full group">
               <div class="p-6">
-                <div class="w-16 h-16 bg-primary-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Icon :name="feature.icon.toLowerCase()" :size="32" class="text-white" />
+                <div class="w-16 h-16 bg-primary-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-600 transition-colors">
+                  <Icon :name="feature.icon.toLowerCase()" :size="32" class="text-white group-hover:text-white" />
                 </div>
                 <h3 class="text-xl font-semibold text-text-primary mb-3">{{ feature.title }}</h3>
                 <p class="text-text-secondary">{{ feature.description }}</p>

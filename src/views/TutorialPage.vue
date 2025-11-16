@@ -46,16 +46,7 @@
         </div>
 
         <!-- Breadcrumb -->
-        <nav class="mb-6">
-          <div class="flex items-center space-x-2 text-sm text-text-tertiary">
-            <router-link to="/tutorials" class="hover:text-primary-500 transition-colors">Tutorials</router-link>
-            <span>/</span>
-            <span v-if="category">{{ category.title }}</span>
-            <span v-else>Category</span>
-            <span>/</span>
-            <span>{{ page.title }}</span>
-          </div>
-        </nav>
+        <Breadcrumb :items="breadcrumbItems" />
 
         <!-- Header -->
         <header class="mb-12">
@@ -160,6 +151,7 @@ import { supabase } from '../supabase'
 import HIGButton from '../components/hig/HIGButton.vue'
 import Icon from '../components/Icon.vue'
 import EditableField from '../components/EditableField.vue'
+import Breadcrumb from '../components/Breadcrumb.vue'
 import { renderMarkdown } from '../utils/markdown'
 import { useAdminMode } from '../composables/useAdminMode'
 import 'highlight.js/styles/vs2015.css'
@@ -186,6 +178,14 @@ const formatDate = (dateString: string) => {
 const renderedContent = computed(() => {
   if (!page.value?.content) return '<p>Content coming soon...</p>'
   return renderMarkdown(page.value.content)
+})
+
+const breadcrumbItems = computed(() => {
+  return [
+    { label: 'Tutorials', to: '/tutorials' },
+    { label: category.value?.title || 'Category' },
+    { label: page.value?.title || '' }
+  ]
 })
 
 const currentPageIndex = computed(() => {

@@ -99,7 +99,14 @@
               <button
                 class="flex items-center space-x-2 text-text-primary hover:text-primary-500 transition-colors"
               >
-                <div class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+                <div v-if="currentUser?.photoURL" class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-bg-tertiary">
+                  <img 
+                    :src="currentUser.photoURL" 
+                    :alt="currentUser?.displayName || 'User'"
+                    class="w-full h-full object-cover"
+                  />
+                </div>
+                <div v-else class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
                   <span class="text-white text-sm font-medium">
                     {{ userInitials }}
                   </span>

@@ -25,12 +25,9 @@
 
         <!-- Category Detail View (when a category is selected) -->
         <div v-else-if="selectedCategory" class="max-w-4xl mx-auto">
-          <button
-            @click="selectedCategory = null"
-            class="mb-6 text-primary-500 hover:text-primary-600 transition-colors"
-          >
-            ← Back to Categories
-          </button>
+          <!-- Breadcrumb -->
+          <Breadcrumb :items="breadcrumbItems" />
+          
           <h2 class="text-3xl font-bold text-text-primary mb-8">{{ selectedCategory.title }}</h2>
           <div class="space-y-2">
             <a
@@ -100,10 +97,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import Breadcrumb from '../components/Breadcrumb.vue'
 import { 
   faBook, 
   faCode, 
@@ -421,6 +419,14 @@ const selectCategory = (category: any) => {
   selectedCategory.value = category
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
+
+const breadcrumbItems = computed(() => {
+  if (!selectedCategory.value) return []
+  return [
+    { label: 'Tutorials', to: '/tutorials' },
+    { label: selectedCategory.value.title || 'Category' }
+  ]
+})
 
 const getGroupCategories = (groupId: string) => {
   return categories.value

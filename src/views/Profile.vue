@@ -24,6 +24,26 @@
               <div class="p-6">
                 <h2 class="text-2xl font-bold text-text-primary mb-6">Account Information</h2>
                 
+                <!-- Profile Picture -->
+                <div class="mb-6 flex items-center space-x-4">
+                  <div v-if="currentUser?.photoURL" class="w-20 h-20 rounded-full overflow-hidden flex-shrink-0 border-2 border-border-primary bg-bg-tertiary">
+                    <img 
+                      :src="currentUser.photoURL" 
+                      :alt="currentUser?.displayName || 'User'"
+                      class="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div v-else class="w-20 h-20 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-border-primary">
+                    <span class="text-white text-2xl font-medium">
+                      {{ userInitials }}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 class="text-xl font-semibold text-text-primary">{{ currentUser?.displayName || 'User' }}</h3>
+                    <p class="text-text-secondary">{{ currentUser?.email }}</p>
+                  </div>
+                </div>
+                
                 <div class="space-y-6">
                   <div>
                     <label class="block text-sm font-medium text-text-secondary mb-2">Display Name</label>
@@ -362,6 +382,16 @@ const userComments = ref<any[]>([])
 const loadingUserComments = ref(false)
 
 const currentUser = computed(() => store.getters.currentUser)
+
+const userInitials = computed(() => {
+  if (!currentUser.value?.displayName) return 'U'
+  return currentUser.value.displayName
+    .split(' ')
+    .map(name => name[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+})
 
 const formatDate = (dateString?: string) => {
   if (!dateString) return 'N/A'
