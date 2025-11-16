@@ -555,16 +555,39 @@ const updateValue = (newValue: string) => {
       emit('update:modelValue', newValue)
       emit('change', newValue, originalValue.value)
     }
+    debounceTimer = null
   }, props.debounceMs)
+}
+
+// Flush pending debounced update immediately
+const flushPendingUpdate = () => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+    // Execute the pending update immediately
+    const currentValue = localValue.value
+    if (currentValue !== originalValue.value) {
+      // Record the edit
+      recordEdit(
+        props.entityType,
+        props.entityId,
+        props.field,
+        originalValue.value,
+        currentValue
+      )
+      
+      emit('update:modelValue', currentValue)
+      emit('change', currentValue, originalValue.value)
+    }
+    debounceTimer = null
+  }
 }
 
 const handleBlur = () => {
   // Small delay to allow click events to fire first
   setTimeout(() => {
+    // Flush any pending debounced update before closing
+    flushPendingUpdate()
     isEditing.value = false
-    if (debounceTimer) {
-      clearTimeout(debounceTimer)
-    }
   }, 200)
 }
 
@@ -887,6 +910,10 @@ onUnmounted(() => {
   document.removeEventListener('keydown', handleEscapeFullscreen)
   if (isFullscreen.value) {
     document.body.style.overflow = ''
+  }
+  // Cleanup: Flush any pending debounced update and clear timer
+  if (debounceTimer) {
+    flushPendingUpdate()
   }
 })
 </script>

@@ -163,7 +163,7 @@
           </div>
 
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <HIGButton variant="primary" size="lg" @click="scrollToTop">
+            <HIGButton variant="primary" size="lg" @click="handleGetStarted">
               Get Started Today
             </HIGButton>
             <HIGButton variant="secondary" size="lg" @click="scrollToContact">
@@ -178,6 +178,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { 
   faCodeBranch, 
@@ -190,6 +191,8 @@ import {
 import HIGCard from '../components/hig/HIGCard.vue'
 import HIGButton from '../components/hig/HIGButton.vue'
 import { supabase } from '../supabase'
+
+const router = useRouter()
 
 // Values data
 const values = ref([
@@ -337,6 +340,13 @@ const scrollToContact = () => {
 }
 
 const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+const handleGetStarted = () => {
+  // Navigate to home with signup query parameter
+  router.push({ path: '/', query: { signup: 'true' } })
+  // Scroll to top
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 

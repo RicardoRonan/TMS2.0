@@ -66,81 +66,58 @@
           </HIGButton>
         </div>
 
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <HIGCard v-for="post in paginatedPosts" :key="post.id" class="hover:shadow-hig-lg transition-shadow">
-            <div class="p-6">
-              <!-- Featured Image - Commented out for now -->
-              <!-- <div v-if="post.featuredImageUrl" class="aspect-video bg-bg-tertiary rounded-lg mb-4 overflow-hidden">
-                <img 
-                  :src="post.featuredImageUrl" 
-                  :alt="post.title"
-                  class="w-full h-full object-cover"
-                />
-              </div>
-              <div v-else class="aspect-video bg-bg-tertiary rounded-lg mb-4 flex items-center justify-center">
-                <span class="text-text-tertiary">No Image</span>
-              </div> -->
-              <div class="space-y-3">
-                <div class="flex items-center space-x-2 text-sm text-text-tertiary">
-                  <span v-if="post.category" class="badge badge-secondary">{{ post.category }}</span>
-                  <span v-if="post.category">•</span>
-                  <span>{{ formatDate(post.createdAt) }}</span>
-                </div>
-                <h3 class="text-xl font-semibold text-text-primary line-clamp-2">
-                  {{ post.title }}
-                </h3>
-                <p class="text-text-secondary line-clamp-3">
-                  {{ post.excerpt }}
-                </p>
-                <div class="flex items-center justify-between pt-2">
-                  <div class="flex items-center space-x-2 text-sm text-text-tertiary">
-                    <span>{{ post.readTime }} min read</span>
+        <!-- Grouped by Category -->
+        <div v-else class="space-y-12">
+          <template v-for="category in groupedCategories" :key="category">
+            <div v-if="getCategoryPosts(category).length > 0">
+              <!-- Category Heading -->
+              <h2 class="text-2xl font-bold text-text-primary mb-6">{{ category }}</h2>
+              
+              <!-- Blog Posts Grid for this Category -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                <HIGCard v-for="post in getCategoryPosts(category)" :key="post.id" class="hover:shadow-hig-lg transition-shadow">
+                  <div class="p-6">
+                    <!-- Featured Image - Commented out for now -->
+                    <!-- <div v-if="post.featuredImageUrl" class="aspect-video bg-bg-tertiary rounded-lg mb-4 overflow-hidden">
+                      <img 
+                        :src="post.featuredImageUrl" 
+                        :alt="post.title"
+                        class="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div v-else class="aspect-video bg-bg-tertiary rounded-lg mb-4 flex items-center justify-center">
+                      <span class="text-text-tertiary">No Image</span>
+                    </div> -->
+                    <div class="space-y-3">
+                      <div class="flex items-center space-x-2 text-sm text-text-tertiary">
+                        <span v-if="post.category" class="badge badge-secondary">{{ post.category }}</span>
+                        <span v-if="post.category">•</span>
+                        <span>{{ formatDate(post.createdAt) }}</span>
+                      </div>
+                      <h3 class="text-xl font-semibold text-text-primary line-clamp-2">
+                        {{ post.title }}
+                      </h3>
+                      <p class="text-text-secondary line-clamp-3">
+                        {{ post.excerpt }}
+                      </p>
+                      <div class="flex items-center justify-between pt-2">
+                        <div class="flex items-center space-x-2 text-sm text-text-tertiary">
+                          <span>{{ post.readTime }} min read</span>
+                        </div>
+                        <router-link 
+                          :to="`/blog/${post.slug}`"
+                          class="inline-flex items-center text-primary-500 hover:text-primary-600 font-medium transition-colors"
+                        >
+                          Read More
+                          <Icon name="arrow-right" :size="16" class="ml-1" />
+                        </router-link>
+                      </div>
+                    </div>
                   </div>
-                  <router-link 
-                    :to="`/blog/${post.slug}`"
-                    class="inline-flex items-center text-primary-500 hover:text-primary-600 font-medium transition-colors"
-                  >
-                    Read More
-                    <Icon name="arrow-right" :size="16" class="ml-1" />
-                  </router-link>
-                </div>
+                </HIGCard>
               </div>
             </div>
-          </HIGCard>
-        </div>
-
-        <!-- Pagination -->
-        <div v-if="totalPages > 1" class="flex justify-center mt-12">
-          <div class="flex items-center space-x-2">
-            <HIGButton
-              variant="secondary"
-              size="sm"
-              :disabled="currentPage === 1"
-              @click="goToPage(currentPage - 1)"
-            >
-              Previous
-            </HIGButton>
-            
-            <div class="flex space-x-1">
-              <button
-                v-for="page in visiblePages"
-                :key="page"
-                :class="pageButtonClasses(page)"
-                @click="goToPage(page)"
-              >
-                {{ page }}
-              </button>
-            </div>
-            
-            <HIGButton
-              variant="secondary"
-              size="sm"
-              :disabled="currentPage === totalPages"
-              @click="goToPage(currentPage + 1)"
-            >
-              Next
-            </HIGButton>
-          </div>
+          </template>
         </div>
       </div>
     </section>
@@ -196,6 +173,23 @@ const filteredPosts = computed(() => {
     return dateB - dateA // Descending order (newest first)
   })
 })
+
+// Group posts by category
+const groupedCategories = computed(() => {
+  const categorySet = new Set<string>()
+  filteredPosts.value.forEach(post => {
+    if (post.category) {
+      categorySet.add(post.category)
+    }
+  })
+  // Sort categories alphabetically
+  return Array.from(categorySet).sort()
+})
+
+// Get posts for a specific category
+const getCategoryPosts = (category: string) => {
+  return filteredPosts.value.filter(post => post.category === category)
+}
 
 const totalPages = computed(() => Math.ceil(filteredPosts.value.length / postsPerPage))
 

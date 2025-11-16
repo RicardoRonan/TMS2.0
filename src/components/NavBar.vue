@@ -1,5 +1,5 @@
 <template>
-  <nav class="bg-bg-secondary border-b border-border-primary sticky top-0 z-50">
+  <nav class="nav-bar sticky top-0 z-50 bg-bg-secondary border-b border-border-primary shadow-lg">
     <div class="container mx-auto px-4">
       <div class="flex items-center justify-between h-16">
         <!-- Logo -->
@@ -278,7 +278,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { useAuth } from '../composables/useAuth'
@@ -421,6 +421,11 @@ const handleRegisterSuccess = () => {
   console.log('Register success handler called')
   showRegisterModal.value = false
   
+  // Remove signup query parameter
+  if (route.query.signup) {
+    router.replace({ query: {} })
+  }
+  
   // Wait a moment for store to update, then verify user is actually signed in
   setTimeout(() => {
     const user = store.getters.currentUser
@@ -440,10 +445,29 @@ const handleRegisterSuccess = () => {
   }, 100)
 }
 
+// Watch for signup query parameter to open register modal
+watch(() => route.query.signup, (signup) => {
+  if (signup === 'true' && !isAuthenticated.value) {
+    showRegisterModal.value = true
+  }
+}, { immediate: true })
+
+// Also check on mount
+onMounted(() => {
+  if (route.query.signup === 'true' && !isAuthenticated.value) {
+    showRegisterModal.value = true
+  }
+})
+
 // User menu now uses hover, so no click outside handler needed
 </script>
 
 <style scoped>
+.nav-bar {
+  backdrop-filter: blur(10px);
+  background-color: rgba(var(--bg-secondary-rgb), 0.95);
+}
+
 .dropdown-enter-active,
 .dropdown-leave-active {
   transition: all 0.2s ease;

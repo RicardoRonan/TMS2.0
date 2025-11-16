@@ -200,7 +200,7 @@
           </div>
 
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <HIGButton variant="primary" size="lg" @click="scrollToTop">
+            <HIGButton variant="primary" size="lg" @click="handleGetStarted">
               Get Started Today
             </HIGButton>
             <HIGButton variant="secondary" size="lg" @click="scrollToContact">
@@ -216,6 +216,7 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import HIGButton from '../components/hig/HIGButton.vue'
 import HIGCard from '../components/hig/HIGCard.vue'
 import Icon from '../components/Icon.vue'
@@ -225,6 +226,7 @@ import { supabase } from '../supabase'
 import { setSafeInnerHTML } from '../utils/sanitize'
 
 const store = useStore()
+const router = useRouter()
 
 // Features data
 const features = ref([
@@ -412,6 +414,17 @@ const scrollToContact = () => {
 }
 
 const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+const handleGetStarted = () => {
+  // Navigate to home with signup query parameter
+  if (router.currentRoute.value.path === '/') {
+    router.push({ path: '/', query: { signup: 'true' } })
+  } else {
+    router.push({ path: '/', query: { signup: 'true' } })
+  }
+  // Scroll to top
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 

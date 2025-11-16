@@ -17,7 +17,7 @@
             </button>
           </header>
           
-          <div class="p-6">
+          <div class="modal-content p-6">
             <slot />
           </div>
           
@@ -101,6 +101,111 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.modal {
+  background-color: var(--color-bg-secondary);
+  border-radius: 0.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 100%;
+  max-height: calc(100vh - 2rem);
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-sm {
+  max-width: 32rem;
+}
+
+.modal-md {
+  max-width: 42rem;
+}
+
+.modal-lg {
+  max-width: 56rem;
+}
+
+.modal-xl {
+  max-width: 72rem;
+}
+
+/* Tablet adjustments */
+@media (max-width: 1024px) {
+  .modal-sm {
+    max-width: 28rem;
+  }
+  
+  .modal-md {
+    max-width: 36rem;
+  }
+  
+  .modal-lg {
+    max-width: 48rem;
+  }
+  
+  .modal-xl {
+    max-width: 64rem;
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 0.75rem;
+    align-items: flex-start;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  
+  .modal {
+    max-height: calc(100vh - 2rem);
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+  
+  .modal-sm {
+    max-width: calc(100% - 1.5rem);
+  }
+  
+  .modal-md {
+    max-width: calc(100% - 1.5rem);
+  }
+  
+  .modal-lg {
+    max-width: calc(100% - 1.5rem);
+  }
+  
+  .modal-xl {
+    max-width: calc(100% - 1.5rem);
+  }
+}
+
+/* Ensure modal content is scrollable if needed */
+.modal-content {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Make sure header and footer don't scroll */
+.modal > header,
+.modal > footer {
+  flex-shrink: 0;
+}
+
 .modal-enter-active,
 .modal-leave-active {
   transition: all 0.3s ease;
