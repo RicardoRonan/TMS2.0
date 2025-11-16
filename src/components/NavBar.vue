@@ -2,8 +2,18 @@
   <nav class="nav-bar sticky top-0 z-50 bg-bg-secondary border-b border-border-primary shadow-lg">
     <div class="container mx-auto px-4">
       <div class="flex items-center justify-between h-16">
-        <!-- Logo -->
-        <router-link to="/" class="flex items-center space-x-2">
+        <!-- Mobile Menu Button (Left on mobile) -->
+        <button
+          class="md:hidden p-2 text-text-primary hover:text-primary-500 transition-colors"
+          @click="toggleMobileMenu"
+          aria-label="Toggle mobile menu"
+        >
+          <Icon v-if="!showMobileMenu" name="menu" :size="24" />
+          <Icon v-else name="close" :size="24" />
+        </button>
+
+        <!-- Logo (Right on mobile, left on desktop) -->
+        <router-link to="/" class="flex items-center space-x-2 ml-auto md:ml-0">
           <img src="@/assets/meta-stack-logo.png" alt="MetaStack Logo" class="w-8 h-8" />
           <span class="text-xl font-bold text-text-primary">MetaStack</span>
         </router-link>
@@ -168,22 +178,26 @@
             </HIGButton>
           </template>
         </div>
-
-        <!-- Mobile Menu Button -->
-        <button
-          class="md:hidden p-2 text-text-primary hover:text-primary-500 transition-colors"
-          @click="toggleMobileMenu"
-          aria-label="Toggle mobile menu"
-        >
-          <Icon v-if="!showMobileMenu" name="menu" :size="24" />
-          <Icon v-else name="close" :size="24" />
-        </button>
       </div>
+    </div>
 
-      <!-- Mobile Navigation -->
-      <Transition name="mobile-menu">
-        <div v-if="showMobileMenu" class="md:hidden border-t border-border-primary py-4">
-          <div class="space-y-2">
+    <!-- Mobile Sidebar Backdrop -->
+    <Teleport to="body">
+      <Transition name="backdrop">
+        <div
+          v-if="showMobileMenu"
+          class="md:hidden fixed inset-0 bg-black/50 z-[60]"
+          @click="closeMobileMenu"
+        ></div>
+      </Transition>
+
+      <!-- Mobile Sidebar -->
+      <Transition name="sidebar">
+        <aside
+          v-if="showMobileMenu"
+          class="md:hidden fixed top-0 left-0 h-full w-[280px] max-w-[75vw] bg-bg-secondary border-r border-border-primary shadow-xl z-[70] overflow-y-auto"
+        >
+          <div class="p-4 space-y-2">
             <router-link
               v-for="item in regularNavigationItems"
               :key="item.name"
@@ -243,7 +257,7 @@
             </router-link>
           </div>
           
-          <div v-if="isAuthenticated" class="mt-4 pt-4 border-t border-border-primary space-y-2">
+          <div v-if="isAuthenticated" class="px-4 mt-4 pt-4 border-t border-border-primary space-y-2">
             <router-link
               to="/profile"
               :class="mobileNavLinkClasses('/profile')"
@@ -260,7 +274,7 @@
             </router-link>
           </div>
           
-          <div v-if="!isAuthenticated" class="mt-4 pt-4 border-t border-border-primary space-y-2">
+          <div v-if="!isAuthenticated" class="px-4 mt-4 pt-4 border-t border-border-primary space-y-2">
             <HIGButton
               variant="tertiary"
               size="sm"
@@ -278,9 +292,9 @@
               Sign Up
             </HIGButton>
           </div>
-        </div>
+        </aside>
       </Transition>
-    </div>
+    </Teleport>
 
     <!-- Login Modal -->
     <HIGModal
@@ -303,7 +317,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, provide } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { useAuth } from '../composables/useAuth'
@@ -379,11 +393,21 @@ const mobileNavLinkClasses = (href: string) => [
 
 const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value
+  updateBodyScroll()
 }
 
 const closeMobileMenu = () => {
   showMobileMenu.value = false
   showResourcesMobileMenu.value = false
+  updateBodyScroll()
+}
+
+const updateBodyScroll = () => {
+  if (showMobileMenu.value) {
+    document.body.style.overflow = 'hidden'
+  } else {
+    document.body.style.overflow = ''
+  }
 }
 
 const closeUserMenu = () => {
@@ -483,7 +507,20 @@ onMounted(() => {
   }
 })
 
-// User menu now uses hover, so no click outside handler needed
+// Watch route changes to close sidebar
+watch(() => route.path, () => {
+  if (showMobileMenu.value) {
+    closeMobileMenu()
+  }
+})
+
+// Provide sidebar state for App.vue to use
+provide('isMobileSidebarOpen', showMobileMenu)
+
+// Cleanup on unmount
+onUnmounted(() => {
+  document.body.style.overflow = ''
+})
 </script>
 
 <style scoped>
@@ -509,17 +546,51 @@ onMounted(() => {
 
 .mobile-menu-enter-active,
 .mobile-menu-leave-active {
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .mobile-menu-enter-from {
   opacity: 0;
-  transform: translateY(-20px);
+  max-height: 0;
 }
 
 .mobile-menu-leave-to {
   opacity: 0;
-  transform: translateY(-20px);
+  max-height: 0;
+}
+
+/* Sidebar slide-in animation */
+.sidebar-enter-active,
+.sidebar-leave-active {
+  transition: transform 0.3s ease-in-out;
+}
+
+.sidebar-enter-from {
+  transform: translateX(-100%);
+}
+
+.sidebar-leave-to {
+  transform: translateX(-100%);
+}
+
+/* Ensure sidebar is off-screen when closed */
+aside.md\\:hidden {
+  transform: translateX(-100%);
+}
+
+aside.md\\:hidden[data-sidebar-open="true"] {
+  transform: translateX(0);
+}
+
+/* Backdrop fade animation */
+.backdrop-enter-active,
+.backdrop-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.backdrop-enter-from,
+.backdrop-leave-to {
+  opacity: 0;
 }
 </style>
 

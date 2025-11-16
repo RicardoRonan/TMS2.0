@@ -1,10 +1,13 @@
 <template>
-  <div id="app">
+  <div id="app" class="transition-transform duration-300 ease-in-out md:!transform-none md:!translate-x-0" :class="{ 'translate-x-[280px]': isMobileSidebarOpen }">
     <!-- Navigation -->
     <NavBar />
     
     <!-- Main Content -->
-    <main id="main-content" class="min-h-screen">
+    <main 
+      id="main-content" 
+      class="min-h-screen"
+    >
       <router-view v-slot="{ Component, route }">
         <transition name="page" mode="out-in">
           <component :is="Component" :key="route.path" />
@@ -30,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, inject, type Ref } from 'vue'
 import { useStore } from 'vuex'
 import { supabase } from './supabase'
 import NavBar from './components/NavBar.vue'
@@ -48,6 +51,10 @@ const store = useStore()
 useKeyboardShortcuts()
 
 const isLoading = computed(() => store.getters.isLoading)
+
+// Inject sidebar state from NavBar
+const sidebarState = inject<Ref<boolean>>('isMobileSidebarOpen', ref(false))
+const isMobileSidebarOpen = computed(() => sidebarState?.value ?? false)
 // Track session state for debugging and UI reactivity
 const session = ref<any>(null)
 // Store auth subscription for cleanup
@@ -121,6 +128,13 @@ onUnmounted(() => {
   .page-enter-from,
   .page-leave-to {
     transform: none;
+  }
+}
+
+/* Mobile sidebar content push */
+@media (max-width: 767px) {
+  #main-content {
+    will-change: transform;
   }
 }
 </style>
