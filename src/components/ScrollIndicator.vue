@@ -77,7 +77,7 @@
       >
         <div
           v-if="hoveredHeading"
-          class="absolute right-full mr-4 top-1/2 -translate-y-1/2 px-3 py-2 bg-bg-secondary border border-border-primary rounded-lg shadow-xl text-sm font-medium text-text-primary whitespace-nowrap pointer-events-none z-50"
+          class="absolute right-full mr-4 top-1/2 -translate-y-1/2 px-3 py-2 bg-bg-secondary border border-border-primary rounded-lg shadow-xl text-sm font-medium text-text-primary whitespace-nowrap overflow-hidden text-ellipsis pointer-events-none z-50"
           :style="{ 
             maxWidth: '250px',
             top: hoveredHeadingPosition + '%'

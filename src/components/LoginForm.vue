@@ -9,6 +9,7 @@
         :error="errors.email"
         required
         @blur="validateField('email')"
+        @input="clearError('email')"
       />
       
       <div class="relative">
@@ -20,6 +21,7 @@
           :error="errors.password"
           required
           @blur="validateField('password')"
+          @input="clearError('password')"
           class="pr-10"
         />
         <button
@@ -144,6 +146,12 @@ const isFormValid = computed(() => {
   return form.value.email && form.value.password && !Object.keys(errors.value).length
 })
 
+const clearError = (field: string) => {
+  if (errors.value[field]) {
+    delete errors.value[field]
+  }
+}
+
 const validateField = (field: string) => {
   switch (field) {
     case 'email':
@@ -201,11 +209,22 @@ const handleSubmit = async () => {
       message: errorMessage
     })
     
-    // Set form errors if needed
-    if (errorMessage.includes('email') || errorMessage.includes('credentials')) {
+    // Set form errors on the specific field based on error field info
+    // The useAuth composable now provides field information in the error object
+    const errorField = error?.field || (errorMessage.toLowerCase().includes('email') && !errorMessage.toLowerCase().includes('password') ? 'email' : null)
+    
+    if (errorField === 'email') {
       errors.value.email = errorMessage
-    } else if (errorMessage.includes('password')) {
+      // Clear password error if it exists
+      delete errors.value.password
+    } else if (errorField === 'password' || errorMessage.toLowerCase().includes('password') || errorMessage.toLowerCase().includes('credentials') || errorMessage.toLowerCase().includes('incorrect')) {
       errors.value.password = errorMessage
+      // Clear email error if it exists
+      delete errors.value.email
+    } else {
+      // For generic errors, default to password field (more secure - doesn't reveal if email exists)
+      errors.value.password = errorMessage
+      delete errors.value.email
     }
   } finally {
     loading.value = false

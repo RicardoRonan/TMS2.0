@@ -583,7 +583,10 @@ export function useAuth() {
         throw new Error('Authentication failed - no user data returned')
       }
     } catch (err: any) {
-      error.value = getErrorMessage(err)
+      const errorInfo = getErrorMessage(err)
+      error.value = errorInfo.message
+      // Attach field info to error object for LoginForm to use
+      ;(err as any).field = errorInfo.field
       throw err
     } finally {
       loading.value = false
@@ -652,7 +655,8 @@ export function useAuth() {
         return data.user
       }
     } catch (err: any) {
-      error.value = getErrorMessage(err)
+      const errorInfo = getErrorMessage(err)
+      error.value = errorInfo.message
       throw err
     } finally {
       loading.value = false
@@ -674,7 +678,8 @@ export function useAuth() {
 
       if (authError) throw authError
     } catch (err: any) {
-      error.value = getErrorMessage(err)
+      const errorInfo = getErrorMessage(err)
+      error.value = errorInfo.message
       throw err
     } finally {
       loading.value = false
@@ -713,7 +718,8 @@ export function useAuth() {
       store.dispatch('setUser', null)
     } catch (err: any) {
       // Even if there's an error, user is already logged out locally
-      error.value = getErrorMessage(err)
+      const errorInfo = getErrorMessage(err)
+      error.value = errorInfo.message
       // Ensure store is cleared
       store.dispatch('setUser', null)
       // Don't throw - logout should succeed locally even if server call fails
@@ -734,7 +740,8 @@ export function useAuth() {
 
       if (authError) throw authError
     } catch (err: any) {
-      error.value = getErrorMessage(err)
+      const errorInfo = getErrorMessage(err)
+      error.value = errorInfo.message
       throw err
     } finally {
       loading.value = false
@@ -774,7 +781,8 @@ export function useAuth() {
         ...data
       })
     } catch (err: any) {
-      error.value = getErrorMessage(err)
+      const errorInfo = getErrorMessage(err)
+      error.value = errorInfo.message
       throw err
     } finally {
       loading.value = false
@@ -792,19 +800,66 @@ export function useAuth() {
     // It will be cleaned up when the app unmounts
   })
 
-  // Helper function to get user-friendly error messages
-  const getErrorMessage = (error: AuthError | Error | string): string => {
-    const errorMessage = typeof error === 'string' 
-      ? error 
-      : (error as any)?.message || (error as any)?.code || ''
+  // Helper function to get user-friendly error messages and determine which field has the error
+  const getErrorMessage = (error: AuthError | Error | string): { message: string; field?: 'email' | 'password' } => {
+    const errorObj = typeof error === 'string' 
+      ? { message: error, code: '' }
+      : error as any
+    
+    const errorMessage = errorObj?.message || errorObj?.code || ''
+    const errorCode = errorObj?.code || ''
 
-    const errorMessages: Record<string, string> = {
-      'Invalid login credentials': 'Incorrect email or password. Please try again.',
+    // Email-specific errors
+    const emailErrors: Record<string, string> = {
       'Email not confirmed': 'Please verify your email address before signing in.',
-      'User already registered': 'An account with this email already exists.',
-      'Password should be at least 6 characters': 'Password should be at least 6 characters long.',
       'Invalid email': 'Please enter a valid email address.',
       'User not found': 'No account found with this email address.',
+      'email_not_confirmed': 'Please verify your email address before signing in.',
+      'invalid_email': 'Please enter a valid email address.',
+      'user_not_found': 'No account found with this email address.',
+      'signup_disabled': 'Sign up is currently disabled. Please contact support.',
+      'email_rate_limit_exceeded': 'Too many requests. Please try again later.'
+    }
+
+    // Password-specific errors
+    const passwordErrors: Record<string, string> = {
+      'Password should be at least 6 characters': 'Password must be at least 6 characters long.',
+      'Invalid password': 'Incorrect password. Please try again.',
+      'wrong_password': 'Incorrect password. Please try again.',
+      'weak_password': 'Password is too weak. Please use a stronger password.'
+    }
+
+    // Generic errors that could be either, but we'll default to password for security
+    const genericErrors: Record<string, string> = {
+      'Invalid login credentials': 'Incorrect password. Please try again.',
+      'invalid_credentials': 'Incorrect password. Please try again.',
+      'invalid_grant': 'Incorrect password. Please try again.'
+    }
+
+    // Check for email-specific errors first
+    for (const [key, value] of Object.entries(emailErrors)) {
+      if (errorMessage.includes(key) || errorCode.includes(key)) {
+        return { message: value, field: 'email' }
+      }
+    }
+
+    // Check for password-specific errors
+    for (const [key, value] of Object.entries(passwordErrors)) {
+      if (errorMessage.includes(key) || errorCode.includes(key)) {
+        return { message: value, field: 'password' }
+      }
+    }
+
+    // Check for generic errors (default to password field for security)
+    for (const [key, value] of Object.entries(genericErrors)) {
+      if (errorMessage.includes(key) || errorCode.includes(key)) {
+        return { message: value, field: 'password' }
+      }
+    }
+
+    // Other errors
+    const otherErrors: Record<string, string> = {
+      'User already registered': 'An account with this email already exists.',
       'Email rate limit exceeded': 'Too many password reset requests. Please try again later.',
       'Network request failed': 'Network error. Please check your connection.',
       'Request timeout': 'Request timeout - please check your connection.',
@@ -813,19 +868,13 @@ export function useAuth() {
       'not reaching Supabase': 'Unable to connect to Supabase. Please check your network connection and try again.'
     }
 
-    // Check for exact matches first
-    if (errorMessages[errorMessage]) {
-      return errorMessages[errorMessage]
-    }
-
-    // Check for partial matches
-    for (const [key, value] of Object.entries(errorMessages)) {
+    for (const [key, value] of Object.entries(otherErrors)) {
       if (errorMessage.includes(key)) {
-        return value
+        return { message: value }
       }
     }
 
-    return 'An unexpected error occurred. Please try again.'
+    return { message: 'An unexpected error occurred. Please try again.' }
   }
 
   return {
