@@ -508,7 +508,13 @@
               class="flex-1 px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">Uncategorized</option>
-              <option v-for="cat in blogCategoriesList" :key="cat.id" :value="cat.name">{{ cat.name }}</option>
+              <option 
+                v-for="cat in blogCategories" 
+                :key="cat" 
+                :value="cat"
+              >
+                {{ cat }}
+              </option>
             </select>
             <HIGButton variant="tertiary" size="sm" @click="openCreateBlogCategoryModal" type="button">
               + New

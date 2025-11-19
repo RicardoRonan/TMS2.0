@@ -144,6 +144,7 @@ const currentPage = ref(1)
 const postsPerPage = 9
 const posts = ref<any[]>([])
 const categories = ref(['All'])
+const blogCategories = ref<any[]>([])
 const lastFetchTime = ref<number>(0)
 const FETCH_CACHE_TIME = 30000 // 30 seconds - refetch if data is older than this
 
@@ -319,14 +320,8 @@ const fetchBlogs = async (force = false) => {
       } : null
     }))
 
-    // Extract unique categories
-    const uniqueCategories = new Set<string>(['All'])
-    posts.value.forEach(post => {
-      if (post.category) {
-        uniqueCategories.add(post.category)
-      }
-    })
-    categories.value = Array.from(uniqueCategories)
+    // Update categories - will be set by fetchBlogCategories
+    updateCategories()
     lastFetchTime.value = now
   } catch (error: any) {
     posts.value = []
@@ -341,16 +336,98 @@ const fetchBlogs = async (force = false) => {
   }
 }
 
-onMounted(() => {
-  fetchBlogs()
+// Fetch blog categories from blog_categories table
+const fetchBlogCategories = async () => {
+  try {
+    console.log('Fetching blog categories from Supabase...')
+    const { data, error } = await supabase
+      .from('blog_categories')
+      .select('name')
+      .order('name', { ascending: true })
+
+    if (error) {
+      // If table doesn't exist or RLS blocks access, log it
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        console.warn('blog_categories table does not exist, using categories from posts')
+        blogCategories.value = []
+        updateCategories()
+        return
+      }
+      
+      // Log RLS or permission errors
+      if (error.code === '42501' || error.message?.includes('permission') || error.message?.includes('policy')) {
+        console.warn('RLS policy may be blocking blog_categories read access:', error.message)
+        console.warn('Falling back to categories from posts. Make sure blog_categories table has public read policy.')
+      }
+      
+      // For other errors, still try to use categories from posts
+      console.error('Error fetching blog categories:', error)
+      blogCategories.value = []
+      updateCategories()
+      return
+    }
+
+    console.log('Fetched blog categories:', data)
+    blogCategories.value = data || []
+    
+    // If we got categories from the table, use them as primary source
+    if (blogCategories.value.length > 0) {
+      updateCategories()
+    } else {
+      // If table exists but is empty, still update to show categories from posts
+      console.log('blog_categories table is empty, using categories from posts')
+      updateCategories()
+    }
+  } catch (error: any) {
+    console.error('Unexpected error fetching blog categories:', error)
+    blogCategories.value = []
+    updateCategories()
+  }
+}
+
+// Update categories list - uses blog_categories table as primary source
+const updateCategories = () => {
+  const uniqueCategories = new Set<string>(['All'])
+  
+  // PRIMARY: Add all categories from blog_categories table (this is the source of truth)
+  if (blogCategories.value.length > 0) {
+    blogCategories.value.forEach(cat => {
+      if (cat && cat.name) {
+        uniqueCategories.add(cat.name)
+        console.log('Added category from blog_categories table:', cat.name)
+      }
+    })
+  }
+  
+  // FALLBACK: Also add categories from posts (in case some posts have categories not in the table yet)
+  // This ensures backward compatibility
+  posts.value.forEach(post => {
+    if (post.category) {
+      uniqueCategories.add(post.category)
+    }
+  })
+  
+  const sortedCategories = Array.from(uniqueCategories).sort()
+  console.log('Final categories list:', sortedCategories)
+  categories.value = sortedCategories
+}
+
+onMounted(async () => {
+  // Fetch categories first, then blogs
+  // This ensures categories are available when posts are loaded
+  await fetchBlogCategories()
+  await fetchBlogs()
 })
 
 // Refetch when component is activated (navigated back to)
-onActivated(() => {
+onActivated(async () => {
   const now = Date.now()
+  // Always refresh categories first to get any new ones
+  await fetchBlogCategories()
+  
   // Refetch if data is stale or empty
   if (now - lastFetchTime.value > FETCH_CACHE_TIME || posts.value.length === 0) {
-    fetchBlogs(true)
+    await fetchBlogs(true)
   }
 })
 </script>
