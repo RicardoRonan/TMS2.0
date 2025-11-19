@@ -192,9 +192,51 @@
             <div v-if="activeTab === 'blog'" class="space-y-6">
               <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                 <h2 class="text-xl sm:text-2xl font-bold text-text-primary">Blog Posts</h2>
-                <HIGButton variant="primary" @click="openCreateModal" class="w-full sm:w-auto">
-                  + New Post
-                </HIGButton>
+                <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  <HIGButton variant="secondary" @click="openCreateBlogCategoryModal" class="w-full sm:w-auto">
+                    + New Category
+                  </HIGButton>
+                  <HIGButton variant="primary" @click="openCreateModal" class="w-full sm:w-auto">
+                    + New Post
+                  </HIGButton>
+                </div>
+              </div>
+
+              <!-- Blog Categories Section -->
+              <div class="mb-8">
+                <h3 class="text-xl font-semibold text-text-primary mb-4">Categories</h3>
+                <div v-if="loadingBlogCategories" class="text-center py-12">
+                  <HIGSpinner />
+                  <p class="text-text-secondary mt-4">Loading categories...</p>
+                </div>
+                <div v-else-if="blogCategoriesList.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <HIGCard v-for="category in blogCategoriesList" :key="category.id" class="hover:shadow-hig-lg transition-shadow">
+                    <div class="p-6">
+                      <div class="flex items-start justify-between mb-3">
+                        <div class="flex-1">
+                          <h4 class="text-lg font-semibold text-text-primary mb-2">{{ category.name }}</h4>
+                          <p v-if="category.description" class="text-text-secondary text-sm line-clamp-2">{{ category.description }}</p>
+                          <div class="flex items-center space-x-2 mt-2 text-xs text-text-tertiary">
+                            <span>{{ getBlogsInCategory(category.name).length }} posts</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="flex items-center space-x-2 mt-4 pt-4 border-t border-border-primary">
+                        <HIGButton variant="tertiary" size="sm" @click="editBlogCategory(category)">
+                          Edit
+                        </HIGButton>
+                        <HIGButton variant="danger" size="sm" @click="confirmDeleteBlogCategory(category)">
+                          Delete
+                        </HIGButton>
+                      </div>
+                    </div>
+                  </HIGCard>
+                </div>
+                <HIGCard v-else>
+                  <div class="p-6 text-center py-12 text-text-secondary">
+                    <p>No categories yet. Create your first category!</p>
+                  </div>
+                </HIGCard>
               </div>
 
               <!-- Search and Filter -->
@@ -458,11 +500,21 @@
           required
           hint="Use the toolbar buttons to format your content, or type Markdown directly. Press F11 for fullscreen mode."
         />
-        <HIGInput
-          v-model="blogForm.category"
-          label="Category"
-          placeholder="e.g., Vue.js, React, CSS"
-        />
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Category</label>
+          <div class="flex gap-2">
+            <select
+              v-model="blogForm.category"
+              class="flex-1 px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="">Uncategorized</option>
+              <option v-for="cat in blogCategoriesList" :key="cat.id" :value="cat.name">{{ cat.name }}</option>
+            </select>
+            <HIGButton variant="tertiary" size="sm" @click="openCreateBlogCategoryModal" type="button">
+              + New
+            </HIGButton>
+          </div>
+        </div>
         <div>
           <label class="block text-sm font-medium text-text-primary mb-2">
             Featured Image
@@ -888,6 +940,72 @@
         </div>
       </div>
     </HIGModal>
+
+    <!-- Blog Category Modal -->
+    <HIGModal
+      v-model:is-open="showBlogCategoryModal"
+      :title="editingBlogCategory ? 'Edit Blog Category' : 'Create New Blog Category'"
+      size="lg"
+    >
+      <form @submit.prevent="handleSubmitBlogCategory" class="space-y-4">
+        <HIGInput
+          v-model="blogCategoryForm.name"
+          label="Name"
+          placeholder="Enter category name"
+          required
+        />
+        <HIGInput
+          v-model="blogCategoryForm.slug"
+          label="Slug"
+          placeholder="category-slug"
+          hint="URL-friendly version of the name"
+          required
+        />
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Description</label>
+          <textarea
+            v-model="blogCategoryForm.description"
+            placeholder="Brief description of the category"
+            rows="3"
+            class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 resize-y"
+          />
+        </div>
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
+          <HIGButton variant="tertiary" type="button" @click="closeBlogCategoryModal" class="w-full sm:w-auto">
+            Cancel
+          </HIGButton>
+          <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
+            {{ submitting ? 'Saving...' : (editingBlogCategory ? 'Update' : 'Create') }}
+          </HIGButton>
+        </div>
+      </form>
+    </HIGModal>
+
+    <!-- Delete Blog Category Modal -->
+    <HIGModal
+      v-model:is-open="showDeleteBlogCategoryModal"
+      title="Delete Blog Category"
+      size="sm"
+    >
+      <div class="space-y-4">
+        <p class="text-text-primary">
+          Are you sure you want to delete "<strong>{{ blogCategoryToDelete?.name }}</strong>"? 
+          <span v-if="getBlogsInCategory(blogCategoryToDelete?.name).length > 0">
+            This category has {{ getBlogsInCategory(blogCategoryToDelete?.name).length }} post(s). 
+            They will be set to "Uncategorized".
+          </span>
+          This action cannot be undone.
+        </p>
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
+          <HIGButton variant="tertiary" @click="showDeleteBlogCategoryModal = false" class="w-full sm:w-auto">
+            Cancel
+          </HIGButton>
+          <HIGButton variant="danger" @click="handleDeleteBlogCategory" :disabled="deleting" class="w-full sm:w-auto">
+            {{ deleting ? 'Deleting...' : 'Delete' }}
+          </HIGButton>
+        </div>
+      </div>
+    </HIGModal>
   </div>
 </template>
 
@@ -917,6 +1035,7 @@ const loadingCategories = ref(false)
 const loadingPages = ref(false)
 const loadingTools = ref(false)
 const loadingUsers = ref(false)
+const loadingBlogCategories = ref(false)
 const submitting = ref(false)
 const deleting = ref(false)
 
@@ -926,6 +1045,7 @@ const categories = ref<any[]>([])
 const pages = ref<any[]>([])
 const tools = ref<any[]>([])
 const users = ref<any[]>([])
+const blogCategoriesList = ref<any[]>([])
 const expandedCategories = ref<Record<string, boolean>>({})
 
 // Search and filters
@@ -947,6 +1067,8 @@ const showDeleteModal = ref(false)
 const showDeleteCategoryModal = ref(false)
 const showDeletePageModal = ref(false)
 const showDeleteToolModal = ref(false)
+const showBlogCategoryModal = ref(false)
+const showDeleteBlogCategoryModal = ref(false)
 
 // Editing states
 const editingBlog = ref<any>(null)
@@ -954,12 +1076,14 @@ const editingCategory = ref<any>(null)
 const editingPage = ref<any>(null)
 const editingTool = ref<any>(null)
 const editingUser = ref<any>(null)
+const editingBlogCategory = ref<any>(null)
 
 // Delete targets
 const blogToDelete = ref<any>(null)
 const categoryToDelete = ref<any>(null)
 const pageToDelete = ref<any>(null)
 const toolToDelete = ref<any>(null)
+const blogCategoryToDelete = ref<any>(null)
 
 // Forms
 const blogForm = ref({
@@ -1007,6 +1131,12 @@ const userForm = ref({
   is_admin: false
 })
 
+const blogCategoryForm = ref({
+  name: '',
+  slug: '',
+  description: ''
+})
+
 const tabs = [
   { id: 'tutorials', label: 'Tutorials' },
   { id: 'blog', label: 'Blog Posts' },
@@ -1023,6 +1153,10 @@ const stats = computed(() => ({
 }))
 
 const blogCategories = computed(() => {
+  // Use blogCategoriesList if available, otherwise fall back to extracting from blogs
+  if (blogCategoriesList.value.length > 0) {
+    return blogCategoriesList.value.map(cat => cat.name).sort()
+  }
   const cats = new Set(blogs.value.map(b => b.category).filter(Boolean))
   return Array.from(cats).sort()
 })
@@ -1256,6 +1390,40 @@ const fetchUsers = async () => {
   }
 }
 
+const fetchBlogCategories = async () => {
+  try {
+    loadingBlogCategories.value = true
+    // Try to fetch from blog_categories table, if it doesn't exist, we'll create it on first use
+    const { data, error } = await supabase
+      .from('blog_categories')
+      .select('*')
+      .order('name', { ascending: true })
+
+    if (error) {
+      // If table doesn't exist, create it
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        console.log('blog_categories table does not exist, will be created on first category creation')
+        blogCategoriesList.value = []
+        return
+      }
+      throw error
+    }
+    blogCategoriesList.value = data || []
+  } catch (error: any) {
+    console.error('Error fetching blog categories:', error)
+    // Don't show error if table doesn't exist - it will be created on first use
+    if (error.code !== '42P01' && !error.message?.includes('does not exist')) {
+      store.dispatch('addNotification', {
+        type: 'error',
+        message: 'Failed to load blog categories'
+      })
+    }
+    blogCategoriesList.value = []
+  } finally {
+    loadingBlogCategories.value = false
+  }
+}
+
 // Reload all data from Supabase to ensure fresh data
 const reloadAllData = async () => {
   console.log('Reloading all data from Supabase...')
@@ -1266,7 +1434,8 @@ const reloadAllData = async () => {
       fetchCategories(),
       fetchPages(),
       fetchTools(),
-      fetchUsers()
+      fetchUsers(),
+      fetchBlogCategories()
     ])
     console.log('All data reloaded successfully')
   } catch (error) {
@@ -1978,6 +2147,191 @@ const handleSubmitUser = async () => {
   }
 }
 
+// Blog Category functions
+const openCreateBlogCategoryModal = () => {
+  editingBlogCategory.value = null
+  blogCategoryForm.value = {
+    name: '',
+    slug: '',
+    description: ''
+  }
+  showBlogCategoryModal.value = true
+}
+
+const editBlogCategory = (category: any) => {
+  editingBlogCategory.value = category
+  blogCategoryForm.value = {
+    name: category.name,
+    slug: category.slug || slugify(category.name, { lower: true, strict: true }),
+    description: category.description || ''
+  }
+  showBlogCategoryModal.value = true
+}
+
+const closeBlogCategoryModal = () => {
+  showBlogCategoryModal.value = false
+  editingBlogCategory.value = null
+}
+
+const handleSubmitBlogCategory = async () => {
+  try {
+    submitting.value = true
+
+    if (!user.value) {
+      throw new Error('User not authenticated')
+    }
+
+    // Validate required fields
+    if (!blogCategoryForm.value.name || !blogCategoryForm.value.name.trim()) {
+      throw new Error('Category name is required')
+    }
+    if (!blogCategoryForm.value.slug || !blogCategoryForm.value.slug.trim()) {
+      throw new Error('Category slug is required')
+    }
+
+    const categoryData = {
+      name: blogCategoryForm.value.name.trim(),
+      slug: blogCategoryForm.value.slug.trim(),
+      description: blogCategoryForm.value.description?.trim() || null
+    }
+
+    if (editingBlogCategory.value) {
+      const { error } = await supabase
+        .from('blog_categories')
+        .update(categoryData)
+        .eq('id', editingBlogCategory.value.id)
+
+      if (error) {
+        // If table doesn't exist, try to create it first
+        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          await createBlogCategoriesTable()
+          // Retry the update
+          const { error: retryError } = await supabase
+            .from('blog_categories')
+            .update(categoryData)
+            .eq('id', editingBlogCategory.value.id)
+          if (retryError) throw retryError
+        } else {
+          throw error
+        }
+      }
+      store.dispatch('addNotification', {
+        type: 'success',
+        message: 'Blog category updated successfully'
+      })
+    } else {
+      const { error } = await supabase
+        .from('blog_categories')
+        .insert(categoryData)
+
+      if (error) {
+        // If table doesn't exist, try to create it first
+        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          await createBlogCategoriesTable()
+          // Retry the insert
+          const { error: retryError } = await supabase
+            .from('blog_categories')
+            .insert(categoryData)
+          if (retryError) throw retryError
+        } else {
+          throw error
+        }
+      }
+      store.dispatch('addNotification', {
+        type: 'success',
+        message: 'Blog category created successfully'
+      })
+    }
+
+    closeBlogCategoryModal()
+    await reloadAllData()
+  } catch (error: any) {
+    console.error('Error saving blog category:', error)
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: error.message || 'Failed to save blog category'
+    })
+  } finally {
+    submitting.value = false
+  }
+}
+
+const createBlogCategoriesTable = async () => {
+  // Note: This requires the table to be created in Supabase
+  // We'll just show a helpful error message if it fails
+  store.dispatch('addNotification', {
+    type: 'info',
+    message: 'Please create the blog_categories table in Supabase. Run: CREATE TABLE blog_categories (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), name TEXT NOT NULL UNIQUE, slug TEXT NOT NULL UNIQUE, description TEXT, created_at TIMESTAMPTZ DEFAULT NOW());'
+  })
+}
+
+const confirmDeleteBlogCategory = (category: any) => {
+  blogCategoryToDelete.value = category
+  showDeleteBlogCategoryModal.value = true
+}
+
+const handleDeleteBlogCategory = async () => {
+  if (!blogCategoryToDelete.value) return
+
+  try {
+    deleting.value = true
+
+    // First, update all blogs with this category to have null category
+    const blogsWithCategory = blogs.value.filter(b => b.category === blogCategoryToDelete.value.name)
+    if (blogsWithCategory.length > 0) {
+      const { error: updateError } = await supabase
+        .from('blogs')
+        .update({ category: null })
+        .in('id', blogsWithCategory.map(b => b.id))
+
+      if (updateError) {
+        console.error('Error updating blogs:', updateError)
+        // Continue with deletion even if update fails
+      }
+    }
+
+    // Then delete the category
+    const { error } = await supabase
+      .from('blog_categories')
+      .delete()
+      .eq('id', blogCategoryToDelete.value.id)
+
+    if (error) {
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        // Table doesn't exist, nothing to delete
+        store.dispatch('addNotification', {
+          type: 'info',
+          message: 'Category removed from blogs'
+        })
+      } else {
+        throw error
+      }
+    } else {
+      store.dispatch('addNotification', {
+        type: 'success',
+        message: 'Blog category deleted successfully'
+      })
+    }
+
+    showDeleteBlogCategoryModal.value = false
+    blogCategoryToDelete.value = null
+    await reloadAllData()
+  } catch (error: any) {
+    console.error('Error deleting blog category:', error)
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: 'Failed to delete blog category'
+    })
+  } finally {
+    deleting.value = false
+  }
+}
+
+const getBlogsInCategory = (categoryName: string) => {
+  if (!categoryName) return []
+  return blogs.value.filter(b => b.category === categoryName)
+}
+
 // Auto-generate slugs
 watch(() => blogForm.value.title, (newTitle) => {
   // Only auto-generate slug when creating (not editing)
@@ -1999,9 +2353,18 @@ watch(() => pageForm.value.title, (newTitle) => {
   }
 })
 
+watch(() => blogCategoryForm.value.name, (newName) => {
+  if (!editingBlogCategory.value && newName) {
+    blogCategoryForm.value.slug = slugify(newName, { lower: true, strict: true })
+  }
+})
+
 // Load data when tab changes
 watch(activeTab, (newTab) => {
-  if (newTab === 'blog' && blogs.value.length === 0) fetchBlogs()
+  if (newTab === 'blog') {
+    if (blogs.value.length === 0) fetchBlogs()
+    if (blogCategoriesList.value.length === 0) fetchBlogCategories()
+  }
   if (newTab === 'tutorials') {
     if (categories.value.length === 0) fetchCategories()
     if (pages.value.length === 0) fetchPages()
@@ -2130,6 +2493,7 @@ onMounted(async () => {
   } else {
     // Default: fetch all data
     fetchBlogs()
+    fetchBlogCategories()
     fetchCategories()
     fetchPages()
     fetchTools()
