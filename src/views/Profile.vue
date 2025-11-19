@@ -327,6 +327,63 @@
       size="md"
     >
       <div class="space-y-4">
+        <!-- Profile Picture Upload -->
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">
+            Profile Picture
+          </label>
+          <div class="space-y-3">
+            <!-- Current/Preview Image -->
+            <div v-if="editForm.photoURL" class="flex items-center space-x-4">
+              <div class="w-20 h-20 rounded-full overflow-hidden flex-shrink-0 border-2 border-border-primary bg-bg-tertiary">
+                <img 
+                  :src="editForm.photoURL" 
+                  alt="Profile Preview" 
+                  class="w-full h-full object-cover"
+                  @error="editForm.photoURL = ''"
+                />
+              </div>
+              <div class="flex-1">
+                <p class="text-sm text-text-secondary mb-2">Current profile picture</p>
+                <button
+                  type="button"
+                  @click="editForm.photoURL = ''"
+                  class="text-sm text-red-500 hover:text-red-600 transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+            
+            <!-- Upload Input -->
+            <div>
+              <input
+                type="file"
+                accept="image/*"
+                @change="handleImageUpload"
+                :disabled="uploadingImage"
+                class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-500 file:text-white hover:file:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+              <p class="text-xs text-text-tertiary mt-2">
+                Upload a profile picture (JPG, PNG, GIF - max 32MB)
+              </p>
+              <p v-if="uploadingImage" class="text-xs text-primary-500 mt-1">
+                Uploading image...
+              </p>
+            </div>
+            
+            <!-- Or paste URL -->
+            <div>
+              <HIGInput
+                v-model="editForm.photoURL"
+                label="Or paste image URL"
+                placeholder="https://example.com/photo.jpg"
+                type="url"
+              />
+            </div>
+          </div>
+        </div>
+        
         <HIGInput
           v-model="editForm.displayName"
           label="Display Name"
@@ -336,7 +393,7 @@
           <HIGButton variant="tertiary" @click="showEditModal = false">
             Cancel
           </HIGButton>
-          <HIGButton variant="primary" @click="handleUpdateProfile" :disabled="updating">
+          <HIGButton variant="primary" @click="handleUpdateProfile" :disabled="updating || uploadingImage">
             {{ updating ? 'Updating...' : 'Update' }}
           </HIGButton>
         </div>
@@ -352,6 +409,7 @@ import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import { useAdminMode } from '../composables/useAdminMode'
 import { supabase } from '../supabase'
+import { uploadImageToImgBB } from '../utils/imgbb'
 import HIGCard from '../components/hig/HIGCard.vue'
 import HIGButton from '../components/hig/HIGButton.vue'
 import HIGInput from '../components/hig/HIGInput.vue'
@@ -365,8 +423,10 @@ const { isAdminMode, toggleAdminMode } = useAdminMode()
 
 const showEditModal = ref(false)
 const updating = ref(false)
+const uploadingImage = ref(false)
 const editForm = ref({
-  displayName: ''
+  displayName: '',
+  photoURL: ''
 })
 
 // Tutorial Progress State
@@ -402,17 +462,74 @@ const formatDate = (dateString?: string) => {
   })
 }
 
+const handleImageUpload = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  
+  if (!file) return
+
+  try {
+    uploadingImage.value = true
+    
+    // Upload to ImgBB
+    const response = await uploadImageToImgBB(file)
+    
+    // Set the photo URL
+    editForm.value.photoURL = response.data.url
+    
+    store.dispatch('addNotification', {
+      type: 'success',
+      message: 'Image uploaded successfully'
+    })
+    
+    // Reset file input
+    target.value = ''
+  } catch (error: any) {
+    console.error('Error uploading image:', error)
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: error.message || 'Failed to upload image'
+    })
+  } finally {
+    uploadingImage.value = false
+  }
+}
+
 const handleUpdateProfile = async () => {
   try {
     updating.value = true
-    await updateProfile({
-      displayName: editForm.value.displayName
-    })
-    showEditModal.value = false
-    store.dispatch('addNotification', {
-      type: 'success',
-      message: 'Profile updated successfully'
-    })
+    
+    const updateData: { displayName?: string; photoURL?: string | null } = {}
+    
+    if (editForm.value.displayName !== currentUser.value?.displayName) {
+      updateData.displayName = editForm.value.displayName
+    }
+    
+    // Handle photo URL changes (including removal)
+    const currentPhotoURL = currentUser.value?.photoURL || ''
+    const newPhotoURL = editForm.value.photoURL || ''
+    
+    if (newPhotoURL !== currentPhotoURL) {
+      // If user had a photo and now it's empty, explicitly set to null to remove it
+      if (currentPhotoURL && !newPhotoURL) {
+        updateData.photoURL = null
+      } else if (newPhotoURL) {
+        // User is setting/updating a photo
+        updateData.photoURL = newPhotoURL
+      }
+    }
+    
+    // Only update if there are changes
+    if (Object.keys(updateData).length > 0) {
+      await updateProfile(updateData)
+      showEditModal.value = false
+      store.dispatch('addNotification', {
+        type: 'success',
+        message: 'Profile updated successfully'
+      })
+    } else {
+      showEditModal.value = false
+    }
   } catch (error) {
     store.dispatch('addNotification', {
       type: 'error',
@@ -443,6 +560,7 @@ const handleLogout = async () => {
 const initEditForm = () => {
   if (currentUser.value) {
     editForm.value.displayName = currentUser.value.displayName || ''
+    editForm.value.photoURL = currentUser.value.photoURL || ''
   }
 }
 

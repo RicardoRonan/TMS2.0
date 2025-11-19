@@ -749,7 +749,7 @@ export function useAuth() {
   }
 
   // Update user profile
-  const updateProfile = async (data: { displayName?: string; photoURL?: string }) => {
+  const updateProfile = async (data: { displayName?: string; photoURL?: string | null }) => {
     try {
       loading.value = true
       error.value = null
@@ -758,10 +758,11 @@ export function useAuth() {
 
       // Update user profile in database
       const updates: any = {}
-      if (data.displayName) {
+      if (data.displayName !== undefined) {
         updates.display_name = data.displayName
       }
-      if (data.photoURL) {
+      if (data.photoURL !== undefined) {
+        // Allow null to remove photo, or a URL to set/update photo
         updates.photo_url = data.photoURL
       }
 
