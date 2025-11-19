@@ -62,6 +62,8 @@ const session = ref<any>(null)
 
 // Store interval ID for session check cleanup
 let sessionCheckInterval: number | null = null
+// Store activity timeout for cleanup
+let activityTimeout: number | null = null
 
 // Handle tab visibility changes to refresh session when tab becomes active
 const handleVisibilityChange = async () => {
@@ -89,8 +91,8 @@ const handleVisibilityChange = async () => {
         const expiresAt = session.expires_at ? new Date(session.expires_at * 1000) : null
         const now = new Date()
         
-        // If session expires in less than 5 minutes, refresh it proactively
-        if (expiresAt && expiresAt.getTime() - now.getTime() < 5 * 60 * 1000) {
+        // If session expires in less than 15 minutes, refresh it proactively
+        if (expiresAt && expiresAt.getTime() - now.getTime() < 15 * 60 * 1000) {
           console.log('🔄 Session expiring soon, refreshing proactively...')
           await supabase.auth.refreshSession()
         }
@@ -99,6 +101,33 @@ const handleVisibilityChange = async () => {
       console.warn('⚠️ Error checking session on visibility change:', err)
     }
   }
+}
+
+// Add activity-based session refresh
+const handleUserActivity = () => {
+  // Clear existing timeout
+  if (activityTimeout) {
+    clearTimeout(activityTimeout)
+  }
+  
+  // Refresh session after 2 minutes of activity (debounced)
+  activityTimeout = window.setTimeout(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        const expiresAt = session.expires_at ? new Date(session.expires_at * 1000) : null
+        const now = new Date()
+        
+        // Refresh if expiring in less than 20 minutes
+        if (expiresAt && expiresAt.getTime() - now.getTime() < 20 * 60 * 1000) {
+          console.log('🔄 Refreshing session due to user activity...')
+          await supabase.auth.refreshSession()
+        }
+      }
+    } catch (err) {
+      console.warn('⚠️ Activity-based session refresh failed:', err)
+    }
+  }, 2 * 60 * 1000) // Wait 2 minutes after last activity
 }
 
 onMounted(async () => {
@@ -123,7 +152,13 @@ onMounted(async () => {
   // Handle tab visibility changes to refresh session when tab becomes active
   document.addEventListener('visibilitychange', handleVisibilityChange)
   
-  // Also check session periodically (every 5 minutes) as a backup
+  // Add activity listeners for session refresh
+  const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click']
+  activityEvents.forEach(event => {
+    document.addEventListener(event, handleUserActivity, { passive: true })
+  })
+  
+  // Also check session periodically (every 2 minutes) as a backup
   sessionCheckInterval = window.setInterval(async () => {
     if (!document.hidden) {
       try {
@@ -132,8 +167,9 @@ onMounted(async () => {
           const expiresAt = session.expires_at ? new Date(session.expires_at * 1000) : null
           const now = new Date()
           
-          // Refresh if expiring in less than 10 minutes
-          if (expiresAt && expiresAt.getTime() - now.getTime() < 10 * 60 * 1000) {
+          // Refresh if expiring in less than 20 minutes
+          if (expiresAt && expiresAt.getTime() - now.getTime() < 20 * 60 * 1000) {
+            console.log('🔄 Periodic session refresh...')
             await supabase.auth.refreshSession()
           }
         }
@@ -141,7 +177,7 @@ onMounted(async () => {
         console.warn('⚠️ Periodic session check failed:', err)
       }
     }
-  }, 5 * 60 * 1000) // Check every 5 minutes
+  }, 2 * 60 * 1000) // Check every 2 minutes instead of 5
 })
 
 onUnmounted(() => {
@@ -150,6 +186,18 @@ onUnmounted(() => {
 
   // Clean up visibility change listener
   document.removeEventListener('visibilitychange', handleVisibilityChange)
+  
+  // Clean up activity listeners
+  const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click']
+  activityEvents.forEach(event => {
+    document.removeEventListener(event, handleUserActivity)
+  })
+  
+  // Clean up activity timeout
+  if (activityTimeout) {
+    clearTimeout(activityTimeout)
+    activityTimeout = null
+  }
   
   // Clean up interval
   if (sessionCheckInterval !== null) {

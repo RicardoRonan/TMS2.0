@@ -18,9 +18,7 @@
     <section class="py-8">
       <div class="container mx-auto px-4">
         <div v-if="loading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <div v-for="n in 8" :key="n" class="animate-pulse">
-            <div class="aspect-square bg-bg-tertiary rounded-lg"></div>
-          </div>
+          <HIGSkeleton v-for="n in 8" :key="n" type="tutorial-category" />
         </div>
 
         <!-- Category Detail View (when a category is selected) -->
@@ -102,6 +100,7 @@ import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import Breadcrumb from '../components/Breadcrumb.vue'
+import HIGSkeleton from '../components/hig/HIGSkeleton.vue'
 import { 
   faBook, 
   faCode, 

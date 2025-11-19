@@ -295,6 +295,10 @@
     @apply w-full;
   }
 
+  .skeleton-tutorial-category {
+    @apply w-full;
+  }
+
   /* HIG Loading Spinner */
   .spinner {
     display: inline-block;
