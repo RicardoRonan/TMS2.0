@@ -269,39 +269,42 @@ const fetchBlogs = async (force = false) => {
   try {
     loading.value = true
     
-    // Try fetching with author join first
-    let { data, error } = await supabase
+    // Fetch blogs with author_id
+    const { data, error } = await supabase
       .from('blogs')
-      .select(`
-        *,
-        author:users!author_id (
-          id,
-          display_name,
-          email,
-          photo_url
-        )
-      `)
+      .select('*')
       .eq('published', true)
       .order('created_at', { ascending: false })
 
-    // If the join fails (e.g., RLS on users table), try without the join
-    if (error) {
-      const { data: blogsData, error: blogsError } = await supabase
-        .from('blogs')
-        .select('*')
-        .eq('published', true)
-        .order('created_at', { ascending: false })
-      
-      if (blogsError) {
-        throw blogsError
-      }
-      
-      data = blogsData
-      error = null
-    }
-
     if (error) {
       throw error
+    }
+
+    // Get unique author IDs
+    const authorIds = [...new Set((data || []).map(blog => blog.author_id).filter(Boolean))]
+    
+    // Fetch author information separately
+    const authorMap = new Map()
+    if (authorIds.length > 0) {
+      try {
+        const { data: authorsData, error: authorsError } = await supabase
+          .from('users')
+          .select('id, display_name, email, photo_url')
+          .in('id', authorIds)
+
+        if (!authorsError && authorsData) {
+          authorsData.forEach(author => {
+            authorMap.set(author.id, {
+              name: author.display_name || author.email?.split('@')[0] || 'Anonymous',
+              email: author.email,
+              photoUrl: author.photo_url
+            })
+          })
+        }
+      } catch (err) {
+        // If fetching authors fails (e.g., RLS), continue without author info
+        console.warn('Could not fetch author information:', err)
+      }
     }
 
     posts.value = (data || []).map(blog => ({
@@ -313,11 +316,15 @@ const fetchBlogs = async (force = false) => {
       createdAt: blog.created_at,
       readTime: blog.read_time || 5,
       featuredImageUrl: blog.featured_image_url,
-      author: blog.author ? {
-        name: blog.author.display_name || blog.author.email?.split('@')[0] || 'Anonymous',
-        email: blog.author.email,
-        photoUrl: blog.author.photo_url
-      } : null
+      author: blog.author_id ? (authorMap.get(blog.author_id) || {
+        name: 'Anonymous',
+        email: null,
+        photoUrl: null
+      }) : {
+        name: 'Anonymous',
+        email: null,
+        photoUrl: null
+      }
     }))
 
     // Update categories - will be set by fetchBlogCategories

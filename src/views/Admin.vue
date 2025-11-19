@@ -1557,7 +1557,7 @@ const handleSubmitBlog = async () => {
       category: blogForm.value.category?.trim() || null,
       featured_image_url: blogForm.value.featured_image_url?.trim() || null,
       read_time: blogForm.value.read_time || 5,
-      author_id: authorId, // Use session user ID
+      author_id: authorId, // Use author_id to reference the users table
       published: blogForm.value.published || false,
       published_at: blogForm.value.published ? new Date().toISOString() : null
     }

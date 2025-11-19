@@ -78,34 +78,46 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <HIGCard v-for="post in featuredPosts" :key="post.id" class="hover:shadow-hig-lg transition-shadow">
-            <div class="p-6">
-              <!-- Featured Image - Commented out for now -->
-              <!-- <div class="aspect-video bg-bg-tertiary rounded-lg mb-4 flex items-center justify-center">
-                <span class="text-text-tertiary">Featured Image</span>
-              </div> -->
-              <div class="space-y-3">
-                <div class="flex items-center space-x-2 text-sm text-text-tertiary">
-                  <span>{{ post.category }}</span>
-                  <span>•</span>
-                  <span>{{ formatDate(post.createdAt) }}</span>
-                </div>
-                <h3 class="text-xl font-semibold text-text-primary line-clamp-2">
-                  {{ post.title }}
-                </h3>
-                <p class="text-text-secondary line-clamp-3">
-                  {{ post.excerpt }}
-                </p>
-                <router-link 
-                  :to="`/blog/${post.slug}`"
-                  class="inline-flex items-center text-primary-500 hover:text-primary-600 font-medium transition-colors"
-                >
-                  Read More
-                  <Icon name="arrow-right" :size="16" class="ml-1" />
-                </router-link>
+          <!-- Loading state -->
+          <template v-if="loadingBlogPosts">
+            <HIGCard v-for="n in 3" :key="`skeleton-${n}`" class="hover:shadow-hig-lg transition-shadow">
+              <div class="p-6">
+                <HIGSkeleton type="blog-card" />
               </div>
-            </div>
-          </HIGCard>
+            </HIGCard>
+          </template>
+          
+          <!-- Blog posts -->
+          <template v-else>
+            <HIGCard v-for="post in featuredPosts" :key="post.id" class="hover:shadow-hig-lg transition-shadow">
+              <div class="p-6">
+                <!-- Featured Image - Commented out for now -->
+                <!-- <div class="aspect-video bg-bg-tertiary rounded-lg mb-4 flex items-center justify-center">
+                  <span class="text-text-tertiary">Featured Image</span>
+                </div> -->
+                <div class="space-y-3">
+                  <div class="flex items-center space-x-2 text-sm text-text-tertiary">
+                    <span>{{ post.category }}</span>
+                    <span>•</span>
+                    <span>{{ formatDate(post.createdAt) }}</span>
+                  </div>
+                  <h3 class="text-xl font-semibold text-text-primary line-clamp-2">
+                    {{ post.title }}
+                  </h3>
+                  <p class="text-text-secondary line-clamp-3">
+                    {{ post.excerpt }}
+                  </p>
+                  <router-link 
+                    :to="`/blog/${post.slug}`"
+                    class="inline-flex items-center text-primary-500 hover:text-primary-600 font-medium transition-colors"
+                  >
+                    Read More
+                    <Icon name="arrow-right" :size="16" class="ml-1" />
+                  </router-link>
+                </div>
+              </div>
+            </HIGCard>
+          </template>
         </div>
 
         <div class="text-center mt-8 md:hidden">
@@ -219,6 +231,7 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import HIGButton from '../components/hig/HIGButton.vue'
 import HIGCard from '../components/hig/HIGCard.vue'
+import HIGSkeleton from '../components/hig/HIGSkeleton.vue'
 import Icon from '../components/Icon.vue'
 import { getBrandfetchLogoUrl } from '../utils/brandfetch'
 import { getLogoBackgroundColor, extractBackgroundColor } from '../utils/logoColors'
@@ -261,32 +274,8 @@ const features = ref([
 ])
 
 // Featured blog posts
-const featuredPosts = ref([
-  {
-    id: 1,
-    title: 'Getting Started with Vue 3 Composition API',
-    excerpt: 'Learn the fundamentals of Vue 3\'s Composition API and how it can improve your development workflow.',
-    category: 'Vue.js',
-    slug: 'getting-started-vue3-composition-api',
-    createdAt: new Date('2024-01-15')
-  },
-  {
-    id: 2,
-    title: 'Building Scalable React Applications',
-    excerpt: 'Best practices and patterns for creating maintainable and scalable React applications.',
-    category: 'React',
-    slug: 'building-scalable-react-applications',
-    createdAt: new Date('2024-01-12')
-  },
-  {
-    id: 3,
-    title: 'CSS Grid vs Flexbox: When to Use What',
-    excerpt: 'A comprehensive comparison of CSS Grid and Flexbox to help you choose the right layout method.',
-    category: 'CSS',
-    slug: 'css-grid-vs-flexbox-comparison',
-    createdAt: new Date('2024-01-10')
-  }
-])
+const featuredPosts = ref<any[]>([])
+const loadingBlogPosts = ref(false)
 
 // Featured tools
 const featuredTools = ref([
@@ -428,12 +417,84 @@ const handleGetStarted = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-const formatDate = (date: Date) => {
-  return date.toLocaleDateString('en-US', { 
+const formatDate = (date: Date | string) => {
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  return dateObj.toLocaleDateString('en-US', { 
     year: 'numeric', 
     month: 'short', 
     day: 'numeric' 
   })
+}
+
+// Fetch latest blog posts
+const fetchLatestBlogPosts = async () => {
+  loadingBlogPosts.value = true
+  try {
+    // Fetch blogs with author_id
+    const { data, error } = await supabase
+      .from('blogs')
+      .select('*')
+      .eq('published', true)
+      .order('created_at', { ascending: false })
+      .limit(3)
+
+    if (error) {
+      throw error
+    }
+
+    // Get unique author IDs
+    const authorIds = [...new Set((data || []).map(blog => blog.author_id).filter(Boolean))]
+    
+    // Fetch author information separately
+    const authorMap = new Map()
+    if (authorIds.length > 0) {
+      try {
+        const { data: authorsData, error: authorsError } = await supabase
+          .from('users')
+          .select('id, display_name, email, photo_url')
+          .in('id', authorIds)
+
+        if (!authorsError && authorsData) {
+          authorsData.forEach(author => {
+            authorMap.set(author.id, {
+              name: author.display_name || author.email?.split('@')[0] || 'Anonymous',
+              email: author.email,
+              photoUrl: author.photo_url
+            })
+          })
+        }
+      } catch (err) {
+        // If fetching authors fails (e.g., RLS), continue without author info
+        console.warn('Could not fetch author information:', err)
+      }
+    }
+
+    // Map the data to the expected format
+    featuredPosts.value = (data || []).map(blog => ({
+      id: blog.id,
+      title: blog.title,
+      excerpt: blog.excerpt,
+      category: blog.category,
+      slug: blog.slug,
+      createdAt: blog.created_at,
+      author: blog.author_id ? (authorMap.get(blog.author_id) || {
+        name: 'Anonymous',
+        email: null,
+        photoUrl: null
+      }) : {
+        name: 'Anonymous',
+        email: null,
+        photoUrl: null
+      }
+    }))
+  } catch (error: any) {
+    // Keep empty array if fetch fails
+    featuredPosts.value = []
+    const errorMessage = error?.message || error?.code || 'Failed to load blog posts'
+    console.error('Error loading latest blog posts:', errorMessage)
+  } finally {
+    loadingBlogPosts.value = false
+  }
 }
 
 const handleLogoError = (event: Event) => {
@@ -471,6 +532,9 @@ const handleLogoLoad = async (event: Event, toolId: number, toolName: string) =>
 }
 
 onMounted(() => {
+  // Fetch latest blog posts immediately
+  fetchLatestBlogPosts()
+  
   // Defer stats fetching to after initial render to improve Time to Interactive
   // Use nextTick to ensure DOM is rendered first
   nextTick(() => {

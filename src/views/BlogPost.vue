@@ -481,15 +481,7 @@ const fetchBlogPost = async (slug: string) => {
     
     const { data, error: fetchError } = await supabase
       .from('blogs')
-      .select(`
-        *,
-        author:users!author_id (
-          id,
-          display_name,
-          email,
-          photo_url
-        )
-      `)
+      .select('*')
       .eq('slug', slug)
       .eq('published', true)
       .single()
@@ -503,9 +495,31 @@ const fetchBlogPost = async (slug: string) => {
       return
     }
 
-    const author = data.author
-    const authorName = author?.display_name || author?.email?.split('@')[0] || 'Anonymous'
-    const authorInitials = getInitials(author?.display_name, author?.email)
+    // Fetch author information using author_id
+    let authorName = 'Anonymous'
+    let authorEmail = null
+    let authorPhotoUrl = null
+    
+    if (data.author_id) {
+      try {
+        const { data: authorData, error: authorError } = await supabase
+          .from('users')
+          .select('id, display_name, email, photo_url')
+          .eq('id', data.author_id)
+          .single()
+
+        if (!authorError && authorData) {
+          authorName = authorData.display_name || authorData.email?.split('@')[0] || 'Anonymous'
+          authorEmail = authorData.email
+          authorPhotoUrl = authorData.photo_url
+        }
+      } catch (err) {
+        // If fetching author fails (e.g., RLS), use defaults
+        console.warn('Could not fetch author information:', err)
+      }
+    }
+    
+    const authorInitials = getInitials(authorName, authorEmail)
 
     // Check if current user has liked this post
     let userLiked = false
@@ -562,7 +576,7 @@ const fetchBlogPost = async (slug: string) => {
       slug: data.slug,
       author: authorName,
       authorInitials: authorInitials,
-      authorPhotoUrl: author?.photo_url,
+      authorPhotoUrl: authorPhotoUrl,
       createdAt: data.created_at,
       readTime: data.read_time || 5,
       featuredImageUrl: data.featured_image_url,
