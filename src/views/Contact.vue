@@ -143,13 +143,13 @@
                       <div class="text-sm text-text-secondary">Co-Founder and Full-Stack Developer</div>
                     </div>
                     <div>
-                      <a href="https://www.linkedin.com/in/jesse-spence-83606b210/" target="_blank" rel="noopener noreferrer" class="font-semibold text-text-primary">
+                      <a href="https://www.linkedin.com/in/jesse-spence-seo/" target="_blank" rel="noopener noreferrer" class="font-semibold text-text-primary">
                         Jesse Spence
                       </a>
                       <div class="text-sm text-text-secondary">Co-Founder and SEO Specialist</div>
                     </div>
                     <div>
-                      <a href="https://www.linkedin.com/in/abdus-samad-charles-75036b210/" target="_blank" rel="noopener noreferrer" class="font-semibold text-text-primary">
+                      <a href="https://www.linkedin.com/in/abdus-samad-charles-51bba5227/" target="_blank" rel="noopener noreferrer" class="font-semibold text-text-primary">
                         Abdus-Samad Charles
                       </a>
                       <div class="text-sm text-text-secondary">Co-Founder and SEO Specialist</div>
