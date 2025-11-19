@@ -61,7 +61,7 @@
             © {{ currentYear }} MetaStack. All rights reserved.
           </p>
           <div class="flex items-center space-x-4 text-sm text-text-tertiary">
-            <span>Made with ❤️ for developers</span>
+            <span>Made with <Icon name="heart" :size="14" class="inline-block mx-1 text-red-500" /> for developers</span>
           </div>
         </div>
       </div>
@@ -71,6 +71,7 @@
 
 <script setup lang="ts">
 import { computed, inject } from 'vue'
+import Icon from './Icon.vue'
 
 const currentYear = computed(() => new Date().getFullYear())
 
