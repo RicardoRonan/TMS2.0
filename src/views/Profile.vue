@@ -38,21 +38,21 @@
                       {{ userInitials }}
                     </span>
                   </div>
-                  <div>
-                    <h3 class="text-xl font-semibold text-text-primary">{{ currentUser?.displayName || 'User' }}</h3>
-                    <p class="text-text-secondary">{{ currentUser?.email }}</p>
+                  <div class="min-w-0 flex-1">
+                    <h3 class="text-xl font-semibold text-text-primary break-words">{{ currentUser?.displayName || 'User' }}</h3>
+                    <p class="text-text-secondary break-words">{{ currentUser?.email }}</p>
                   </div>
                 </div>
                 
                 <div class="space-y-6">
                   <div>
                     <label class="block text-sm font-medium text-text-secondary mb-2">Display Name</label>
-                    <div class="text-text-primary text-lg">{{ currentUser?.displayName || 'Not set' }}</div>
+                    <div class="text-text-primary text-lg break-words">{{ currentUser?.displayName || 'Not set' }}</div>
                   </div>
                   
                   <div>
                     <label class="block text-sm font-medium text-text-secondary mb-2">Email</label>
-                    <div class="text-text-primary text-lg">{{ currentUser?.email || 'Not set' }}</div>
+                    <div class="text-text-primary text-lg break-words">{{ currentUser?.email || 'Not set' }}</div>
                   </div>
                   
                   <div>

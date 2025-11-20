@@ -1,13 +1,13 @@
 <template>
   <div class="min-h-screen bg-bg-primary">
     <!-- Header -->
-    <section class="py-16 bg-gradient-to-br from-bg-secondary to-bg-tertiary">
+    <section class="py-8 sm:py-12 md:py-16 bg-gradient-to-br from-bg-secondary to-bg-tertiary">
       <div class="container mx-auto px-4">
         <div class="max-w-4xl mx-auto text-center">
-          <h1 class="text-4xl md:text-5xl font-bold text-text-primary mb-6">
+          <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-text-primary mb-4 sm:mb-6">
             Get in Touch
           </h1>
-          <p class="text-xl text-text-secondary mb-8">
+          <p class="text-base sm:text-lg md:text-xl text-text-secondary mb-6 sm:mb-8">
             Have a question or want to collaborate? We'd love to hear from you.
           </p>
         </div>
@@ -15,17 +15,17 @@
     </section>
 
     <!-- Contact Form and Info -->
-    <section class="py-16">
+    <section class="py-8 sm:py-12 md:py-16">
       <div class="container mx-auto px-4">
         <div class="max-w-6xl mx-auto">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-12">
             <!-- Contact Form -->
             <div>
               <HIGCard>
-                <div class="p-6">
-                  <h2 class="text-2xl font-bold text-text-primary mb-6">Send us a message</h2>
+                <div class="p-4 sm:p-6">
+                  <h2 class="text-xl sm:text-2xl font-bold text-text-primary mb-4 sm:mb-6">Send us a message</h2>
                   
-                  <form @submit.prevent="handleSubmit" class="space-y-6">
+                  <form @submit.prevent="handleSubmit" class="space-y-4 sm:space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <HIGInput
                         v-model="form.firstName"
@@ -94,33 +94,33 @@
             </div>
 
             <!-- Contact Information -->
-            <div class="space-y-8">
+            <div class="space-y-6 sm:space-y-8">
               <HIGCard>
-                <div class="p-6">
-                  <h2 class="text-2xl font-bold text-text-primary mb-6">Contact Information</h2>
+                <div class="p-4 sm:p-6">
+                  <h2 class="text-xl sm:text-2xl font-bold text-text-primary mb-4 sm:mb-6">Contact Information</h2>
                   
-                  <div class="space-y-6">
-                    <div class="flex items-start space-x-4">
-                      <div class="w-12 h-12 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Icon name="mail" :size="24" class="text-white" />
+                  <div class="space-y-4 sm:space-y-6">
+                    <div class="flex items-start space-x-3 sm:space-x-4">
+                      <div class="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Icon name="mail" :size="22" class="text-white" />
                       </div>
-                      <div>
-                        <h3 class="font-semibold text-text-primary mb-1">Email</h3>
+                      <div class="min-w-0 flex-1">
+                        <h3 class="font-semibold text-text-primary mb-1 text-sm sm:text-base">Email</h3>
                         <div class="space-y-1">
-                          <a href="mailto:metastackdev@gmail.com" class="block text-text-secondary hover:text-primary-500 transition-colors">
+                          <a href="mailto:metastackdev@gmail.com" class="block text-text-secondary hover:text-primary-500 transition-colors text-sm sm:text-base break-words">
                             metastackdev@gmail.com
                           </a>
                         </div>
                       </div>
                     </div>
                     
-                    <div class="flex items-start space-x-4">
-                      <div class="w-12 h-12 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Icon name="location" :size="24" class="text-white" />
+                    <div class="flex items-start space-x-3 sm:space-x-4">
+                      <div class="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Icon name="location" :size="22" class="text-white" />
                       </div>
-                      <div>
-                        <h3 class="font-semibold text-text-primary mb-1">Address</h3>
-                        <p class="text-text-secondary">
+                      <div class="min-w-0 flex-1">
+                        <h3 class="font-semibold text-text-primary mb-1 text-sm sm:text-base">Address</h3>
+                        <p class="text-text-secondary text-sm sm:text-base">
                           Cape Town<br>
                           South Africa
                         </p>
@@ -132,27 +132,27 @@
 
               <!-- Social Links -->
               <HIGCard>
-                <div class="p-6">
-                  <h2 class="text-2xl font-bold text-text-primary mb-6">Follow the Creators</h2>
+                <div class="p-4 sm:p-6">
+                  <h2 class="text-xl sm:text-2xl font-bold text-text-primary mb-4 sm:mb-6">Follow the Creators</h2>
                   
-                  <div class="space-y-4">
+                  <div class="space-y-3 sm:space-y-4">
                     <div>
-                      <a href="https://www.linkedin.com/in/the-dev-ricardo/" target="_blank" rel="noopener noreferrer" class="font-semibold text-text-primary">
+                      <a href="https://www.linkedin.com/in/the-dev-ricardo/" target="_blank" rel="noopener noreferrer" class="font-semibold text-text-primary text-sm sm:text-base block break-words">
                         Ricardo Moses
                       </a>
-                      <div class="text-sm text-text-secondary">Co-Founder and Full-Stack Developer</div>
+                      <div class="text-xs sm:text-sm text-text-secondary">Co-Founder and Full-Stack Developer</div>
                     </div>
                     <div>
-                      <a href="https://www.linkedin.com/in/jesse-spence-seo/" target="_blank" rel="noopener noreferrer" class="font-semibold text-text-primary">
+                      <a href="https://www.linkedin.com/in/jesse-spence-seo/" target="_blank" rel="noopener noreferrer" class="font-semibold text-text-primary text-sm sm:text-base block break-words">
                         Jesse Spence
                       </a>
-                      <div class="text-sm text-text-secondary">Co-Founder and SEO Specialist</div>
+                      <div class="text-xs sm:text-sm text-text-secondary">Co-Founder and SEO Specialist</div>
                     </div>
                     <div>
-                      <a href="https://www.linkedin.com/in/abdus-samad-charles-51bba5227/" target="_blank" rel="noopener noreferrer" class="font-semibold text-text-primary">
+                      <a href="https://www.linkedin.com/in/abdus-samad-charles-51bba5227/" target="_blank" rel="noopener noreferrer" class="font-semibold text-text-primary text-sm sm:text-base block break-words">
                         Abdus-Samad Charles
                       </a>
-                      <div class="text-sm text-text-secondary">Co-Founder and SEO Specialist</div>
+                      <div class="text-xs sm:text-sm text-text-secondary">Co-Founder and SEO Specialist</div>
                     </div>
                   </div>
                 </div>
