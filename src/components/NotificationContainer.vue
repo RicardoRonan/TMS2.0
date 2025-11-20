@@ -111,6 +111,13 @@ const handleTouchMove = (e: TouchEvent, id: number) => {
   const deltaX = touch.clientX - state.startX
   const deltaY = Math.abs(touch.clientY - state.startY)
   
+  // If already swiping, continue updating position
+  if (state.isSwiping) {
+    state.currentX = touch.clientX
+    e.preventDefault() // Prevent scrolling while swiping
+    return
+  }
+  
   // Only start swiping if horizontal movement is greater than vertical
   if (Math.abs(deltaX) > 10 && Math.abs(deltaX) > deltaY) {
     state.isSwiping = true

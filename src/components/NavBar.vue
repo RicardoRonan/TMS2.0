@@ -2,8 +2,15 @@
   <!-- Mobile Top Bar (WhatsApp style) -->
   <nav class="md:hidden fixed top-0 left-0 right-0 z-50 bg-bg-secondary border-b border-border-primary">
     <div class="flex items-center justify-between h-14 px-4">
-      <!-- Title on left -->
-      <h1 class="text-xl font-semibold text-text-primary">MetaStack</h1>
+      <!-- Logo/Brand on left (clickable to home) -->
+      <router-link 
+        to="/" 
+        class="flex items-center space-x-2 active:opacity-70 transition-opacity"
+        @click="closeMenuOverlay"
+      >
+        <img src="@/assets/meta-stack-logo.png" alt="MetaStack Logo" class="w-8 h-8" />
+        <span class="text-xl font-semibold text-text-primary">MetaStack</span>
+      </router-link>
       
       <!-- Three-dot menu on right -->
       <button
@@ -321,6 +328,13 @@
         >
           <div class="py-1">
             <router-link
+              to="/"
+              class="block px-4 py-3.5 text-sm text-text-primary hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
+              @click="closeMenuOverlay"
+            >
+              Home
+            </router-link>
+            <router-link
               v-if="isAuthenticated"
               to="/profile"
               class="block px-4 py-3.5 text-sm text-text-primary hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
@@ -329,6 +343,7 @@
               Profile
             </router-link>
             <router-link
+              v-if="isAuthenticated"
               to="/settings"
               class="block px-4 py-3.5 text-sm text-text-primary hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
               @click="closeMenuOverlay"
@@ -342,9 +357,8 @@
             >
               About
             </router-link>
-            <div v-if="isAuthenticated" class="border-t border-border-primary my-1"></div>
+            <div class="border-t border-border-primary my-1"></div>
             <router-link
-              v-if="isAuthenticated"
               to="/blog"
               class="block px-4 py-3.5 text-sm text-text-primary hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
               @click="closeMenuOverlay"
