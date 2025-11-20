@@ -15,6 +15,7 @@ const iconImportMap: Record<string, () => Promise<{ default: IconDefinition }>> 
   // Navigation
   'home': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faHome })),
   'menu': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faBars })),
+  'ellipsis-vertical': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faEllipsisVertical })),
   'close': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faXmark })),
   'chevron-down': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faChevronDown })),
   'chevron-up': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faChevronUp })),

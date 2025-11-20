@@ -6,7 +6,7 @@
     <!-- Main Content -->
     <main 
       id="main-content" 
-      class="min-h-screen"
+      class="min-h-screen md:pt-0 pt-14 pb-16 md:pb-0"
     >
       <router-view v-slot="{ Component, route }">
         <transition name="page" mode="out-in">
@@ -29,6 +29,9 @@
     
     <!-- Admin Bottom Navigation -->
     <AdminBottomNav />
+    
+    <!-- Mobile Bottom Navigation -->
+    <MobileBottomNav />
   </div>
 </template>
 
@@ -42,6 +45,7 @@ import NotificationContainer from './components/NotificationContainer.vue'
 import LoadingOverlay from './components/LoadingOverlay.vue'
 import CookieConsentBanner from './components/CookieConsentBanner.vue'
 import AdminBottomNav from './components/AdminBottomNav.vue'
+import MobileBottomNav from './components/MobileBottomNav.vue'
 import { useKeyboardShortcuts } from './composables/useKeyboardShortcuts'
 import { cleanupAuthListener } from './composables/useAuth'
 

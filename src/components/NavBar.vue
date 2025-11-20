@@ -1,25 +1,34 @@
 <template>
-  <nav class="nav-bar sticky top-0 z-50 bg-bg-secondary border-b border-border-primary shadow-lg">
+  <!-- Mobile Top Bar (WhatsApp style) -->
+  <nav class="md:hidden fixed top-0 left-0 right-0 z-50 bg-bg-secondary border-b border-border-primary">
+    <div class="flex items-center justify-between h-14 px-4">
+      <!-- Title on left -->
+      <h1 class="text-xl font-semibold text-text-primary">MetaStack</h1>
+      
+      <!-- Three-dot menu on right -->
+      <button
+        class="p-2 -mr-2 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-full relative"
+        @click="toggleMenuOverlay"
+        aria-label="Open menu"
+        ref="menuButtonRef"
+      >
+        <Icon name="ellipsis-vertical" :size="20" />
+      </button>
+    </div>
+  </nav>
+
+  <!-- Desktop Navigation -->
+  <nav class="hidden md:block nav-bar sticky top-0 z-50 bg-bg-secondary border-b border-border-primary shadow-lg">
     <div class="container mx-auto px-4">
       <div class="flex items-center justify-between h-16">
-        <!-- Mobile Menu Button (Left on mobile) -->
-        <button
-          class="md:hidden p-2 text-text-primary hover:text-primary-500 transition-colors"
-          @click="toggleMobileMenu"
-          aria-label="Toggle mobile menu"
-        >
-          <Icon v-if="!showMobileMenu" name="menu" :size="24" />
-          <Icon v-else name="close" :size="24" />
-        </button>
-
-        <!-- Logo (Right on mobile, left on desktop) -->
-        <router-link to="/" class="flex items-center space-x-2 ml-auto md:ml-0">
+        <!-- Logo (Left on desktop) -->
+        <router-link to="/" class="flex items-center space-x-2">
           <img src="@/assets/meta-stack-logo.png" alt="MetaStack Logo" class="w-8 h-8" />
           <span class="text-xl font-bold text-text-primary">MetaStack</span>
         </router-link>
 
-        <!-- Desktop Navigation -->
-        <div class="hidden md:flex items-center space-x-8">
+        <!-- Desktop Navigation Links -->
+        <div class="flex items-center space-x-8">
           <router-link
             v-for="item in regularNavigationItems"
             :key="item.name"
@@ -195,7 +204,7 @@
       <Transition name="sidebar">
         <aside
           v-if="showMobileMenu"
-          class="md:hidden fixed top-0 left-0 h-full w-[280px] max-w-[75vw] bg-bg-secondary border-r border-border-primary shadow-xl z-[70] overflow-y-auto"
+          class="md:hidden fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-[280px] max-w-[75vw] bg-bg-secondary border-r border-border-primary shadow-xl z-[70] overflow-y-auto"
         >
           <div class="p-4 space-y-2">
             <router-link
@@ -294,6 +303,95 @@
           </div>
         </aside>
       </Transition>
+
+      <!-- Menu Overlay Backdrop -->
+      <Transition name="backdrop">
+        <div
+          v-if="showMenuOverlay"
+          class="md:hidden fixed inset-0 bg-black/50 z-[60]"
+          @click="closeMenuOverlay"
+        ></div>
+      </Transition>
+
+      <!-- Menu Overlay (WhatsApp style) -->
+      <Transition name="menu-overlay">
+        <div
+          v-if="showMenuOverlay"
+          class="md:hidden fixed top-14 right-2 bg-bg-secondary rounded-lg shadow-hig-lg border border-border-primary z-[70] min-w-[220px] max-w-[85vw] overflow-hidden"
+        >
+          <div class="py-1">
+            <router-link
+              v-if="isAuthenticated"
+              to="/profile"
+              class="block px-4 py-3.5 text-sm text-text-primary hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
+              @click="closeMenuOverlay"
+            >
+              Profile
+            </router-link>
+            <router-link
+              to="/settings"
+              class="block px-4 py-3.5 text-sm text-text-primary hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
+              @click="closeMenuOverlay"
+            >
+              Settings
+            </router-link>
+            <router-link
+              to="/about"
+              class="block px-4 py-3.5 text-sm text-text-primary hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
+              @click="closeMenuOverlay"
+            >
+              About
+            </router-link>
+            <div v-if="isAuthenticated" class="border-t border-border-primary my-1"></div>
+            <router-link
+              v-if="isAuthenticated"
+              to="/blog"
+              class="block px-4 py-3.5 text-sm text-text-primary hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
+              @click="closeMenuOverlay"
+            >
+              Blog
+            </router-link>
+            <router-link
+              to="/tools"
+              class="block px-4 py-3.5 text-sm text-text-primary hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
+              @click="closeMenuOverlay"
+            >
+              Tools
+            </router-link>
+            <router-link
+              to="/tutorials"
+              class="block px-4 py-3.5 text-sm text-text-primary hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
+              @click="closeMenuOverlay"
+            >
+              Tutorials
+            </router-link>
+            <router-link
+              to="/contact"
+              class="block px-4 py-3.5 text-sm text-text-primary hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
+              @click="closeMenuOverlay"
+            >
+              Contact
+            </router-link>
+            <div v-if="isAuthenticated" class="border-t border-border-primary my-1"></div>
+            <button
+              v-if="isAuthenticated"
+              class="block w-full text-left px-4 py-3.5 text-sm text-danger hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
+              @click="handleMenuLogout"
+            >
+              Sign Out
+            </button>
+            <template v-else>
+              <div class="border-t border-border-primary my-1"></div>
+              <button
+                class="block w-full text-left px-4 py-3.5 text-sm text-text-primary hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
+                @click="handleMenuSignIn"
+              >
+                Sign In
+              </button>
+            </template>
+          </div>
+        </div>
+      </Transition>
     </Teleport>
 
     <!-- Login Modal -->
@@ -337,6 +435,7 @@ const isAdminMode = computed(() => store.getters.isAdminMode)
 
 // State
 const showMobileMenu = ref(false)
+const showMenuOverlay = ref(false)
 const showUserMenu = ref(false)
 const showResourcesMenu = ref(false)
 const showResourcesMobileMenu = ref(false)
@@ -344,6 +443,7 @@ const showLoginModal = ref(false)
 const showRegisterModal = ref(false)
 const userMenuRef = ref<HTMLElement>()
 const resourcesMenuRef = ref<HTMLElement>()
+const menuButtonRef = ref<HTMLElement>()
 
 // Navigation items
 const regularNavigationItems = [
@@ -402,6 +502,20 @@ const closeMobileMenu = () => {
   updateBodyScroll()
 }
 
+const toggleMenuOverlay = () => {
+  showMenuOverlay.value = !showMenuOverlay.value
+  if (showMenuOverlay.value) {
+    document.body.style.overflow = 'hidden'
+  } else {
+    document.body.style.overflow = ''
+  }
+}
+
+const closeMenuOverlay = () => {
+  showMenuOverlay.value = false
+  document.body.style.overflow = ''
+}
+
 const updateBodyScroll = () => {
   if (showMobileMenu.value) {
     document.body.style.overflow = 'hidden'
@@ -437,6 +551,16 @@ const handleLogout = async () => {
       message: 'Failed to sign out'
     })
   }
+}
+
+const handleMenuLogout = async () => {
+  closeMenuOverlay()
+  await handleLogout()
+}
+
+const handleMenuSignIn = () => {
+  closeMenuOverlay()
+  showLoginModal.value = true
 }
 
 const handleLoginSuccess = () => {
@@ -507,10 +631,13 @@ onMounted(() => {
   }
 })
 
-// Watch route changes to close sidebar
+// Watch route changes to close sidebar and menu overlay
 watch(() => route.path, () => {
   if (showMobileMenu.value) {
     closeMobileMenu()
+  }
+  if (showMenuOverlay.value) {
+    closeMenuOverlay()
   }
 })
 
@@ -520,6 +647,9 @@ provide('isMobileSidebarOpen', showMobileMenu)
 // Cleanup on unmount
 onUnmounted(() => {
   document.body.style.overflow = ''
+  if (showMenuOverlay.value) {
+    closeMenuOverlay()
+  }
 })
 </script>
 
@@ -527,6 +657,14 @@ onUnmounted(() => {
 .nav-bar {
   backdrop-filter: blur(10px);
   background-color: rgba(var(--bg-secondary-rgb), 0.95);
+}
+
+/* Mobile top bar styling */
+@media (max-width: 767px) {
+  nav.md\\:hidden {
+    backdrop-filter: blur(10px);
+    background-color: var(--color-bg-secondary);
+  }
 }
 
 .dropdown-enter-active,
@@ -591,6 +729,22 @@ aside.md\\:hidden[data-sidebar-open="true"] {
 .backdrop-enter-from,
 .backdrop-leave-to {
   opacity: 0;
+}
+
+/* Menu overlay animation */
+.menu-overlay-enter-active,
+.menu-overlay-leave-active {
+  transition: all 0.2s ease;
+}
+
+.menu-overlay-enter-from {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+}
+
+.menu-overlay-leave-to {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
 }
 </style>
 
