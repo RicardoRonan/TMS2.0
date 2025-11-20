@@ -41,21 +41,94 @@ function initializeClientIfNeeded() {
         headers: {
           'x-client-info': 'tms2.0'
         },
-        fetch: (url, options = {}) => {
+        fetch: async (url, options = {}) => {
           const controller = new AbortController()
           const timeoutId = setTimeout(() => controller.abort(), 30000)
           
-          return fetch(url, {
-            ...options,
-            signal: controller.signal
-          }).catch(err => {
+          // Track if this is a retry to avoid infinite loops
+          const isRetry = (options as any)?._isRetry || false
+          
+          try {
+            const response = await fetch(url, {
+              ...options,
+              signal: controller.signal
+            })
+            
+            // Check for auth errors (401, 403) and handle session refresh
+            if ((response.status === 401 || response.status === 403) && !isRetry) {
+              clearTimeout(timeoutId)
+              
+              // Check if this is a Supabase API request (not auth endpoint itself)
+              const urlStr = typeof url === 'string' ? url : url.toString()
+              const isAuthEndpoint = urlStr.includes('/auth/v1/')
+              
+              // Only retry for non-auth endpoints to avoid infinite loops
+              if (!isAuthEndpoint && supabaseInstance) {
+                console.log('🔄 Session expired, attempting to refresh and retry request...')
+                
+                try {
+                  // Attempt to refresh the session
+                  const { data: { session }, error: refreshError } = await supabaseInstance.auth.refreshSession()
+                  
+                  if (!refreshError && session) {
+                    console.log('✅ Session refreshed successfully, retrying original request...')
+                    
+                    // Retry the original request with refreshed session
+                    const retryOptions = {
+                      ...options,
+                      _isRetry: true
+                    }
+                    
+                    // Clone the request body if it exists (since it can only be read once)
+                    let retryBody = options.body
+                    if (options.body && typeof options.body === 'string') {
+                      retryBody = options.body
+                    } else if (options.body instanceof FormData) {
+                      retryBody = options.body
+                    } else if (options.body) {
+                      // For other body types, try to preserve them
+                      retryBody = options.body
+                    }
+                    
+                    const retryController = new AbortController()
+                    const retryTimeoutId = setTimeout(() => retryController.abort(), 30000)
+                    
+                    try {
+                      const retryResponse = await fetch(url, {
+                        ...retryOptions,
+                        body: retryBody,
+                        signal: retryController.signal
+                      })
+                      clearTimeout(retryTimeoutId)
+                      return retryResponse
+                    } catch (retryErr: any) {
+                      clearTimeout(retryTimeoutId)
+                      if (retryErr.name === 'AbortError' || retryErr.name === 'TimeoutError') {
+                        throw new Error('Request timeout - please check your connection')
+                      }
+                      throw retryErr
+                    }
+                  } else {
+                    console.warn('⚠️ Session refresh failed:', refreshError)
+                    // Return the original response if refresh failed
+                    return response
+                  }
+                } catch (refreshErr) {
+                  console.error('❌ Error during session refresh:', refreshErr)
+                  // Return the original response if refresh errored
+                  return response
+                }
+              }
+            }
+            
+            return response
+          } catch (err: any) {
+            clearTimeout(timeoutId)
             if (err.name === 'AbortError' || err.name === 'TimeoutError') {
               throw new Error('Request timeout - please check your connection')
             }
             throw err
-          }).finally(() => {
-            clearTimeout(timeoutId)
-          })
+          }
         }
       },
       realtime: {
@@ -150,23 +223,95 @@ function getSupabaseClient(): SupabaseClient {
           headers: {
             'x-client-info': 'tms2.0'
           },
-          // Add fetch with timeout for better reliability
-          fetch: (url, options = {}) => {
+          // Add fetch with timeout for better reliability and automatic session refresh
+          fetch: async (url, options = {}) => {
             const controller = new AbortController()
             const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
             
-            return fetch(url, {
-              ...options,
-              signal: controller.signal
-            }).catch(err => {
-              // Handle network errors gracefully
+            // Track if this is a retry to avoid infinite loops
+            const isRetry = (options as any)?._isRetry || false
+            
+            try {
+              const response = await fetch(url, {
+                ...options,
+                signal: controller.signal
+              })
+              
+              // Check for auth errors (401, 403) and handle session refresh
+              if ((response.status === 401 || response.status === 403) && !isRetry) {
+                clearTimeout(timeoutId)
+                
+                // Check if this is a Supabase API request (not auth endpoint itself)
+                const urlStr = typeof url === 'string' ? url : url.toString()
+                const isAuthEndpoint = urlStr.includes('/auth/v1/')
+                
+                // Only retry for non-auth endpoints to avoid infinite loops
+                if (!isAuthEndpoint && supabaseInstance) {
+                  console.log('🔄 Session expired, attempting to refresh and retry request...')
+                  
+                  try {
+                    // Attempt to refresh the session
+                    const { data: { session }, error: refreshError } = await supabaseInstance.auth.refreshSession()
+                    
+                    if (!refreshError && session) {
+                      console.log('✅ Session refreshed successfully, retrying original request...')
+                      
+                      // Retry the original request with refreshed session
+                      const retryOptions = {
+                        ...options,
+                        _isRetry: true
+                      }
+                      
+                      // Clone the request body if it exists (since it can only be read once)
+                      let retryBody = options.body
+                      if (options.body && typeof options.body === 'string') {
+                        retryBody = options.body
+                      } else if (options.body instanceof FormData) {
+                        retryBody = options.body
+                      } else if (options.body) {
+                        // For other body types, try to preserve them
+                        retryBody = options.body
+                      }
+                      
+                      const retryController = new AbortController()
+                      const retryTimeoutId = setTimeout(() => retryController.abort(), 30000)
+                      
+                      try {
+                        const retryResponse = await fetch(url, {
+                          ...retryOptions,
+                          body: retryBody,
+                          signal: retryController.signal
+                        })
+                        clearTimeout(retryTimeoutId)
+                        return retryResponse
+                      } catch (retryErr: any) {
+                        clearTimeout(retryTimeoutId)
+                        if (retryErr.name === 'AbortError' || retryErr.name === 'TimeoutError') {
+                          throw new Error('Request timeout - please check your connection')
+                        }
+                        throw retryErr
+                      }
+                    } else {
+                      console.warn('⚠️ Session refresh failed:', refreshError)
+                      // Return the original response if refresh failed
+                      return response
+                    }
+                  } catch (refreshErr) {
+                    console.error('❌ Error during session refresh:', refreshErr)
+                    // Return the original response if refresh errored
+                    return response
+                  }
+                }
+              }
+              
+              return response
+            } catch (err: any) {
+              clearTimeout(timeoutId)
               if (err.name === 'AbortError' || err.name === 'TimeoutError') {
                 throw new Error('Request timeout - please check your connection')
               }
               throw err
-            }).finally(() => {
-              clearTimeout(timeoutId)
-            })
+            }
           }
         },
         realtime: {
