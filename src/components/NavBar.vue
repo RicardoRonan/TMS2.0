@@ -12,15 +12,23 @@
         <span class="text-xl font-semibold text-text-primary">MetaStack</span>
       </router-link>
       
-      <!-- Three-dot menu on right -->
-      <button
-        class="p-2 -mr-2 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-full relative"
-        @click="toggleMenuOverlay"
-        aria-label="Open menu"
-        ref="menuButtonRef"
-      >
-        <Icon name="ellipsis-vertical" :size="20" />
-      </button>
+      <!-- Auth buttons / Menu button -->
+      <div class="flex items-center space-x-2">
+        <template v-if="!isAuthenticated">
+          <HIGButton variant="primary" size="sm" @click="showRegisterModal = true">
+            Sign Up
+          </HIGButton>
+        </template>
+        <!-- Three-dot menu on right -->
+        <button
+          class="p-2 -mr-2 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-full relative"
+          @click="toggleMenuOverlay"
+          aria-label="Open menu"
+          ref="menuButtonRef"
+        >
+          <Icon name="ellipsis-vertical" :size="20" />
+        </button>
+      </div>
     </div>
   </nav>
 

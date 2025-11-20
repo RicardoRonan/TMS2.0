@@ -100,6 +100,9 @@
           Subscribe to our newsletter for updates and tips
         </span>
       </label>
+      <p class="text-xs text-text-tertiary ml-6 -mt-2">
+        This is a waitlist and will be added when the feature is live.
+      </p>
     </div>
 
     <div class="space-y-3">
