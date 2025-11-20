@@ -6,6 +6,62 @@ let supabaseInstance: SupabaseClient | null = null
 let currentSupabaseUrl: string | null = null
 let currentSupabaseKey: string | null = null
 
+/**
+ * Clones a request body for retry purposes
+ * Some body types (FormData, ReadableStream) can only be read once,
+ * so we need to clone them before the first request
+ */
+function cloneRequestBody(body: any): any {
+  if (!body) {
+    return body
+  }
+  
+  // Strings are immutable, can be reused
+  if (typeof body === 'string') {
+    return body
+  }
+  
+  // FormData needs to be cloned
+  if (body instanceof FormData) {
+    const cloned = new FormData()
+    for (const [key, value] of body.entries()) {
+      if (value instanceof File) {
+        cloned.append(key, value, value.name)
+      } else {
+        cloned.append(key, value)
+      }
+    }
+    return cloned
+  }
+  
+  // Blob can be cloned
+  if (body instanceof Blob) {
+    return body.slice()
+  }
+  
+  // ArrayBuffer can be cloned
+  if (body instanceof ArrayBuffer) {
+    return body.slice(0)
+  }
+  
+  // TypedArray can be cloned
+  if (ArrayBuffer.isView(body)) {
+    return new (body.constructor as any)(body)
+  }
+  
+  // ReadableStream - this is tricky, we need to tee it
+  // But we can't tee before reading, so we'll need to handle this differently
+  // For now, return as-is and handle the error if it occurs
+  if (body instanceof ReadableStream) {
+    // ReadableStream can't be cloned after creation, but we can try to use it
+    // If it fails, the retry will fail gracefully
+    return body
+  }
+  
+  // For other types, return as-is (might work if they're reusable)
+  return body
+}
+
 // Initialize client immediately if env vars are available
 // This ensures session can be restored from localStorage right away
 function initializeClientIfNeeded() {
@@ -48,9 +104,21 @@ function initializeClientIfNeeded() {
           // Track if this is a retry to avoid infinite loops
           const isRetry = (options as any)?._isRetry || false
           
+          // Clone the body BEFORE the first request if it's a type that needs cloning
+          // This ensures we can retry even if the body gets consumed
+          // Use original for first request, clone for retry
+          const needsCloning = !isRetry && options.body && (
+            options.body instanceof FormData ||
+            options.body instanceof Blob ||
+            options.body instanceof ArrayBuffer ||
+            ArrayBuffer.isView(options.body)
+          )
+          const clonedBody = needsCloning ? cloneRequestBody(options.body) : null
+          
           try {
             const response = await fetch(url, {
               ...options,
+              body: options.body, // Use original body for first request
               signal: controller.signal
             })
             
@@ -74,62 +142,52 @@ function initializeClientIfNeeded() {
                     console.log('✅ Session refreshed successfully, retrying original request...')
                     
                     // Retry the original request with refreshed session
+                    // Use the cloned body (which was created before the first request)
                     const retryOptions = {
                       ...options,
                       _isRetry: true
                     }
                     
-                    // Clone the request body if it exists (since it can only be read once)
-                    let retryBody = options.body
-                    if (options.body && typeof options.body === 'string') {
-                      retryBody = options.body
-                    } else if (options.body instanceof FormData) {
-                      retryBody = options.body
-                    } else if (options.body) {
-                      // For other body types, try to preserve them
-                      retryBody = options.body
-                    }
-                    
                     const retryController = new AbortController()
                     const retryTimeoutId = setTimeout(() => retryController.abort(), 30000)
                     
-                    try {
-                      const retryResponse = await fetch(url, {
-                        ...retryOptions,
-                        body: retryBody,
-                        signal: retryController.signal
-                      })
-                      clearTimeout(retryTimeoutId)
-                      return retryResponse
-                    } catch (retryErr: any) {
-                      clearTimeout(retryTimeoutId)
-                      if (retryErr.name === 'AbortError' || retryErr.name === 'TimeoutError') {
-                        throw new Error('Request timeout - please check your connection')
+                      try {
+                        const retryResponse = await fetch(url, {
+                          ...retryOptions,
+                          body: clonedBody || options.body, // Use cloned body if available, otherwise original
+                          signal: retryController.signal
+                        })
+                        clearTimeout(retryTimeoutId)
+                        return retryResponse
+                      } catch (retryErr: any) {
+                        clearTimeout(retryTimeoutId)
+                        if (retryErr.name === 'AbortError' || retryErr.name === 'TimeoutError') {
+                          throw new Error('Request timeout - please check your connection')
+                        }
+                        throw retryErr
                       }
-                      throw retryErr
+                    } else {
+                      console.warn('⚠️ Session refresh failed:', refreshError)
+                      // Return the original response if refresh failed
+                      return response
                     }
-                  } else {
-                    console.warn('⚠️ Session refresh failed:', refreshError)
-                    // Return the original response if refresh failed
+                  } catch (refreshErr) {
+                    console.error('❌ Error during session refresh:', refreshErr)
+                    // Return the original response if refresh errored
                     return response
                   }
-                } catch (refreshErr) {
-                  console.error('❌ Error during session refresh:', refreshErr)
-                  // Return the original response if refresh errored
-                  return response
                 }
               }
+              
+              return response
+            } catch (err: any) {
+              clearTimeout(timeoutId)
+              if (err.name === 'AbortError' || err.name === 'TimeoutError') {
+                throw new Error('Request timeout - please check your connection')
+              }
+              throw err
             }
-            
-            return response
-          } catch (err: any) {
-            clearTimeout(timeoutId)
-            if (err.name === 'AbortError' || err.name === 'TimeoutError') {
-              throw new Error('Request timeout - please check your connection')
-            }
-            throw err
           }
-        }
       },
       realtime: {
         params: {
@@ -231,9 +289,21 @@ function getSupabaseClient(): SupabaseClient {
             // Track if this is a retry to avoid infinite loops
             const isRetry = (options as any)?._isRetry || false
             
+            // Clone the body BEFORE the first request if it's a type that needs cloning
+            // This ensures we can retry even if the body gets consumed
+            // Use original for first request, clone for retry
+            const needsCloning = !isRetry && options.body && (
+              options.body instanceof FormData ||
+              options.body instanceof Blob ||
+              options.body instanceof ArrayBuffer ||
+              ArrayBuffer.isView(options.body)
+            )
+            const clonedBody = needsCloning ? cloneRequestBody(options.body) : null
+            
             try {
               const response = await fetch(url, {
                 ...options,
+                body: options.body, // Use original body for first request
                 signal: controller.signal
               })
               
@@ -257,20 +327,10 @@ function getSupabaseClient(): SupabaseClient {
                       console.log('✅ Session refreshed successfully, retrying original request...')
                       
                       // Retry the original request with refreshed session
+                      // Use the cloned body (which was created before the first request)
                       const retryOptions = {
                         ...options,
                         _isRetry: true
-                      }
-                      
-                      // Clone the request body if it exists (since it can only be read once)
-                      let retryBody = options.body
-                      if (options.body && typeof options.body === 'string') {
-                        retryBody = options.body
-                      } else if (options.body instanceof FormData) {
-                        retryBody = options.body
-                      } else if (options.body) {
-                        // For other body types, try to preserve them
-                        retryBody = options.body
                       }
                       
                       const retryController = new AbortController()
@@ -279,7 +339,7 @@ function getSupabaseClient(): SupabaseClient {
                       try {
                         const retryResponse = await fetch(url, {
                           ...retryOptions,
-                          body: retryBody,
+                          body: clonedBody || options.body, // Use cloned body if available, otherwise original
                           signal: retryController.signal
                         })
                         clearTimeout(retryTimeoutId)
