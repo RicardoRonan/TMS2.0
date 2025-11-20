@@ -210,6 +210,20 @@ function getSupabaseClient(): SupabaseClient {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
+  // Debug logging in development mode to help diagnose env var issues
+  if (import.meta.env.DEV && typeof window !== 'undefined') {
+    console.debug('🔍 Supabase env check:', {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseAnonKey,
+      urlType: typeof supabaseUrl,
+      keyType: typeof supabaseAnonKey,
+      urlLength: supabaseUrl?.length || 0,
+      keyLength: supabaseAnonKey?.length || 0,
+      currentUrl: currentSupabaseUrl,
+      isPlaceholder: currentSupabaseUrl === 'https://placeholder.supabase.co'
+    })
+  }
+
   // Check if we have valid environment variables
   // Also check for empty strings (which can happen if env vars are set but empty)
   const hasValidEnv = !!(supabaseUrl && supabaseAnonKey && 
@@ -228,23 +242,31 @@ function getSupabaseClient(): SupabaseClient {
   // Recreate client if:
   // 1. No client exists yet
   // 2. Credentials have changed (env vars updated)
-  // 3. We have valid env vars but current client was created with invalid ones
+  // 3. We have valid env vars but current client was created with invalid ones (placeholders)
   // 4. We don't have valid env vars but current client was created with valid ones
+  // Force recreation if we have valid env vars but are currently using placeholders
+  const isUsingPlaceholder = currentSupabaseUrl === 'https://placeholder.supabase.co'
   const needsRecreation = 
     !supabaseInstance || 
     credentialsChanged ||
-    (hasValidEnv && (!currentSupabaseUrl || currentSupabaseUrl === 'https://placeholder.supabase.co')) ||
-    (!hasValidEnv && currentSupabaseUrl && currentSupabaseUrl !== 'https://placeholder.supabase.co')
+    (hasValidEnv && isUsingPlaceholder) ||
+    (!hasValidEnv && currentSupabaseUrl && !isUsingPlaceholder)
 
   if (needsRecreation) {
     if (!hasValidEnv) {
-      const missing = []
-      if (!supabaseUrl) missing.push('VITE_SUPABASE_URL')
-      if (!supabaseAnonKey) missing.push('VITE_SUPABASE_ANON_KEY')
-      
-      console.error('❌ Missing Supabase environment variables:', missing.join(', '))
-      console.error('💡 The app will load but Supabase features will not work')
-      console.error('💡 Set these in Netlify: Site configuration → Environment variables')
+      // Only show error messages in development mode
+      if (import.meta.env.DEV) {
+        const missing = []
+        if (!supabaseUrl) missing.push('VITE_SUPABASE_URL')
+        if (!supabaseAnonKey) missing.push('VITE_SUPABASE_ANON_KEY')
+        
+        console.error('❌ Missing Supabase environment variables:', missing.join(', '))
+        console.error('💡 The app will load but Supabase features will not work')
+        console.error('💡 For local development: Create a .env file in the project root with:')
+        console.error('   VITE_SUPABASE_URL=your_supabase_url')
+        console.error('   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key')
+        console.error('💡 For production: Set these in Netlify → Site configuration → Environment variables')
+      }
       
       // Create a dummy client with placeholder values to prevent app crash
       supabaseInstance = createClient(
@@ -261,6 +283,9 @@ function getSupabaseClient(): SupabaseClient {
       currentSupabaseKey = 'placeholder-key'
     } else {
       // Create a real supabase client with valid credentials
+      if (import.meta.env.DEV) {
+        console.log('✅ Creating Supabase client with valid credentials')
+      }
       supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
           autoRefreshToken: true,
@@ -395,22 +420,25 @@ function getSupabaseClient(): SupabaseClient {
 // the client will already be created. Otherwise, getSupabaseClient() will handle it.
 const supabase = getSupabaseClient()
 
-// Debug: Log client status (both dev and production for debugging)
-if (typeof window !== 'undefined') {
+// Debug: Log client status (only in development mode)
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
   const url = import.meta.env.VITE_SUPABASE_URL
   const key = import.meta.env.VITE_SUPABASE_ANON_KEY
   const hasEnv = !!(url && key && 
     typeof url === 'string' && 
     typeof key === 'string' &&
     url.trim() !== '' &&
-    key.trim() !== '')
+    key.trim() !== '' &&
+    url !== 'https://placeholder.supabase.co' && 
+    key !== 'placeholder-key')
   
   if (hasEnv) {
     console.log('✅ Supabase client initialized with valid credentials')
     console.log('📍 Supabase URL:', url.substring(0, 30) + '...')
   } else {
     console.warn('⚠️ Supabase client initialized with placeholder (env vars missing)')
-    console.warn('💡 Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Netlify environment variables')
+    console.warn('💡 For local development: Create a .env file with VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY')
+    console.warn('💡 For production: Set these in Netlify → Site configuration → Environment variables')
   }
 }
 

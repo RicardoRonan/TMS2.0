@@ -25,7 +25,15 @@
                 <div class="p-4 sm:p-6">
                   <h2 class="text-xl sm:text-2xl font-bold text-text-primary mb-4 sm:mb-6">Send us a message</h2>
                   
-                  <form @submit.prevent="handleSubmit" class="space-y-4 sm:space-y-6">
+                  <form ref="contactForm" id="contact-form" @submit.prevent="handleSubmit" class="space-y-4 sm:space-y-6">
+                    <!-- Hidden inputs for EmailJS template variables -->
+                    <input type="hidden" name="name" :value="`${form.firstName} ${form.lastName}`" />
+                    <input type="hidden" name="title" :value="form.subject" />
+                    <input type="hidden" name="email" :value="form.email" />
+                    <input type="hidden" name="from_email" :value="form.email" />
+                    <input type="hidden" name="reply_to" :value="form.email" />
+                    <input type="hidden" name="message" :value="form.message" />
+                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <HIGInput
                         v-model="form.firstName"
@@ -168,6 +176,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
+import emailjs from '@emailjs/browser'
 import HIGCard from '../components/hig/HIGCard.vue'
 import HIGButton from '../components/hig/HIGButton.vue'
 import HIGInput from '../components/hig/HIGInput.vue'
@@ -176,6 +185,9 @@ import Icon from '../components/Icon.vue'
 
 const store = useStore()
 
+// Initialize EmailJS
+emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY')
+
 const form = ref({
   firstName: '',
   lastName: '',
@@ -183,6 +195,8 @@ const form = ref({
   subject: '',
   message: ''
 })
+
+const contactForm = ref<HTMLFormElement | null>(null)
 
 const errors = ref<Record<string, string>>({})
 const loading = ref(false)
@@ -253,8 +267,15 @@ const handleSubmit = async () => {
   loading.value = true
   
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    if (!contactForm.value) {
+      throw new Error('Form element not found')
+    }
+
+    await emailjs.sendForm(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID || 'default_service',
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_oylltf5',
+      contactForm.value
+    )
     
     store.dispatch('addNotification', {
       type: 'success',
@@ -270,6 +291,7 @@ const handleSubmit = async () => {
       message: ''
     }
   } catch (error) {
+    console.error('EmailJS error:', error)
     store.dispatch('addNotification', {
       type: 'error',
       message: 'Failed to send message. Please try again.'
