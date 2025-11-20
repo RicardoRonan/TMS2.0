@@ -2,7 +2,7 @@
   <Transition name="cookie-banner">
     <div
       v-if="showBanner"
-      class="fixed bottom-0 left-0 right-0 z-50 bg-bg-secondary border-t border-border-primary shadow-lg"
+      class="fixed bottom-16 md:bottom-0 left-0 right-0 z-[55] bg-bg-secondary border-t border-border-primary shadow-lg"
     >
       <div class="container mx-auto px-4 py-4">
         <div class="max-w-6xl mx-auto">

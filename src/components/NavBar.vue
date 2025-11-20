@@ -357,7 +357,7 @@
             >
               About
             </router-link>
-            <div class="border-t border-border-primary my-1"></div>
+            <div v-if="isAuthenticated" class="border-t border-border-primary my-1"></div>
             <router-link
               to="/blog"
               class="block px-4 py-3.5 text-sm text-text-primary hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
