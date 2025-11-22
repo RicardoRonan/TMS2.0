@@ -67,8 +67,12 @@ const isMobileSidebarOpen = computed(() => sidebarState?.value ?? false)
 const mainContentClasses = computed(() => {
   const baseClasses = 'min-h-screen md:pt-0 pt-14 md:pb-0'
   // On mobile, if admin mode is active and user is admin, add extra padding for both navbars
-  if (isAdminMode.value && isAdmin.value) {
-    return `${baseClasses} pb-32`
+  try {
+    if (isAdminMode.value && isAdmin.value) {
+      return `${baseClasses} pb-32`
+    }
+  } catch (error) {
+    console.warn('Error computing mainContentClasses:', error)
   }
   return `${baseClasses} pb-16`
 })
