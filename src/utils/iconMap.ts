@@ -36,6 +36,7 @@ const iconImportMap: Record<string, () => Promise<{ default: IconDefinition }>> 
   'copy': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faCopy })),
   'undo': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faRotateLeft })),
   'redo': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faRotateRight })),
+  'save': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faFloppyDisk })),
   'settings': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faGear })),
   'cogicon': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faGear })),
   'cog': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faGear })),

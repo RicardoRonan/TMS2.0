@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="isAdminMode && isAdmin"
-    class="admin-bottom-nav fixed bottom-0 left-0 right-0 z-50 bg-bg-secondary border-t border-border-primary"
+    class="admin-bottom-nav fixed md:bottom-0 bottom-16 left-0 right-0 z-[51] bg-bg-secondary border-t border-border-primary"
   >
     <div class="container mx-auto px-4 py-3">
       <div class="flex items-center justify-between max-w-6xl mx-auto gap-2 md:gap-4">
@@ -194,7 +194,7 @@ onUnmounted(() => {
 
 @media (max-width: 640px) {
   :global(body:has(.admin-bottom-nav)) {
-    padding-bottom: 70px;
+    padding-bottom: 140px; /* Account for both admin nav (64px) and mobile nav (64px) */
   }
 }
 </style>

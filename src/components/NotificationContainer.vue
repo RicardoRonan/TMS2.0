@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed bottom-24 left-1/2 -translate-x-1/2 right-4 md:top-4 md:left-auto md:translate-x-0 md:right-4 md:bottom-auto z-toast space-y-2 w-[calc(100%-2rem)] md:w-[384px]">
+  <div class="fixed top-14 left-1/2 -translate-x-1/2 right-4 md:top-16 md:left-auto md:translate-x-0 md:right-4 md:bottom-auto z-toast space-y-2 w-[calc(100%-2rem)] md:w-[384px]">
     <TransitionGroup name="toast" tag="div">
       <div
         v-for="notification in notifications"
@@ -154,15 +154,15 @@ const handleTouchEnd = (e: TouchEvent, id: number) => {
   transition: all 0.3s ease;
 }
 
-/* Mobile: slide up from bottom */
+/* Mobile: slide down from top */
 .toast-enter-from {
   opacity: 0;
-  transform: translateY(100%);
+  transform: translateY(-100%);
 }
 
 .toast-leave-to {
   opacity: 0;
-  transform: translateY(100%) translateX(100%);
+  transform: translateY(-100%) translateX(100%);
 }
 
 /* Desktop: slide in from right */

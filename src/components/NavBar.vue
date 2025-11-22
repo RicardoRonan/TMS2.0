@@ -13,7 +13,37 @@
       </router-link>
       
       <!-- Auth buttons / Menu button -->
-      <div class="flex items-center space-x-2">
+      <div class="flex items-center space-x-1">
+        <!-- Admin mode buttons: Save, Undo, Redo -->
+        <template v-if="isAdminMode && currentUser?.isAdmin">
+          <button
+            class="p-2 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="handleSave"
+            :disabled="!hasPendingChanges || saving"
+            title="Save changes"
+            aria-label="Save changes"
+          >
+            <Icon name="save" :size="18" />
+          </button>
+          <button
+            class="p-2 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="handleUndo"
+            :disabled="!canUndo"
+            title="Undo"
+            aria-label="Undo"
+          >
+            <Icon name="undo" :size="18" />
+          </button>
+          <button
+            class="p-2 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="handleRedo"
+            :disabled="!canRedo"
+            title="Redo"
+            aria-label="Redo"
+          >
+            <Icon name="redo" :size="18" />
+          </button>
+        </template>
         <template v-if="!isAuthenticated">
           <HIGButton variant="primary" size="sm" @click="showRegisterModal = true">
             Sign Up
@@ -441,6 +471,7 @@ import { ref, computed, watch, onMounted, onUnmounted, provide } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { useAuth } from '../composables/useAuth'
+import { useAdminMode } from '../composables/useAdminMode'
 import HIGButton from './hig/HIGButton.vue'
 import HIGModal from './hig/HIGModal.vue'
 import LoginForm from './LoginForm.vue'
@@ -454,6 +485,16 @@ const { logout } = useAuth()
 
 // Admin mode state
 const isAdminMode = computed(() => store.getters.isAdminMode)
+const {
+  canUndo,
+  canRedo,
+  hasPendingChanges,
+  undoEdit,
+  redoEdit,
+  saveChanges
+} = useAdminMode()
+
+const saving = ref(false)
 
 // State
 const showMobileMenu = ref(false)
@@ -583,6 +624,26 @@ const handleMenuLogout = async () => {
 const handleMenuSignIn = () => {
   closeMenuOverlay()
   showLoginModal.value = true
+}
+
+// Admin mode handlers
+const handleUndo = () => {
+  undoEdit()
+}
+
+const handleRedo = () => {
+  redoEdit()
+}
+
+const handleSave = async () => {
+  try {
+    saving.value = true
+    await saveChanges()
+  } catch (error) {
+    // Error is already handled in saveChanges
+  } finally {
+    saving.value = false
+  }
 }
 
 const handleLoginSuccess = () => {
