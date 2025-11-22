@@ -148,7 +148,7 @@ const handleUserActivity = () => {
     } catch (err) {
       console.warn('⚠️ Activity-based session refresh failed:', err)
     }
-  }, 2 * 60 * 1000) // Wait 2 minutes after last activity
+  }, 5 * 60 * 1000) // Wait 5 minutes after last activity (reduced frequency)
 }
 
 onMounted(async () => {
@@ -173,8 +173,9 @@ onMounted(async () => {
   // Handle tab visibility changes to refresh session when tab becomes active
   document.addEventListener('visibilitychange', handleVisibilityChange)
   
-  // Add activity listeners for session refresh
-  const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click']
+  // Add activity listeners for session refresh (reduced frequency to avoid excessive checks)
+  // Only listen to less frequent events to reduce session check calls
+  const activityEvents = ['mousedown', 'keypress', 'click']
   activityEvents.forEach(event => {
     document.addEventListener(event, handleUserActivity, { passive: true })
   })
@@ -198,7 +199,7 @@ onMounted(async () => {
         console.warn('⚠️ Periodic session check failed:', err)
       }
     }
-  }, 2 * 60 * 1000) // Check every 2 minutes instead of 5
+  }, 5 * 60 * 1000) // Check every 5 minutes (reduced frequency to minimize session checks)
 })
 
 onUnmounted(() => {

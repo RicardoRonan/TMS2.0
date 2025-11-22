@@ -53,16 +53,9 @@ export async function initializeAuthListener(store: any) {
     if (supabaseSessionStr) {
       try {
         const supabaseSession = JSON.parse(supabaseSessionStr)
-        console.log('🔍 Found Supabase session in localStorage:', {
-          hasAccessToken: !!supabaseSession?.access_token,
-          expiresAt: supabaseSession?.expires_at ? new Date(supabaseSession.expires_at * 1000).toISOString() : 'N/A',
-          userId: supabaseSession?.user?.id || 'N/A'
-        })
       } catch (e) {
         console.warn('⚠️ Could not parse Supabase session from localStorage:', e)
       }
-    } else {
-      console.log('ℹ️ No Supabase session found in localStorage')
     }
   } catch (err) {
     console.warn('⚠️ Error checking Supabase session in localStorage:', err)
@@ -73,24 +66,11 @@ export async function initializeAuthListener(store: any) {
   // Set up the auth state change listener FIRST
   // This ensures INITIAL_SESSION event is captured immediately
   authListener = supabase.auth.onAuthStateChange(async (event, session) => {
-    console.log(`🔔 Auth state change event: ${event}`, {
-      hasSession: !!session,
-      hasUser: !!session?.user,
-      userId: session?.user?.id || 'N/A',
-      email: session?.user?.email || 'N/A'
-    })
     try {
       switch (event) {
         case 'INITIAL_SESSION':
           // This is the primary way sessions are restored on page reload
-          console.log('🔄 useAuth: INITIAL_SESSION event received', {
-            hasSession: !!session,
-            hasUser: !!session?.user,
-            sessionExpiresAt: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : 'N/A'
-          })
-          
           if (session?.user) {
-            console.log('✅ useAuth: Session found, user:', session.user.email || session.user.id)
             
             // Verify session is not expired
             if (session.expires_at) {
@@ -108,9 +88,8 @@ export async function initializeAuthListener(store: any) {
             
             try {
               await loadUserDataForStore(session.user, store)
-              console.log('✅ useAuth: User data loaded successfully and synced with localStorage')
             } catch (err: any) {
-              console.warn('⚠️ useAuth: Failed to load user data, using basic auth data:', err?.message)
+              console.warn('⚠️ useAuth: Failed to load user data, using basic auth data')
               // If loading user data fails, still set basic auth data
               // This ensures the user stays logged in even if profile fetch fails
               // This will also update localStorage with the fresh session data
@@ -130,10 +109,7 @@ export async function initializeAuthListener(store: any) {
             const storedUser = localStorage.getItem('user')
             const storedSupabaseSession = localStorage.getItem('supabase.auth.token')
             
-            console.log('ℹ️ useAuth: No session in INITIAL_SESSION event', {
-              hasStoredUser: !!storedUser,
-              hasStoredSupabaseSession: !!storedSupabaseSession
-            })
+            // No session in INITIAL_SESSION event
             
             // Only clear if we're sure there's no Supabase session
             // Wait a bit for Supabase to fully initialize
@@ -141,10 +117,10 @@ export async function initializeAuthListener(store: any) {
               try {
                 const { data: { session: delayedSession } } = await supabase.auth.getSession()
                 if (!delayedSession) {
-                  console.log('ℹ️ useAuth: Confirmed no Supabase session after delay - clearing user data')
+                  // Confirmed no Supabase session after delay - clearing user data
                   store.dispatch('setUser', null)
                 } else {
-                  console.log('✅ useAuth: Found Supabase session after delay, restoring user')
+                  // Found Supabase session after delay, restoring user
                   if (delayedSession.user) {
                     try {
                       await loadUserDataForStore(delayedSession.user, store)
@@ -206,7 +182,7 @@ export async function initializeAuthListener(store: any) {
       
       case 'SIGNED_OUT':
         // Clear store and localStorage when signed out
-        console.log('🔓 useAuth: User signed out - clearing user data')
+        // User signed out - clearing user data
         store.dispatch('setUser', null)
         break
       
@@ -279,12 +255,7 @@ export async function initializeAuthListener(store: any) {
       const { data: { session }, error } = result || { data: { session: null }, error: null }
       const currentUser = store.getters.currentUser
       
-      console.log('🔍 Backup session check:', {
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        hasCurrentUser: !!currentUser,
-        error: error?.message || 'N/A'
-      })
+      // Backup session check completed
       
       // Sync check: Ensure Supabase session matches store state
       if (!error && session?.user) {
@@ -334,7 +305,7 @@ export async function initializeAuthListener(store: any) {
         // No Supabase session - clear store and localStorage if it has a user
         // This ensures localStorage doesn't have stale data when session expires
         if (currentUser) {
-          console.log('ℹ️ useAuth: No Supabase session found - clearing user data from store and localStorage')
+          // No Supabase session found - clearing user data from store and localStorage
           store.dispatch('setUser', null)
         }
       }
@@ -454,7 +425,7 @@ export function useAuth() {
         throw new Error(errorMsg)
       }
 
-      console.log('🔐 Attempting sign-in for:', email)
+      // Sign-in attempt initiated
       
       // Add timeout to prevent hanging
       // Use 35 seconds to match the fetch timeout (30s) plus a buffer
@@ -483,7 +454,7 @@ export function useAuth() {
         throw authError
       }
       
-      console.log('✅ Sign-in successful')
+      // Sign-in successful
 
       if (!data.user) {
         throw new Error('No user data returned from authentication')

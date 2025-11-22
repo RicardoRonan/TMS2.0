@@ -221,28 +221,16 @@ async function initializeApp() {
     const savedUser = localStorage.getItem('user')
     const supabaseSession = localStorage.getItem('supabase.auth.token')
     
-    console.log('🔍 App initialization - checking localStorage:', {
-      hasStoredUser: !!savedUser,
-      hasSupabaseSession: !!supabaseSession
-    })
-    
     if (savedUser) {
       try {
         const userData = JSON.parse(savedUser)
         // Restore user data immediately (before Supabase loads)
         // This provides instant UI feedback while Supabase session is being verified
         store.commit('SET_USER', userData)
-        console.log('✅ Restored user from localStorage:', {
-          email: userData.email || 'N/A',
-          uid: userData.uid || 'N/A',
-          hasSupabaseSession: !!supabaseSession
-        })
       } catch (parseErr) {
         console.warn('⚠️ Failed to parse saved user data:', parseErr)
         localStorage.removeItem('user')
       }
-    } else if (supabaseSession) {
-      console.log('ℹ️ No stored user but Supabase session exists - will restore from Supabase')
     }
   } catch (err) {
     console.warn('⚠️ Failed to restore user from localStorage:', err)

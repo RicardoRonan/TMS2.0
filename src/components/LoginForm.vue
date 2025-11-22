@@ -185,11 +185,8 @@ const handleSubmit = async () => {
   loading.value = true
   
   try {
-    console.log('LoginForm: Starting sign in process...')
     // Call actual signin function
     await signIn(form.value.email, form.value.password)
-    
-    console.log('LoginForm: Sign in successful')
     // Show success notification
     store.dispatch('addNotification', {
       type: 'success',
@@ -198,11 +195,8 @@ const handleSubmit = async () => {
     
     emit('success')
   } catch (error: any) {
-    console.error('LoginForm: Sign in error:', error)
     // Error is already handled by useAuth, but show notification
     const errorMessage = authError.value || error?.message || 'Failed to sign in. Please try again.'
-    
-    console.error('LoginForm: Error message:', errorMessage)
     
     store.dispatch('addNotification', {
       type: 'error',
@@ -228,7 +222,6 @@ const handleSubmit = async () => {
     }
   } finally {
     loading.value = false
-    console.log('LoginForm: Sign in process completed')
   }
 }
 

@@ -2410,13 +2410,6 @@ const checkAdminStatus = async () => {
   try {
     // Supabase session is automatically managed - no need to call getSession()
     
-    console.log('=== Admin Status Check ===')
-    console.log('User from store:', {
-      uid: user.value.uid,
-      email: user.value.email,
-      isAdmin: user.value.isAdmin
-    })
-
     // Check user in database
     const { data: userData, error: userError } = await supabase
       .from('users')
@@ -2425,13 +2418,10 @@ const checkAdminStatus = async () => {
       .single()
 
     if (userError) {
-      console.error('Error fetching user from database:', userError)
+      console.error('Error fetching user from database')
     } else {
-      console.log('User from database:', userData)
-      console.log('Is admin in DB:', userData?.is_admin)
-      
       if (userData?.is_admin !== user.value.isAdmin) {
-        console.warn('⚠️ Admin status mismatch! Store says:', user.value.isAdmin, 'DB says:', userData?.is_admin)
+        console.warn('⚠️ Admin status mismatch detected')
         // Update store with correct admin status
         store.dispatch('setUser', {
           ...user.value,
@@ -2441,7 +2431,6 @@ const checkAdminStatus = async () => {
     }
 
     // Test if we can insert a test blog (will be rolled back)
-    console.log('Testing blog insert permission...')
     const testBlogData = {
       title: 'TEST - DELETE ME',
       slug: `test-${Date.now()}`,

@@ -647,14 +647,12 @@ const handleSave = async () => {
 }
 
 const handleLoginSuccess = () => {
-  console.log('Login success handler called')
   showLoginModal.value = false
   
   // Wait a moment for store to update, then verify user is actually signed in
   setTimeout(() => {
     const user = store.getters.currentUser
     const authenticated = store.getters.isAuthenticated
-    console.log('After login - User:', user, 'Authenticated:', authenticated)
     
     if (authenticated && user) {
       // User is actually signed in, navigate if needed
@@ -663,7 +661,6 @@ const handleLoginSuccess = () => {
       }
     } else {
       // User not actually signed in - show error
-      console.error('Login appeared successful but user is not in store')
       store.dispatch('addNotification', {
         type: 'error',
         message: 'Sign in may not have completed. Please try again.'
@@ -673,7 +670,6 @@ const handleLoginSuccess = () => {
 }
 
 const handleRegisterSuccess = () => {
-  console.log('Register success handler called')
   showRegisterModal.value = false
   
   // Remove signup query parameter
@@ -685,7 +681,6 @@ const handleRegisterSuccess = () => {
   setTimeout(() => {
     const user = store.getters.currentUser
     const authenticated = store.getters.isAuthenticated
-    console.log('After register - User:', user, 'Authenticated:', authenticated)
     
     if (authenticated && user) {
       // User is actually signed in, navigate if needed
@@ -694,7 +689,6 @@ const handleRegisterSuccess = () => {
       }
     } else {
       // User not actually signed in - might need email confirmation
-      console.log('User registered but may need email confirmation')
       // Don't show error - email confirmation message already shown
     }
   }, 100)

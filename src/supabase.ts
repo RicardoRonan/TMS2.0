@@ -88,7 +88,7 @@ function initializeClientIfNeeded() {
         storageKey: 'supabase.auth.token',
         flowType: 'pkce',
         storageType: 'localStorage',
-        debug: import.meta.env.DEV,
+        debug: false, // Disable verbose GoTrueClient logging
       },
       db: {
         schema: 'public'
@@ -210,19 +210,7 @@ function getSupabaseClient(): SupabaseClient {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-  // Debug logging in development mode to help diagnose env var issues
-  if (import.meta.env.DEV && typeof window !== 'undefined') {
-    console.debug('🔍 Supabase env check:', {
-      hasUrl: !!supabaseUrl,
-      hasKey: !!supabaseAnonKey,
-      urlType: typeof supabaseUrl,
-      keyType: typeof supabaseAnonKey,
-      urlLength: supabaseUrl?.length || 0,
-      keyLength: supabaseAnonKey?.length || 0,
-      currentUrl: currentSupabaseUrl,
-      isPlaceholder: currentSupabaseUrl === 'https://placeholder.supabase.co'
-    })
-  }
+  // Debug logging disabled for security (no longer exposing env var details)
 
   // Check if we have valid environment variables
   // Also check for empty strings (which can happen if env vars are set but empty)
@@ -297,7 +285,7 @@ function getSupabaseClient(): SupabaseClient {
           // Ensure session persists across page reloads
           storageType: 'localStorage',
           // Add retry logic for network issues
-          debug: import.meta.env.DEV,
+          debug: false, // Disable verbose GoTrueClient logging
         },
         db: {
           schema: 'public'
@@ -433,8 +421,7 @@ if (typeof window !== 'undefined' && import.meta.env.DEV) {
     key !== 'placeholder-key')
   
   if (hasEnv) {
-    console.log('✅ Supabase client initialized with valid credentials')
-    console.log('📍 Supabase URL:', url.substring(0, 30) + '...')
+    // Supabase client initialized with valid credentials
   } else {
     console.warn('⚠️ Supabase client initialized with placeholder (env vars missing)')
     console.warn('💡 For local development: Create a .env file with VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY')
