@@ -116,6 +116,73 @@
       </div>
     </section>
 
+    <!-- Favorited Tools Section -->
+    <section class="py-8" v-if="isAuthenticated">
+      <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+          <HIGCard>
+            <div class="p-6">
+              <h2 class="text-2xl font-bold text-text-primary mb-6">Favorited Tools</h2>
+              
+              <div v-if="loadingFavoriteTools" class="space-y-4">
+                <div v-for="n in 3" :key="n" class="animate-pulse">
+                  <div class="h-4 bg-bg-tertiary rounded w-3/4 mb-2"></div>
+                  <div class="h-2 bg-bg-tertiary rounded w-full mb-4"></div>
+                </div>
+              </div>
+              
+              <div v-else-if="favoriteTools.length === 0" class="text-center py-8">
+                <div class="w-16 h-16 bg-bg-tertiary rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Icon name="favorite" :size="32" class="text-text-tertiary" />
+                </div>
+                <p class="text-text-secondary mb-2">No favorited tools yet.</p>
+                <p class="text-text-tertiary text-sm mb-4">Start favoriting tools to see them here!</p>
+                <router-link to="/tools" class="inline-block">
+                  <HIGButton variant="primary">Browse Tools</HIGButton>
+                </router-link>
+              </div>
+              
+              <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <HIGCard v-for="tool in favoriteTools" :key="tool.id" class="hover:shadow-hig-lg transition-shadow">
+                  <div class="p-4">
+                    <div 
+                      class="w-16 h-16 border border-border-primary rounded-xl flex items-center justify-center mx-auto mb-4 p-3 shadow-sm"
+                      :style="{ backgroundColor: toolLogoColors[String(tool.id)] || 'var(--bg-secondary)' }"
+                    >
+                      <img 
+                        :src="getBrandfetchLogoUrl(tool.name, tool.url, { size: 64 })" 
+                        :alt="`${tool.name} logo`"
+                        class="max-w-full max-h-full w-auto h-auto object-contain"
+                        loading="lazy"
+                        @error="handleLogoError"
+                        @load="(e) => handleLogoLoad(e, tool.id, tool.name)"
+                      />
+                    </div>
+                    <h3 class="font-semibold text-text-primary mb-2 text-center">{{ tool.name }}</h3>
+                    <p class="text-sm text-text-secondary mb-4 line-clamp-2 text-center">{{ tool.description }}</p>
+                    <div class="flex items-center justify-center space-x-2">
+                      <HIGBadge :variant="getCategoryVariant(tool.category)" size="sm">
+                        {{ tool.category }}
+                      </HIGBadge>
+                      <a 
+                        :href="tool.url" 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-primary-500 hover:text-primary-600 transition-colors"
+                        :title="`Visit ${tool.name}`"
+                      >
+                        <Icon name="external-link" :size="16" />
+                      </a>
+                    </div>
+                  </div>
+                </HIGCard>
+              </div>
+            </div>
+          </HIGCard>
+        </div>
+      </div>
+    </section>
+
     <!-- Tutorial Progress Section -->
     <section class="py-8">
       <div class="container mx-auto px-4">
@@ -410,9 +477,13 @@ import { useAuth } from '../composables/useAuth'
 import { useAdminMode } from '../composables/useAdminMode'
 import { supabase } from '../supabase'
 import { uploadImageToImgBB } from '../utils/imgbb'
+import { getBrandfetchLogoUrl } from '../utils/brandfetch'
+import { getLogoBackgroundColor, extractBackgroundColor } from '../utils/logoColors'
+import { setSafeInnerHTML } from '../utils/sanitize'
 import HIGCard from '../components/hig/HIGCard.vue'
 import HIGButton from '../components/hig/HIGButton.vue'
 import HIGInput from '../components/hig/HIGInput.vue'
+import HIGBadge from '../components/hig/HIGBadge.vue'
 import HIGModal from '../components/hig/HIGModal.vue'
 import Icon from '../components/Icon.vue'
 
@@ -440,6 +511,12 @@ const loadingLikedPosts = ref(false)
 // User Comments State
 const userComments = ref<any[]>([])
 const loadingUserComments = ref(false)
+
+// Favorited Tools State
+const favoriteTools = ref<any[]>([])
+const loadingFavoriteTools = ref(false)
+const toolLogoColors = ref<Record<string, string>>({})
+const isAuthenticated = computed(() => store.getters.isAuthenticated)
 
 const currentUser = computed(() => store.getters.currentUser)
 
@@ -793,12 +870,121 @@ const fetchUserComments = async () => {
   }
 }
 
+// Fetch favorited tools
+const fetchFavoriteTools = async () => {
+  if (!isAuthenticated.value || !currentUser.value?.uid) {
+    favoriteTools.value = []
+    return
+  }
+
+  loadingFavoriteTools.value = true
+  try {
+    // First get favorite tool IDs
+    const { data: favoritesData, error: favoritesError } = await supabase
+      .from('user_tool_favorites')
+      .select('tool_id')
+      .eq('user_id', currentUser.value.uid)
+
+    if (favoritesError) {
+      // If table doesn't exist, that's okay - just use empty array
+      if (favoritesError.code === '42P01' || favoritesError.message?.includes('does not exist')) {
+        favoriteTools.value = []
+        return
+      }
+      throw favoritesError
+    }
+
+    if (!favoritesData || favoritesData.length === 0) {
+      favoriteTools.value = []
+      return
+    }
+
+    const toolIds = favoritesData.map((fav: any) => fav.tool_id)
+
+    // Fetch tool details
+    const { data: toolsData, error: toolsError } = await supabase
+      .from('tools')
+      .select('*')
+      .in('id', toolIds)
+
+    if (toolsError) {
+      throw toolsError
+    }
+
+    favoriteTools.value = (toolsData || []).map((tool: any) => ({
+      id: tool.id,
+      name: tool.name,
+      description: tool.description,
+      category: tool.category,
+      url: tool.url
+    }))
+  } catch (err: any) {
+    console.error('Error fetching favorite tools:', err)
+    favoriteTools.value = []
+  } finally {
+    loadingFavoriteTools.value = false
+  }
+}
+
+// Helper functions for tool logos
+const getCategoryVariant = (category: string) => {
+  const variants: Record<string, string> = {
+    'Build Tool': 'primary',
+    'CSS Framework': 'info',
+    'Language': 'warning',
+    'Backend': 'danger',
+    'Framework': 'success',
+    'Editor': 'secondary',
+    'Version Control': 'info',
+    'Design': 'primary',
+    'API Testing': 'warning',
+    'DevOps': 'danger',
+    'Code Quality': 'success'
+  }
+  return variants[category] || 'secondary'
+}
+
+const handleLogoError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  if (img && img.parentElement) {
+    const toolName = img.alt.replace(' logo', '')
+    const firstLetter = toolName[0] || '?'
+    setSafeInnerHTML(
+      img.parentElement,
+      `<span class="text-primary-500 font-bold text-xl">${firstLetter}</span>`
+    )
+    img.parentElement.classList.add('bg-primary-100')
+  }
+}
+
+const handleLogoLoad = async (event: Event, toolId: string | number, toolName: string) => {
+  const img = event.target as HTMLImageElement
+  const toolIdStr = String(toolId)
+  
+  // First try to get known background color
+  const bgColor = getLogoBackgroundColor(toolName)
+  if (bgColor) {
+    toolLogoColors.value[toolIdStr] = bgColor
+    return
+  }
+  
+  // Otherwise, extract background color from image edges
+  try {
+    const backgroundColor = await extractBackgroundColor(img.src)
+    toolLogoColors.value[toolIdStr] = backgroundColor
+  } catch (error) {
+    // Fallback to default background if extraction fails
+    toolLogoColors.value[toolIdStr] = 'var(--bg-secondary)'
+  }
+}
+
 // Fetch all data on mount
 onMounted(() => {
   if (currentUser.value?.uid) {
     fetchTutorialProgress()
     fetchLikedPosts()
     fetchUserComments()
+    fetchFavoriteTools()
   }
 })
 
@@ -808,10 +994,12 @@ watch(currentUser, (newUser) => {
     fetchTutorialProgress()
     fetchLikedPosts()
     fetchUserComments()
+    fetchFavoriteTools()
   } else {
     tutorialProgress.value = []
     likedPosts.value = []
     userComments.value = []
+    favoriteTools.value = []
   }
 })
 </script>

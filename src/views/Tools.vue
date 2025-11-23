@@ -71,7 +71,7 @@
             <div class="p-6">
               <div 
                 class="w-20 h-20 border border-border-primary rounded-xl flex items-center justify-center mx-auto mb-4 p-4 shadow-sm transition-colors"
-                :style="{ backgroundColor: logoColors[tool.id] || 'var(--bg-secondary)' }"
+                :style="{ backgroundColor: logoColors[String(tool.id)] || 'var(--bg-secondary)' }"
               >
                 <img 
                   :src="getBrandfetchLogoUrl(tool.name, tool.url, { size: 80 })" 
@@ -93,22 +93,28 @@
                 <div class="flex items-center justify-center space-x-2">
                   <a 
                     :href="tool.url" 
-                    target="_blank" 
+                    target="_blank"
                     rel="noopener noreferrer"
                     class="text-primary-500 hover:text-primary-600 transition-colors"
                     :title="`Visit ${tool.name}`"
+                    @click.stop
                   >
                     <Icon name="external-link" :size="16" />
                   </a>
                   <button
-                    class="text-text-tertiary hover:text-primary-500 transition-colors"
-                    :title="`Add ${tool.name} to favorites`"
-                    @click="toggleFavorite(tool.id)"
+                    type="button"
+                    :class="[
+                      'transition-colors cursor-pointer p-1 rounded hover:bg-bg-tertiary flex items-center justify-center',
+                      tool.isFavorite ? 'text-primary-500' : 'text-text-tertiary hover:text-primary-500'
+                    ]"
+                    :title="tool.isFavorite ? `Remove ${tool.name} from favorites` : `Add ${tool.name} to favorites`"
+                    @click="(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(tool.id); }"
                   >
                     <Icon 
                       name="favorite" 
                       :size="16" 
-                      :class="{ 'text-primary-500': tool.isFavorite }"
+                      :class="tool.isFavorite ? 'text-primary-500 fill-primary-500' : ''"
+                      style="pointer-events: none;"
                     />
                   </button>
                 </div>
@@ -156,7 +162,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onActivated, watch } from 'vue'
+import { useStore } from 'vuex'
+import { supabase } from '../supabase'
 import HIGCard from '../components/hig/HIGCard.vue'
 import HIGButton from '../components/hig/HIGButton.vue'
 import HIGInput from '../components/hig/HIGInput.vue'
@@ -167,119 +175,159 @@ import { getBrandfetchLogoUrl } from '../utils/brandfetch'
 import { getLogoBackgroundColor, extractBackgroundColor } from '../utils/logoColors'
 import { setSafeInnerHTML } from '../utils/sanitize'
 
+const store = useStore()
+const isAuthenticated = computed(() => store.getters.isAuthenticated)
+const currentUser = computed(() => store.getters.currentUser)
+
 // State
 const loading = ref(true)
 const searchQuery = ref('')
 const selectedCategory = ref('All')
 const currentPage = ref(1)
 const toolsPerPage = 12
-const logoColors = ref<Record<number, string>>({})
+const logoColors = ref<Record<string, string>>({})
+const tools = ref<any[]>([])
+const categories = ref(['All'])
+const lastFetchTime = ref<number>(0)
+const FETCH_CACHE_TIME = 30000 // 30 seconds - refetch if data is older than this
 
-// Mock data
-const tools = ref([
-  {
-    id: 1,
-    name: 'Vite',
-    description: 'Next generation frontend tooling for fast development',
-    category: 'Build Tool',
-    url: 'https://vitejs.dev',
-    isFavorite: false
-  },
-  {
-    id: 2,
-    name: 'Tailwind CSS',
-    description: 'Utility-first CSS framework for rapid UI development',
-    category: 'CSS Framework',
-    url: 'https://tailwindcss.com',
-    isFavorite: true
-  },
-  {
-    id: 3,
-    name: 'TypeScript',
-    description: 'Typed JavaScript at any scale',
-    category: 'Language',
-    url: 'https://typescriptlang.org',
-    isFavorite: false
-  },
-  {
-    id: 4,
-    name: 'Firebase',
-    description: 'Backend-as-a-Service platform for web and mobile',
-    category: 'Backend',
-    url: 'https://firebase.google.com',
-    isFavorite: true
-  },
-  {
-    id: 5,
-    name: 'Vue.js',
-    description: 'Progressive JavaScript framework for building UIs',
-    category: 'Framework',
-    url: 'https://vuejs.org',
-    isFavorite: false
-  },
-  {
-    id: 6,
-    name: 'VS Code',
-    description: 'Free source-code editor made by Microsoft',
-    category: 'Editor',
-    url: 'https://code.visualstudio.com',
-    isFavorite: true
-  },
-  {
-    id: 7,
-    name: 'GitHub',
-    description: 'Web-based version control and collaboration platform',
-    category: 'Version Control',
-    url: 'https://github.com',
-    isFavorite: false
-  },
-  {
-    id: 8,
-    name: 'Figma',
-    description: 'Collaborative interface design tool',
-    category: 'Design',
-    url: 'https://figma.com',
-    isFavorite: true
-  },
-  {
-    id: 9,
-    name: 'Postman',
-    description: 'API development and testing platform',
-    category: 'API Testing',
-    url: 'https://postman.com',
-    isFavorite: false
-  },
-  {
-    id: 10,
-    name: 'Docker',
-    description: 'Containerization platform for applications',
-    category: 'DevOps',
-    url: 'https://docker.com',
-    isFavorite: false
-  },
-  {
-    id: 11,
-    name: 'ESLint',
-    description: 'JavaScript and TypeScript linter',
-    category: 'Code Quality',
-    url: 'https://eslint.org',
-    isFavorite: true
-  },
-  {
-    id: 12,
-    name: 'Prettier',
-    description: 'Code formatter for consistent code style',
-    category: 'Code Quality',
-    url: 'https://prettier.io',
-    isFavorite: false
+// Load favorites from localStorage (for guests)
+const loadFavoritesFromLocalStorage = (): Set<string> => {
+  try {
+    const stored = localStorage.getItem('toolFavorites')
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      // Convert to strings to handle both old (number) and new (UUID string) formats
+      return new Set(parsed.map((id: any) => String(id)))
+    }
+  } catch (err) {
+    // Silently fail - return empty set
   }
-])
+  return new Set<string>()
+}
 
-const categories = ref(['All', 'Build Tool', 'CSS Framework', 'Language', 'Backend', 'Framework', 'Editor', 'Version Control', 'Design', 'API Testing', 'DevOps', 'Code Quality'])
+// Save favorites to localStorage (for guests)
+const saveFavoritesToLocalStorage = (favorites: Set<string>) => {
+  try {
+    localStorage.setItem('toolFavorites', JSON.stringify(Array.from(favorites)))
+  } catch (err) {
+    // Silently fail - favorites will still work in memory
+  }
+}
+
+// Load favorites from database (for logged-in users)
+const loadFavoritesFromDatabase = async (): Promise<Set<string>> => {
+  if (!isAuthenticated.value || !currentUser.value?.uid) {
+    return new Set<string>()
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('user_tool_favorites')
+      .select('tool_id')
+      .eq('user_id', currentUser.value.uid)
+
+    if (error) {
+      // If table doesn't exist, return empty set
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        return new Set<string>()
+      }
+      throw error
+    }
+
+    return new Set<string>((data || []).map((fav: any) => String(fav.tool_id)))
+  } catch (err: any) {
+    return new Set<string>()
+  }
+}
+
+// Save favorites to database (for logged-in users)
+const saveFavoritesToDatabase = async (favorites: Set<string>) => {
+  if (!isAuthenticated.value || !currentUser.value?.uid) {
+    return
+  }
+
+  try {
+    const favoriteArray = Array.from(favorites)
+    
+    // Delete all existing favorites for this user
+    const { error: deleteError } = await supabase
+      .from('user_tool_favorites')
+      .delete()
+      .eq('user_id', currentUser.value.uid)
+
+    if (deleteError && deleteError.code !== '42P01') {
+      // Ignore "table doesn't exist" error
+      if (!deleteError.message?.includes('does not exist')) {
+        throw deleteError
+      }
+    }
+
+    // Insert new favorites
+    if (favoriteArray.length > 0) {
+      const favoritesToInsert = favoriteArray.map(toolId => ({
+        user_id: currentUser.value.uid,
+        tool_id: toolId
+      }))
+
+      const { error: insertError } = await supabase
+        .from('user_tool_favorites')
+        .insert(favoritesToInsert)
+
+      if (insertError && insertError.code !== '42P01') {
+        // Ignore "table doesn't exist" error
+        if (!insertError.message?.includes('does not exist')) {
+          throw insertError
+        }
+      }
+    }
+  } catch (err: any) {
+    // Silently fail - favorites will still work with localStorage
+  }
+}
+
+// Sync localStorage favorites to database when user logs in
+const syncFavoritesToDatabase = async () => {
+  if (!isAuthenticated.value || !currentUser.value?.uid) {
+    return
+  }
+
+  const localFavorites = loadFavoritesFromLocalStorage()
+  if (localFavorites.size === 0) {
+    return
+  }
+
+  try {
+    const dbFavorites = await loadFavoritesFromDatabase()
+    
+    // Merge: add any localStorage favorites that aren't in database
+    const mergedFavorites = new Set([...dbFavorites, ...localFavorites])
+    
+    if (mergedFavorites.size > dbFavorites.size) {
+      // Save merged favorites to database
+      await saveFavoritesToDatabase(mergedFavorites)
+      favorites.value = mergedFavorites
+      
+      // Clear localStorage after successful sync
+      localStorage.removeItem('toolFavorites')
+    } else {
+      // Database already has all favorites, just use database
+      favorites.value = dbFavorites
+    }
+  } catch (err) {
+    // Keep using localStorage favorites
+    favorites.value = localFavorites
+  }
+}
+
+const favorites = ref<Set<string>>(new Set<string>())
 
 // Computed
 const filteredTools = computed(() => {
-  let filtered = tools.value
+  let filtered = tools.value.map(tool => ({
+    ...tool,
+    isFavorite: favorites.value.has(String(tool.id))
+  }))
 
   // Filter by category
   if (selectedCategory.value !== 'All') {
@@ -290,9 +338,9 @@ const filteredTools = computed(() => {
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     filtered = filtered.filter(tool => 
-      tool.name.toLowerCase().includes(query) ||
-      tool.description.toLowerCase().includes(query) ||
-      tool.category.toLowerCase().includes(query)
+      tool.name?.toLowerCase().includes(query) ||
+      tool.description?.toLowerCase().includes(query) ||
+      tool.category?.toLowerCase().includes(query)
     )
   }
 
@@ -342,10 +390,50 @@ const goToPage = (page: number) => {
   }
 }
 
-const toggleFavorite = (toolId: number) => {
-  const tool = tools.value.find(t => t.id === toolId)
-  if (tool) {
-    tool.isFavorite = !tool.isFavorite
+const toggleFavorite = async (toolId: string | number) => {
+  try {
+    const toolIdStr = String(toolId)
+    
+    // Find the tool to get its name for the notification
+    const tool = tools.value.find(t => String(t.id) === toolIdStr)
+    const toolName = tool?.name || 'Tool'
+    
+    // Create a new Set to trigger Vue reactivity
+    const newFavorites = new Set(favorites.value)
+    
+    let isAdding = false
+    if (newFavorites.has(toolIdStr)) {
+      newFavorites.delete(toolIdStr)
+      isAdding = false
+    } else {
+      newFavorites.add(toolIdStr)
+      isAdding = true
+    }
+    
+    // Update the ref with the new Set to trigger reactivity
+    favorites.value = newFavorites
+
+    // Save to appropriate storage
+    if (isAuthenticated.value) {
+      await saveFavoritesToDatabase(favorites.value)
+    } else {
+      saveFavoritesToLocalStorage(favorites.value)
+    }
+    
+    // Show success notification
+    store.dispatch('addNotification', {
+      type: 'success',
+      message: isAdding 
+        ? `${toolName} added to favorites` 
+        : `${toolName} removed from favorites`,
+      duration: 3000
+    })
+  } catch (error) {
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: 'Failed to update favorite. Please try again.',
+      duration: 3000
+    })
   }
 }
 
@@ -380,23 +468,24 @@ const handleLogoError = (event: Event) => {
   }
 }
 
-const handleLogoLoad = async (event: Event, toolId: number, toolName: string) => {
+const handleLogoLoad = async (event: Event, toolId: string | number, toolName: string) => {
   const img = event.target as HTMLImageElement
+  const toolIdStr = String(toolId)
   
   // First try to get known background color
   const bgColor = getLogoBackgroundColor(toolName)
   if (bgColor) {
-    logoColors.value[toolId] = bgColor
+    logoColors.value[toolIdStr] = bgColor
     return
   }
   
   // Otherwise, extract background color from image edges
   try {
     const backgroundColor = await extractBackgroundColor(img.src)
-    logoColors.value[toolId] = backgroundColor
+    logoColors.value[toolIdStr] = backgroundColor
   } catch (error) {
     // Fallback to default background if extraction fails
-    logoColors.value[toolId] = 'var(--bg-secondary)'
+    logoColors.value[toolIdStr] = 'var(--bg-secondary)'
   }
 }
 
@@ -416,11 +505,157 @@ const pageButtonClasses = (page: number) => [
   }
 ]
 
-onMounted(() => {
-  // Simulate loading
-  setTimeout(() => {
+// Fetch tools from Supabase
+const fetchTools = async (force = false) => {
+  // Check cache first
+  if (!force) {
+    const cached = store.getters.getCachedData('tools')
+    if (cached && Array.isArray(cached) && cached.length > 0) {
+      tools.value = cached
+      loading.value = false
+      updateCategories()
+      // Fetch fresh data in background
+      force = true
+    }
+  }
+
+  // Skip if data was recently fetched (unless forced)
+  const now = Date.now()
+  if (!force && now - lastFetchTime.value < FETCH_CACHE_TIME && tools.value.length > 0) {
+    return
+  }
+
+  try {
+    // Only show loading if we don't have cached data
+    if (tools.value.length === 0) {
+      loading.value = true
+    }
+    
+    const { data, error } = await supabase
+      .from('tools')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      throw error
+    }
+
+    tools.value = (data || []).map(tool => ({
+      id: tool.id,
+      name: tool.name,
+      description: tool.description,
+      category: tool.category,
+      url: tool.url,
+      isFavorite: favorites.value.has(String(tool.id))
+    }))
+
+    updateCategories()
+    lastFetchTime.value = now
+    
+    // Cache the fetched data
+    store.dispatch('setCachedData', { type: 'tools', data: tools.value })
+  } catch (error: any) {
+    tools.value = []
+    const errorMessage = error?.message || error?.code || 'Failed to load tools'
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: `Error loading tools: ${errorMessage}`,
+      duration: 8000
+    })
+  } finally {
     loading.value = false
-  }, 1000)
+  }
+}
+
+// Update categories list from fetched tools
+const updateCategories = () => {
+  const uniqueCategories = new Set<string>(['All'])
+  tools.value.forEach(tool => {
+    if (tool.category) {
+      uniqueCategories.add(tool.category)
+    }
+  })
+  categories.value = Array.from(uniqueCategories).sort()
+}
+
+// Load favorites when component mounts or user logs in
+const loadFavorites = async () => {
+  if (isAuthenticated.value) {
+    const dbFavorites = await loadFavoritesFromDatabase()
+    favorites.value = dbFavorites
+    
+    // Sync localStorage favorites to database if any exist
+    await syncFavoritesToDatabase()
+  } else {
+    const localFavorites = loadFavoritesFromLocalStorage()
+    favorites.value = localFavorites
+  }
+  
+  // Update tools with favorite status after loading favorites
+  updateToolsFavoriteStatus()
+}
+
+// Update all tools with current favorite status
+const updateToolsFavoriteStatus = () => {
+  tools.value = tools.value.map(tool => ({
+    ...tool,
+    isFavorite: favorites.value.has(String(tool.id))
+  }))
+}
+
+// Watch for authentication changes to sync favorites
+watch(isAuthenticated, async (newValue) => {
+  if (newValue) {
+    await loadFavorites()
+  } else {
+    // User logged out - switch to localStorage
+    favorites.value = loadFavoritesFromLocalStorage()
+  }
+})
+
+onMounted(async () => {
+  // Load favorites FIRST before loading tools
+  await loadFavorites()
+  
+  // Check cache first for instant display
+  const cached = store.getters.getCachedData('tools')
+  
+  if (cached && Array.isArray(cached) && cached.length > 0) {
+    // Update cached tools with favorite status
+    tools.value = cached.map(tool => ({
+      ...tool,
+      isFavorite: favorites.value.has(String(tool.id))
+    }))
+    loading.value = false
+    updateCategories()
+  }
+  
+  // Fetch fresh data in background
+  await fetchTools()
+  
+  // Update tools again after fetch to ensure favorite status is correct
+  updateToolsFavoriteStatus()
+})
+
+// Watch favorites and update tools when favorites change
+// Watch the Set by converting to array for proper reactivity tracking
+watch(() => Array.from(favorites.value), () => {
+  updateToolsFavoriteStatus()
+}, { deep: true })
+
+// Refetch when component is activated (navigated back to)
+onActivated(async () => {
+  // Reload favorites when navigating back to the page
+  await loadFavorites()
+  
+  const now = Date.now()
+  // Refetch if data is stale or empty
+  if (now - lastFetchTime.value > FETCH_CACHE_TIME || tools.value.length === 0) {
+    await fetchTools(true)
+  } else {
+    // Even if not refetching, update favorite status
+    updateToolsFavoriteStatus()
+  }
 })
 </script>
 

@@ -122,24 +122,27 @@
             <input
               type="checkbox"
               :checked="isPageComplete"
-              :disabled="isTogglingProgress"
+              :disabled="isTogglingProgress || loading"
               @change="togglePageProgress"
-              class="w-5 h-5 rounded border-border-primary bg-bg-secondary text-primary-500 focus:ring-primary-500 focus:ring-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-5 h-5 rounded border-border-primary bg-bg-secondary text-primary-500 focus:ring-primary-500 focus:ring-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             />
             <div class="flex-1">
               <span class="text-text-primary font-medium">
                 Mark as complete
               </span>
               <p class="text-sm text-text-secondary mt-1">
-                Track your progress through this tutorial
+                {{ isTogglingProgress ? 'Saving...' : 'Track your progress through this tutorial' }}
               </p>
             </div>
             <Icon 
-              v-if="isPageComplete" 
+              v-if="isPageComplete && !isTogglingProgress" 
               name="check" 
               :size="20" 
               class="text-primary-500"
             />
+            <div v-if="isTogglingProgress" class="w-5 h-5 flex items-center justify-center">
+              <div class="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
           </label>
         </div>
 
@@ -280,10 +283,13 @@ const handleContentUpdate = (newContent: string) => {
 
 // Check if page is already marked as complete
 const checkPageProgress = async () => {
-  if (!currentUser.value?.uid || !page.value || !category.value) return
+  if (!currentUser.value?.uid || !page.value || !category.value) {
+    return
+  }
 
   try {
-    const { data, error } = await supabase
+    // First try with tutorial_page_id (per-page tracking)
+    let { data, error } = await supabase
       .from('tutorial_progress')
       .select('*')
       .eq('user_id', currentUser.value.uid)
@@ -291,6 +297,20 @@ const checkPageProgress = async () => {
       .eq('tutorial_page_id', page.value.id)
       .eq('completed', true)
       .maybeSingle()
+
+    // If that fails due to missing column, try without tutorial_page_id
+    if (error && (error.message?.includes('tutorial_page_id') || error.code === '42703')) {
+      const result = await supabase
+        .from('tutorial_progress')
+        .select('*')
+        .eq('user_id', currentUser.value.uid)
+        .eq('tutorial_category_id', category.value.category_id)
+        .eq('completed', true)
+        .maybeSingle()
+      
+      data = result.data
+      error = result.error
+    }
 
     if (error && error.code !== 'PGRST116') {
       console.error('Error checking progress:', error)
@@ -305,20 +325,46 @@ const checkPageProgress = async () => {
 
 // Automatically update tutorial progress when page is viewed
 const updateTutorialProgress = async () => {
-  if (!currentUser.value?.uid || !page.value || !category.value) return
+  if (!currentUser.value?.uid || !page.value || !category.value) {
+    return
+  }
+
+  // Wait a bit to ensure checkPageProgress has completed
+  await new Promise(resolve => setTimeout(resolve, 100))
 
   // Don't auto-update if user has already marked it (to respect their choice)
-  if (isPageComplete.value) return
+  if (isPageComplete.value) {
+    return
+  }
 
   try {
-    // Check if progress already exists
-    const { data: existingProgress, error: checkError } = await supabase
+    // First try checking with tutorial_page_id
+    let existingProgress = null
+    let checkError = null
+    
+    let result = await supabase
       .from('tutorial_progress')
       .select('*')
       .eq('user_id', currentUser.value.uid)
       .eq('tutorial_category_id', category.value.category_id)
       .eq('tutorial_page_id', page.value.id)
       .maybeSingle()
+    
+    existingProgress = result.data
+    checkError = result.error
+
+    // If that fails due to missing column, try without tutorial_page_id
+    if (checkError && (checkError.message?.includes('tutorial_page_id') || checkError.code === '42703')) {
+      const fallbackResult = await supabase
+        .from('tutorial_progress')
+        .select('*')
+        .eq('user_id', currentUser.value.uid)
+        .eq('tutorial_category_id', category.value.category_id)
+        .maybeSingle()
+      
+      existingProgress = fallbackResult.data
+      checkError = fallbackResult.error
+    }
 
     if (checkError && checkError.code !== 'PGRST116') {
       console.error('Error checking progress:', checkError)
@@ -327,7 +373,10 @@ const updateTutorialProgress = async () => {
 
     // If progress doesn't exist, create it automatically
     if (!existingProgress) {
-      const { error: insertError } = await supabase
+      let insertError = null
+      
+      // Try with tutorial_page_id first
+      let insertResult = await supabase
         .from('tutorial_progress')
         .insert({
           user_id: currentUser.value.uid,
@@ -336,30 +385,31 @@ const updateTutorialProgress = async () => {
           completed: true,
           completed_at: new Date().toISOString()
         })
+      
+      insertError = insertResult.error
 
-      if (insertError) {
-        // If insert fails due to missing column, try without tutorial_page_id
-        // (in case the schema only tracks per category)
-        if (insertError.message?.includes('tutorial_page_id')) {
-          const { error: fallbackError } = await supabase
-            .from('tutorial_progress')
-            .upsert({
-              user_id: currentUser.value.uid,
-              tutorial_category_id: category.value.category_id,
-              completed: true,
-              completed_at: new Date().toISOString()
-            }, {
-              onConflict: 'user_id,tutorial_category_id'
-            })
-          
-          if (fallbackError) {
-            console.error('Error saving progress (fallback):', fallbackError)
-          } else {
-            isPageComplete.value = true
-          }
+      // If insert fails due to missing column, try without tutorial_page_id
+      if (insertError && (insertError.message?.includes('tutorial_page_id') || insertError.code === '42703')) {
+        const fallbackResult = await supabase
+          .from('tutorial_progress')
+          .upsert({
+            user_id: currentUser.value.uid,
+            tutorial_category_id: category.value.category_id,
+            completed: true,
+            completed_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id,tutorial_category_id'
+          })
+        
+        insertError = fallbackResult.error
+        
+        if (insertError) {
+          console.error('Error saving progress (fallback):', insertError)
         } else {
-          console.error('Error saving progress:', insertError)
+          isPageComplete.value = true
         }
+      } else if (insertError) {
+        console.error('Error saving progress:', insertError)
       } else {
         isPageComplete.value = true
       }
@@ -373,7 +423,10 @@ const updateTutorialProgress = async () => {
 
 // Toggle page progress (mark/unmark as complete)
 const togglePageProgress = async (event: Event) => {
-  if (!currentUser.value?.uid || !page.value || !category.value) return
+  if (!currentUser.value?.uid || !page.value || !category.value) {
+    alert('Please make sure you are logged in and the page has loaded completely.')
+    return
+  }
 
   const target = event.target as HTMLInputElement
   const shouldComplete = target.checked
@@ -381,8 +434,8 @@ const togglePageProgress = async (event: Event) => {
   isTogglingProgress.value = true
   try {
     if (shouldComplete) {
-      // Mark as complete
-      const { error } = await supabase
+      // Mark as complete - try with tutorial_page_id first
+      let result = await supabase
         .from('tutorial_progress')
         .upsert({
           user_id: currentUser.value.uid,
@@ -394,53 +447,64 @@ const togglePageProgress = async (event: Event) => {
           onConflict: 'user_id,tutorial_category_id,tutorial_page_id'
         })
 
-      if (error) {
-        // Try fallback without tutorial_page_id if column doesn't exist
-        if (error.message?.includes('tutorial_page_id')) {
-          const { error: fallbackError } = await supabase
-            .from('tutorial_progress')
-            .upsert({
-              user_id: currentUser.value.uid,
-              tutorial_category_id: category.value.category_id,
-              completed: true,
-              completed_at: new Date().toISOString()
-            }, {
-              onConflict: 'user_id,tutorial_category_id'
-            })
-          
-          if (fallbackError) {
-            throw fallbackError
-          }
-        } else {
+      let error = result.error
+
+      // If that fails due to missing column, try without tutorial_page_id
+      if (error && (error.message?.includes('tutorial_page_id') || error.code === '42703' || error.code === '42P01')) {
+        const fallbackResult = await supabase
+          .from('tutorial_progress')
+          .upsert({
+            user_id: currentUser.value.uid,
+            tutorial_category_id: category.value.category_id,
+            completed: true,
+            completed_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id,tutorial_category_id'
+          })
+        
+        error = fallbackResult.error
+        
+        if (error) {
+          console.error('Error saving progress (fallback):', error)
           throw error
         }
+      } else if (error) {
+        console.error('Error saving progress:', error)
+        throw error
       }
+      
       isPageComplete.value = true
     } else {
       // Unmark as complete - delete the progress entry
-      const { error } = await supabase
+      // Try with tutorial_page_id first
+      let result = await supabase
         .from('tutorial_progress')
         .delete()
         .eq('user_id', currentUser.value.uid)
         .eq('tutorial_category_id', category.value.category_id)
         .eq('tutorial_page_id', page.value.id)
 
-      if (error) {
-        // Try fallback without tutorial_page_id
-        if (error.message?.includes('tutorial_page_id')) {
-          const { error: fallbackError } = await supabase
-            .from('tutorial_progress')
-            .delete()
-            .eq('user_id', currentUser.value.uid)
-            .eq('tutorial_category_id', category.value.category_id)
-          
-          if (fallbackError) {
-            throw fallbackError
-          }
-        } else {
+      let error = result.error
+
+      // If that fails, try without tutorial_page_id
+      if (error && (error.message?.includes('tutorial_page_id') || error.code === '42703')) {
+        const fallbackResult = await supabase
+          .from('tutorial_progress')
+          .delete()
+          .eq('user_id', currentUser.value.uid)
+          .eq('tutorial_category_id', category.value.category_id)
+        
+        error = fallbackResult.error
+        
+        if (error) {
+          console.error('Error deleting progress (fallback):', error)
           throw error
         }
+      } else if (error) {
+        console.error('Error deleting progress:', error)
+        throw error
       }
+      
       isPageComplete.value = false
     }
   } catch (err: any) {
@@ -448,6 +512,7 @@ const togglePageProgress = async (event: Event) => {
     // Revert checkbox state on error
     target.checked = !shouldComplete
     isPageComplete.value = !shouldComplete
+    alert(`Error ${shouldComplete ? 'saving' : 'removing'} progress: ${err.message || 'Unknown error'}`)
   } finally {
     isTogglingProgress.value = false
   }
@@ -1057,8 +1122,10 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
         
         // Check and update progress if we have cached data
         if (currentUser.value?.uid && page.value && category.value) {
-          checkPageProgress()
-          updateTutorialProgress()
+          // First check existing progress, then auto-update if needed
+          checkPageProgress().then(() => {
+            updateTutorialProgress()
+          })
         }
         
         // Only show loading if we don't have cached data
@@ -1092,7 +1159,6 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
         categoryData = catData
       }
     } catch (err) {
-      console.log('Error fetching category, using dummy data:', err)
     }
 
     // Fetch page
@@ -1109,7 +1175,6 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
         pageData = pgData
       }
     } catch (err) {
-      console.log('Error fetching page, using dummy data:', err)
     }
 
     // Use dummy data if fetch fails
@@ -1140,7 +1205,6 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
         allPagesData = pagesData
       }
     } catch (err) {
-      console.log('Error fetching all pages, using dummy data:', err)
     }
 
     if (allPagesData.length === 0) {
@@ -1157,9 +1221,10 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
     
     // Check and update progress after page is loaded
     if (currentUser.value?.uid) {
-      checkPageProgress()
+      // First check existing progress, then auto-update if needed
+      await checkPageProgress()
       // Automatically mark as complete when page is viewed (if not already complete)
-      updateTutorialProgress()
+      await updateTutorialProgress()
     }
     
     // Update cache - add/update this page in the cached pages array
