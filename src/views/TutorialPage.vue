@@ -116,6 +116,33 @@
         <!-- Scroll Indicator -->
         <ScrollIndicator :content-ref="markdownContentRef" />
 
+        <!-- Progress Tracking Toggle -->
+        <div v-if="currentUser" class="mt-8 pt-6 border-t border-border-primary">
+          <label class="flex items-center space-x-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              :checked="isPageComplete"
+              :disabled="isTogglingProgress"
+              @change="togglePageProgress"
+              class="w-5 h-5 rounded border-border-primary bg-bg-secondary text-primary-500 focus:ring-primary-500 focus:ring-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+            <div class="flex-1">
+              <span class="text-text-primary font-medium">
+                Mark as complete
+              </span>
+              <p class="text-sm text-text-secondary mt-1">
+                Track your progress through this tutorial
+              </p>
+            </div>
+            <Icon 
+              v-if="isPageComplete" 
+              name="check" 
+              :size="20" 
+              class="text-primary-500"
+            />
+          </label>
+        </div>
+
         <!-- Navigation -->
         <div class="mt-12 pt-8 border-t border-border-primary">
           <div class="flex items-center justify-between">
@@ -158,11 +185,15 @@ import Breadcrumb from '../components/Breadcrumb.vue'
 import ScrollIndicator from '../components/ScrollIndicator.vue'
 import { renderMarkdown } from '../utils/markdown'
 import { useAdminMode } from '../composables/useAdminMode'
+import { useStore } from 'vuex'
+import { useAuth } from '../composables/useAuth'
 import 'highlight.js/styles/vs2015.css'
 
 const route = useRoute()
 const router = useRouter()
 const { isAdminMode } = useAdminMode()
+const store = useStore()
+const { user } = useAuth()
 
 const loading = ref(true)
 const error = ref<string | null>(null)
@@ -171,6 +202,11 @@ const category = ref<any>(null)
 const allPages = ref<any[]>([])
 const totalPages = ref(0)
 const markdownContentRef = ref<HTMLElement | null>(null)
+
+// Tutorial progress state
+const isPageComplete = ref(false)
+const isTogglingProgress = ref(false)
+const currentUser = computed(() => store.getters.currentUser)
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', { 
@@ -239,6 +275,181 @@ const handleTitleUpdate = (newTitle: string) => {
 const handleContentUpdate = (newContent: string) => {
   if (page.value) {
     page.value.content = newContent
+  }
+}
+
+// Check if page is already marked as complete
+const checkPageProgress = async () => {
+  if (!currentUser.value?.uid || !page.value || !category.value) return
+
+  try {
+    const { data, error } = await supabase
+      .from('tutorial_progress')
+      .select('*')
+      .eq('user_id', currentUser.value.uid)
+      .eq('tutorial_category_id', category.value.category_id)
+      .eq('tutorial_page_id', page.value.id)
+      .eq('completed', true)
+      .maybeSingle()
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error checking progress:', error)
+      return
+    }
+
+    isPageComplete.value = !!data
+  } catch (err) {
+    console.error('Error checking page progress:', err)
+  }
+}
+
+// Automatically update tutorial progress when page is viewed
+const updateTutorialProgress = async () => {
+  if (!currentUser.value?.uid || !page.value || !category.value) return
+
+  // Don't auto-update if user has already marked it (to respect their choice)
+  if (isPageComplete.value) return
+
+  try {
+    // Check if progress already exists
+    const { data: existingProgress, error: checkError } = await supabase
+      .from('tutorial_progress')
+      .select('*')
+      .eq('user_id', currentUser.value.uid)
+      .eq('tutorial_category_id', category.value.category_id)
+      .eq('tutorial_page_id', page.value.id)
+      .maybeSingle()
+
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error('Error checking progress:', checkError)
+      return
+    }
+
+    // If progress doesn't exist, create it automatically
+    if (!existingProgress) {
+      const { error: insertError } = await supabase
+        .from('tutorial_progress')
+        .insert({
+          user_id: currentUser.value.uid,
+          tutorial_category_id: category.value.category_id,
+          tutorial_page_id: page.value.id,
+          completed: true,
+          completed_at: new Date().toISOString()
+        })
+
+      if (insertError) {
+        // If insert fails due to missing column, try without tutorial_page_id
+        // (in case the schema only tracks per category)
+        if (insertError.message?.includes('tutorial_page_id')) {
+          const { error: fallbackError } = await supabase
+            .from('tutorial_progress')
+            .upsert({
+              user_id: currentUser.value.uid,
+              tutorial_category_id: category.value.category_id,
+              completed: true,
+              completed_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id,tutorial_category_id'
+            })
+          
+          if (fallbackError) {
+            console.error('Error saving progress (fallback):', fallbackError)
+          } else {
+            isPageComplete.value = true
+          }
+        } else {
+          console.error('Error saving progress:', insertError)
+        }
+      } else {
+        isPageComplete.value = true
+      }
+    } else if (existingProgress.completed) {
+      isPageComplete.value = true
+    }
+  } catch (err) {
+    console.error('Error updating tutorial progress:', err)
+  }
+}
+
+// Toggle page progress (mark/unmark as complete)
+const togglePageProgress = async (event: Event) => {
+  if (!currentUser.value?.uid || !page.value || !category.value) return
+
+  const target = event.target as HTMLInputElement
+  const shouldComplete = target.checked
+
+  isTogglingProgress.value = true
+  try {
+    if (shouldComplete) {
+      // Mark as complete
+      const { error } = await supabase
+        .from('tutorial_progress')
+        .upsert({
+          user_id: currentUser.value.uid,
+          tutorial_category_id: category.value.category_id,
+          tutorial_page_id: page.value.id,
+          completed: true,
+          completed_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,tutorial_category_id,tutorial_page_id'
+        })
+
+      if (error) {
+        // Try fallback without tutorial_page_id if column doesn't exist
+        if (error.message?.includes('tutorial_page_id')) {
+          const { error: fallbackError } = await supabase
+            .from('tutorial_progress')
+            .upsert({
+              user_id: currentUser.value.uid,
+              tutorial_category_id: category.value.category_id,
+              completed: true,
+              completed_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id,tutorial_category_id'
+            })
+          
+          if (fallbackError) {
+            throw fallbackError
+          }
+        } else {
+          throw error
+        }
+      }
+      isPageComplete.value = true
+    } else {
+      // Unmark as complete - delete the progress entry
+      const { error } = await supabase
+        .from('tutorial_progress')
+        .delete()
+        .eq('user_id', currentUser.value.uid)
+        .eq('tutorial_category_id', category.value.category_id)
+        .eq('tutorial_page_id', page.value.id)
+
+      if (error) {
+        // Try fallback without tutorial_page_id
+        if (error.message?.includes('tutorial_page_id')) {
+          const { error: fallbackError } = await supabase
+            .from('tutorial_progress')
+            .delete()
+            .eq('user_id', currentUser.value.uid)
+            .eq('tutorial_category_id', category.value.category_id)
+          
+          if (fallbackError) {
+            throw fallbackError
+          }
+        } else {
+          throw error
+        }
+      }
+      isPageComplete.value = false
+    }
+  } catch (err: any) {
+    console.error('Error toggling page progress:', err)
+    // Revert checkbox state on error
+    target.checked = !shouldComplete
+    isPageComplete.value = !shouldComplete
+  } finally {
+    isTogglingProgress.value = false
   }
 }
 
@@ -844,6 +1055,12 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
           totalPages.value = allPages.value.length
         }
         
+        // Check and update progress if we have cached data
+        if (currentUser.value?.uid && page.value && category.value) {
+          checkPageProgress()
+          updateTutorialProgress()
+        }
+        
         // Only show loading if we don't have cached data
         if (!page.value || !category.value) {
           loading.value = true
@@ -937,6 +1154,13 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
     }
     allPages.value = allPagesData.sort((a, b) => a.page_order - b.page_order)
     totalPages.value = allPages.value.length
+    
+    // Check and update progress after page is loaded
+    if (currentUser.value?.uid) {
+      checkPageProgress()
+      // Automatically mark as complete when page is viewed (if not already complete)
+      updateTutorialProgress()
+    }
     
     // Update cache - add/update this page in the cached pages array
     const cachedPagesForUpdate = store.getters.getCachedData('tutorialPages') || []
