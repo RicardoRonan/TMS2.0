@@ -317,21 +317,50 @@ async function initializeApp() {
       const { supabase, isSupabaseConfigured } = await import('./supabase')
       
       if (!isSupabaseConfigured()) {
-        return // Skip test if not configured
-      }
-      
-      const { error } = await supabase.from('blogs').select('id').limit(1)
-      if (error && error.code !== 'PGRST116') {
-        // Only show error if it's not a "not found" error
         store.dispatch('addNotification', {
           type: 'error',
-          message: `Supabase connection error: ${error.message || error.code}`,
-          duration: 10000
+          message: 'Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables.',
+          duration: 15000
+        })
+        return
+      }
+      
+      // Test connection with a simple query
+      const { error } = await supabase.from('blogs').select('id').limit(1)
+      if (error) {
+        // Don't show error for "not found" (empty table) - that's okay
+        if (error.code === 'PGRST116') {
+          return
+        }
+        
+        // Provide helpful error messages based on error type
+        let userMessage = 'Supabase connection error'
+        
+        if (error.code === '42501' || error.message?.includes('permission') || error.message?.includes('policy')) {
+          userMessage = 'Database access denied. Please check Row Level Security (RLS) policies in Supabase. Tables need SELECT policies for anonymous users.'
+        } else if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          userMessage = 'Database table not found. Please check your Supabase database schema.'
+        } else if (error.message?.includes('fetch') || error.message?.includes('network')) {
+          userMessage = 'Cannot connect to Supabase. Please check your network connection and VITE_SUPABASE_URL.'
+        } else {
+          userMessage = `Supabase connection error: ${error.message || error.code}`
+        }
+        
+        store.dispatch('addNotification', {
+          type: 'error',
+          message: userMessage,
+          duration: 15000
         })
       }
     } catch (testErr: any) {
-      // Silently fail - connection test is not critical
-      console.warn('Connection test failed (non-critical):', testErr?.message)
+      // Only show critical errors
+      if (testErr?.message?.includes('Supabase') || testErr?.message?.includes('environment')) {
+        store.dispatch('addNotification', {
+          type: 'error',
+          message: 'Failed to initialize Supabase. Please check your environment variables.',
+          duration: 10000
+        })
+      }
     }
   })
 }

@@ -556,11 +556,28 @@ const fetchTools = async (force = false) => {
     store.dispatch('setCachedData', { type: 'tools', data: tools.value })
   } catch (error: any) {
     tools.value = []
-    const errorMessage = error?.message || error?.code || 'Failed to load tools'
+    const errorCode = error?.code || ''
+    const errorMessage = error?.message || 'Failed to load tools'
+    
+    // Provide more helpful error messages
+    let userMessage = 'Failed to load tools'
+    
+    if (errorCode === '42501' || errorMessage?.includes('permission') || errorMessage?.includes('policy')) {
+      userMessage = 'Access denied. Please check Row Level Security (RLS) policies in Supabase.'
+    } else if (errorCode === 'PGRST301' || errorMessage?.includes('JWT') || errorMessage?.includes('token')) {
+      userMessage = 'Authentication error. Please refresh the page.'
+    } else if (errorCode === '42P01' || errorMessage?.includes('does not exist')) {
+      userMessage = 'Tools table not found. Please check your Supabase database.'
+    } else if (errorMessage?.includes('fetch') || errorMessage?.includes('network') || errorMessage?.includes('Failed to fetch')) {
+      userMessage = 'Network error. Please check your internet connection and Supabase configuration.'
+    } else {
+      userMessage = `Error loading tools: ${errorMessage}`
+    }
+    
     store.dispatch('addNotification', {
       type: 'error',
-      message: `Error loading tools: ${errorMessage}`,
-      duration: 8000
+      message: userMessage,
+      duration: 10000
     })
   } finally {
     loading.value = false

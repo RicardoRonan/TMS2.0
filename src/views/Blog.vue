@@ -318,7 +318,6 @@ const fetchBlogs = async (force = false) => {
         }
       } catch (err) {
         // If fetching authors fails (e.g., RLS), continue without author info
-        console.warn('Could not fetch author information:', err)
       }
     }
 
@@ -372,35 +371,32 @@ const fetchBlogCategories = async () => {
   }
 
   try {
-    console.log('Fetching blog categories from Supabase...')
     const { data, error } = await supabase
       .from('blog_categories')
       .select('name')
       .order('name', { ascending: true })
 
     if (error) {
-      // If table doesn't exist or RLS blocks access, log it
+      // If table doesn't exist or RLS blocks access, silently fall back
       if (error.code === '42P01' || error.message?.includes('does not exist')) {
-        console.warn('blog_categories table does not exist, using categories from posts')
         blogCategories.value = []
         updateCategories()
         return
       }
       
-      // Log RLS or permission errors
+      // For RLS or permission errors, silently fall back
       if (error.code === '42501' || error.message?.includes('permission') || error.message?.includes('policy')) {
-        console.warn('RLS policy may be blocking blog_categories read access:', error.message)
-        console.warn('Falling back to categories from posts. Make sure blog_categories table has public read policy.')
+        blogCategories.value = []
+        updateCategories()
+        return
       }
       
       // For other errors, still try to use categories from posts
-      console.error('Error fetching blog categories:', error)
       blogCategories.value = []
       updateCategories()
       return
     }
 
-    console.log('Fetched blog categories:', data)
     blogCategories.value = data || []
     
     // Cache the fetched categories
@@ -413,11 +409,9 @@ const fetchBlogCategories = async () => {
       updateCategories()
     } else {
       // If table exists but is empty, still update to show categories from posts
-      console.log('blog_categories table is empty, using categories from posts')
       updateCategories()
     }
   } catch (error: any) {
-    console.error('Unexpected error fetching blog categories:', error)
     blogCategories.value = []
     updateCategories()
   }
@@ -432,7 +426,6 @@ const updateCategories = () => {
     blogCategories.value.forEach(cat => {
       if (cat && cat.name) {
         uniqueCategories.add(cat.name)
-        console.log('Added category from blog_categories table:', cat.name)
       }
     })
   }
@@ -446,7 +439,6 @@ const updateCategories = () => {
   })
   
   const sortedCategories = Array.from(uniqueCategories).sort()
-  console.log('Final categories list:', sortedCategories)
   categories.value = sortedCategories
 }
 
