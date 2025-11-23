@@ -87,7 +87,6 @@ function initializeClientIfNeeded() {
         storage: typeof window !== 'undefined' ? window.localStorage : undefined,
         storageKey: 'supabase.auth.token',
         flowType: 'pkce',
-        storageType: 'localStorage',
         debug: false, // Disable verbose GoTrueClient logging
       },
       db: {
@@ -104,9 +103,32 @@ function initializeClientIfNeeded() {
           // Track if this is a retry to avoid infinite loops
           const isRetry = (options as any)?._isRetry || false
           
+          // Ensure we preserve all headers, especially Authorization
+          // Convert Headers object to plain object if needed
+          let headers: Record<string, string> = {}
+          if (options.headers) {
+            if (options.headers instanceof Headers) {
+              options.headers.forEach((value, key) => {
+                headers[key] = value
+              })
+            } else if (Array.isArray(options.headers)) {
+              // Array of [key, value] pairs
+              options.headers.forEach(([key, value]) => {
+                headers[key] = value
+              })
+            } else {
+              // Plain object
+              headers = { ...options.headers }
+            }
+          }
+          
+          const fetchOptions: RequestInit = {
+            ...options,
+            signal: controller.signal,
+            headers: headers
+          }
+          
           // Clone the body BEFORE the first request if it's a type that needs cloning
-          // This ensures we can retry even if the body gets consumed
-          // Use original for first request, clone for retry
           const needsCloning = !isRetry && options.body && (
             options.body instanceof FormData ||
             options.body instanceof Blob ||
@@ -116,11 +138,7 @@ function initializeClientIfNeeded() {
           const clonedBody = needsCloning ? cloneRequestBody(options.body) : null
           
           try {
-            const response = await fetch(url, {
-              ...options,
-              body: options.body, // Use original body for first request
-              signal: controller.signal
-            })
+            const response = await fetch(url, fetchOptions)
             
             // Check for auth errors (401, 403) and handle session refresh
             if ((response.status === 401 || response.status === 403) && !isRetry) {
@@ -132,62 +150,74 @@ function initializeClientIfNeeded() {
               
               // Only retry for non-auth endpoints to avoid infinite loops
               if (!isAuthEndpoint && supabaseInstance) {
-                console.log('🔄 Session expired, attempting to refresh and retry request...')
-                
                 try {
                   // Attempt to refresh the session
                   const { data: { session }, error: refreshError } = await supabaseInstance.auth.refreshSession()
                   
                   if (!refreshError && session) {
-                    console.log('✅ Session refreshed successfully, retrying original request...')
-                    
                     // Retry the original request with refreshed session
-                    // Use the cloned body (which was created before the first request)
-                    const retryOptions = {
+                    // Preserve headers for retry
+                    let retryHeaders: Record<string, string> = {}
+                    if (options.headers) {
+                      if (options.headers instanceof Headers) {
+                        options.headers.forEach((value, key) => {
+                          retryHeaders[key] = value
+                        })
+                      } else if (Array.isArray(options.headers)) {
+                        options.headers.forEach(([key, value]) => {
+                          retryHeaders[key] = value
+                        })
+                      } else {
+                        retryHeaders = { ...options.headers }
+                      }
+                    }
+                    
+                    const retryOptions: RequestInit & { _isRetry?: boolean } = {
                       ...options,
-                      _isRetry: true
+                      _isRetry: true,
+                      headers: retryHeaders,
+                      body: clonedBody || options.body,
                     }
                     
                     const retryController = new AbortController()
                     const retryTimeoutId = setTimeout(() => retryController.abort(), 30000)
                     
-                      try {
-                        const retryResponse = await fetch(url, {
-                          ...retryOptions,
-                          body: clonedBody || options.body, // Use cloned body if available, otherwise original
-                          signal: retryController.signal
-                        })
-                        clearTimeout(retryTimeoutId)
-                        return retryResponse
-                      } catch (retryErr: any) {
-                        clearTimeout(retryTimeoutId)
-                        if (retryErr.name === 'AbortError' || retryErr.name === 'TimeoutError') {
-                          throw new Error('Request timeout - please check your connection')
-                        }
-                        throw retryErr
+                    try {
+                      const retryResponse = await fetch(url, {
+                        ...retryOptions,
+                        signal: retryController.signal
+                      })
+                      clearTimeout(retryTimeoutId)
+                      return retryResponse
+                    } catch (retryErr: any) {
+                      clearTimeout(retryTimeoutId)
+                      if (retryErr.name === 'AbortError' || retryErr.name === 'TimeoutError') {
+                        throw new Error('Request timeout - please check your connection')
                       }
-                    } else {
-                      console.warn('⚠️ Session refresh failed:', refreshError)
-                      // Return the original response if refresh failed
-                      return response
+                      throw retryErr
                     }
-                  } catch (refreshErr) {
-                    console.error('❌ Error during session refresh:', refreshErr)
-                    // Return the original response if refresh errored
+                  } else {
+                    // Return the original response if refresh failed
                     return response
                   }
+                } catch (refreshErr) {
+                  // Return the original response if refresh errored
+                  return response
                 }
               }
               
               return response
-            } catch (err: any) {
-              clearTimeout(timeoutId)
-              if (err.name === 'AbortError' || err.name === 'TimeoutError') {
-                throw new Error('Request timeout - please check your connection')
-              }
-              throw err
             }
+            
+            return response
+          } catch (err: any) {
+            clearTimeout(timeoutId)
+            if (err.name === 'AbortError' || err.name === 'TimeoutError') {
+              throw new Error('Request timeout - please check your connection')
+            }
+            throw err
           }
+        }
       },
       realtime: {
         params: {
@@ -282,8 +312,6 @@ function getSupabaseClient(): SupabaseClient {
           storage: typeof window !== 'undefined' ? window.localStorage : undefined,
           storageKey: 'supabase.auth.token',
           flowType: 'pkce',
-          // Ensure session persists across page reloads
-          storageType: 'localStorage',
           // Add retry logic for network issues
           debug: false, // Disable verbose GoTrueClient logging
         },
@@ -297,14 +325,37 @@ function getSupabaseClient(): SupabaseClient {
           // Add fetch with timeout for better reliability and automatic session refresh
           fetch: async (url, options = {}) => {
             const controller = new AbortController()
-            const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+            const timeoutId = setTimeout(() => controller.abort(), 30000)
             
             // Track if this is a retry to avoid infinite loops
             const isRetry = (options as any)?._isRetry || false
             
+            // Ensure we preserve all headers, especially Authorization
+            // Convert Headers object to plain object if needed
+            let headers: Record<string, string> = {}
+            if (options.headers) {
+              if (options.headers instanceof Headers) {
+                options.headers.forEach((value, key) => {
+                  headers[key] = value
+                })
+              } else if (Array.isArray(options.headers)) {
+                // Array of [key, value] pairs
+                options.headers.forEach(([key, value]) => {
+                  headers[key] = value
+                })
+              } else {
+                // Plain object
+                headers = { ...options.headers }
+              }
+            }
+            
+            const fetchOptions: RequestInit = {
+              ...options,
+              signal: controller.signal,
+              headers: headers
+            }
+            
             // Clone the body BEFORE the first request if it's a type that needs cloning
-            // This ensures we can retry even if the body gets consumed
-            // Use original for first request, clone for retry
             const needsCloning = !isRetry && options.body && (
               options.body instanceof FormData ||
               options.body instanceof Blob ||
@@ -314,11 +365,7 @@ function getSupabaseClient(): SupabaseClient {
             const clonedBody = needsCloning ? cloneRequestBody(options.body) : null
             
             try {
-              const response = await fetch(url, {
-                ...options,
-                body: options.body, // Use original body for first request
-                signal: controller.signal
-              })
+              const response = await fetch(url, fetchOptions)
               
               // Check for auth errors (401, 403) and handle session refresh
               if ((response.status === 401 || response.status === 403) && !isRetry) {
@@ -330,20 +377,33 @@ function getSupabaseClient(): SupabaseClient {
                 
                 // Only retry for non-auth endpoints to avoid infinite loops
                 if (!isAuthEndpoint && supabaseInstance) {
-                  console.log('🔄 Session expired, attempting to refresh and retry request...')
-                  
                   try {
                     // Attempt to refresh the session
                     const { data: { session }, error: refreshError } = await supabaseInstance.auth.refreshSession()
                     
                     if (!refreshError && session) {
-                      console.log('✅ Session refreshed successfully, retrying original request...')
-                      
                       // Retry the original request with refreshed session
-                      // Use the cloned body (which was created before the first request)
-                      const retryOptions = {
+                      // Preserve headers for retry
+                      let retryHeaders: Record<string, string> = {}
+                      if (options.headers) {
+                        if (options.headers instanceof Headers) {
+                          options.headers.forEach((value, key) => {
+                            retryHeaders[key] = value
+                          })
+                        } else if (Array.isArray(options.headers)) {
+                          options.headers.forEach(([key, value]) => {
+                            retryHeaders[key] = value
+                          })
+                        } else {
+                          retryHeaders = { ...options.headers }
+                        }
+                      }
+                      
+                      const retryOptions: RequestInit & { _isRetry?: boolean } = {
                         ...options,
-                        _isRetry: true
+                        _isRetry: true,
+                        headers: retryHeaders,
+                        body: clonedBody || options.body,
                       }
                       
                       const retryController = new AbortController()
@@ -352,7 +412,6 @@ function getSupabaseClient(): SupabaseClient {
                       try {
                         const retryResponse = await fetch(url, {
                           ...retryOptions,
-                          body: clonedBody || options.body, // Use cloned body if available, otherwise original
                           signal: retryController.signal
                         })
                         clearTimeout(retryTimeoutId)
@@ -365,16 +424,16 @@ function getSupabaseClient(): SupabaseClient {
                         throw retryErr
                       }
                     } else {
-                      console.warn('⚠️ Session refresh failed:', refreshError)
                       // Return the original response if refresh failed
                       return response
                     }
                   } catch (refreshErr) {
-                    console.error('❌ Error during session refresh:', refreshErr)
                     // Return the original response if refresh errored
                     return response
                   }
                 }
+                
+                return response
               }
               
               return response
@@ -399,7 +458,9 @@ function getSupabaseClient(): SupabaseClient {
     }
   }
   
-  return supabaseInstance
+  // At this point, supabaseInstance should never be null
+  // If it is, we've created a placeholder client above
+  return supabaseInstance!
 }
 
 // Get the client instance (will create if needed)

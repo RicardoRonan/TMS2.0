@@ -563,7 +563,7 @@ const fetchTools = async (force = false) => {
     let userMessage = 'Failed to load tools'
     
     if (errorCode === '42501' || errorMessage?.includes('permission') || errorMessage?.includes('policy')) {
-      userMessage = 'Access denied. Please check Row Level Security (RLS) policies in Supabase.'
+      userMessage = 'Access denied. Please check Row Level Security (RLS) policies in Supabase. Tables need SELECT policies for both anonymous and authenticated users.'
     } else if (errorCode === 'PGRST301' || errorMessage?.includes('JWT') || errorMessage?.includes('token')) {
       userMessage = 'Authentication error. Please refresh the page.'
     } else if (errorCode === '42P01' || errorMessage?.includes('does not exist')) {

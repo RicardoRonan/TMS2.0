@@ -337,7 +337,7 @@ async function initializeApp() {
         let userMessage = 'Supabase connection error'
         
         if (error.code === '42501' || error.message?.includes('permission') || error.message?.includes('policy')) {
-          userMessage = 'Database access denied. Please check Row Level Security (RLS) policies in Supabase. Tables need SELECT policies for anonymous users.'
+          userMessage = 'Database access denied. Please check Row Level Security (RLS) policies in Supabase. Tables need SELECT policies for both anonymous and authenticated users.'
         } else if (error.code === '42P01' || error.message?.includes('does not exist')) {
           userMessage = 'Database table not found. Please check your Supabase database schema.'
         } else if (error.message?.includes('fetch') || error.message?.includes('network')) {

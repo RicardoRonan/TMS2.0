@@ -30,15 +30,11 @@ export async function withAuthRetry<T>(
           errorMessage.includes('authentication')
         
         if (isAuthError && retryCount < maxRetries) {
-          console.log(`🔄 Auth error detected (attempt ${retryCount + 1}/${maxRetries}), attempting to refresh session...`)
-          
           try {
             // Try to refresh the session
             const { data: { session }, error: refreshError } = await supabase.auth.refreshSession()
             
             if (refreshError || !session) {
-              console.error('❌ Failed to refresh session:', refreshError)
-              
               // If refresh failed, check if we have a stored session to recover from
               const { data: { session: storedSession } } = await supabase.auth.getSession()
               
@@ -49,17 +45,13 @@ export async function withAuthRetry<T>(
               
               // We have a stored session, try one more time
               retryCount++
-              console.log('🔄 Retrying with stored session...')
               return await attemptQuery()
             }
             
             // Session refreshed successfully
             retryCount++
-            console.log('✅ Session refreshed successfully, retrying query...')
             return await attemptQuery()
           } catch (refreshErr: any) {
-            console.error('❌ Error during session refresh:', refreshErr)
-            
             // If refresh errored but we haven't exceeded retries, try once more
             if (retryCount < maxRetries) {
               retryCount++
@@ -88,18 +80,15 @@ export async function withAuthRetry<T>(
         err?.code === '403'
       
       if (isAuthError && retryCount < maxRetries) {
-        console.log(`🔄 Auth error in catch block (attempt ${retryCount + 1}/${maxRetries}), attempting to refresh session...`)
-        
         try {
           const { data: { session }, error: refreshError } = await supabase.auth.refreshSession()
           
           if (!refreshError && session) {
             retryCount++
-            console.log('✅ Session refreshed, retrying query...')
             return await attemptQuery()
           }
         } catch (refreshErr) {
-          console.error('❌ Error during session refresh in catch:', refreshErr)
+          // Silently fail and return error
         }
       }
       
