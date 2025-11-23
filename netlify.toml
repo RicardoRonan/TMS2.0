@@ -27,7 +27,7 @@
     
     # Content Security Policy
     # Note: Adjust CSP based on your actual needs
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://cdn.brandfetch.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.imgbb.com https://cdn.brandfetch.io; frame-ancestors 'none';"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://cdn.brandfetch.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.imgbb.com https://cdn.brandfetch.io https://api.emailjs.com; frame-ancestors 'none';"
     
     # Strict Transport Security (HSTS) - only enable if using HTTPS
     # Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
