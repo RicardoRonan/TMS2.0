@@ -72,84 +72,12 @@ const mainContentClasses = computed(() => {
       return `${baseClasses} pb-32`
     }
   } catch (error) {
-    console.warn('Error computing mainContentClasses:', error)
+    // Error computing classes - use default
   }
   return `${baseClasses} pb-16`
 })
-// Track session state for debugging and UI reactivity
-const session = ref<any>(null)
-// Store auth subscription for cleanup
-// Auth subscription is now handled globally by useAuth.ts
-
-// Store interval ID for session check cleanup
-let sessionCheckInterval: number | null = null
-// Store activity timeout for cleanup
-let activityTimeout: number | null = null
-
-// Handle tab visibility changes to refresh session when tab becomes active
-const handleVisibilityChange = async () => {
-  if (!document.hidden) {
-    // Tab became visible - check and refresh session
-    try {
-      const { data: { session }, error } = await supabase.auth.getSession()
-      
-      if (error) {
-        console.warn('⚠️ Session check failed on tab visibility:', error)
-        // Try to refresh the session
-        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
-        
-        if (refreshError || !refreshData.session) {
-          console.error('❌ Failed to refresh session after tab visibility:', refreshError)
-          // Session might be expired - clear user if needed
-          if (refreshError?.message?.includes('expired') || refreshError?.message?.includes('invalid')) {
-            store.dispatch('setUser', null)
-          }
-        } else {
-          console.log('✅ Session refreshed after tab visibility')
-        }
-      } else if (session) {
-        // Session exists - verify it's still valid
-        const expiresAt = session.expires_at ? new Date(session.expires_at * 1000) : null
-        const now = new Date()
-        
-        // If session expires in less than 15 minutes, refresh it proactively
-        if (expiresAt && expiresAt.getTime() - now.getTime() < 15 * 60 * 1000) {
-          console.log('🔄 Session expiring soon, refreshing proactively...')
-          await supabase.auth.refreshSession()
-        }
-      }
-    } catch (err) {
-      console.warn('⚠️ Error checking session on visibility change:', err)
-    }
-  }
-}
-
-// Add activity-based session refresh
-const handleUserActivity = () => {
-  // Clear existing timeout
-  if (activityTimeout) {
-    clearTimeout(activityTimeout)
-  }
-  
-  // Refresh session after 2 minutes of activity (debounced)
-  activityTimeout = window.setTimeout(async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        const expiresAt = session.expires_at ? new Date(session.expires_at * 1000) : null
-        const now = new Date()
-        
-        // Refresh if expiring in less than 20 minutes
-        if (expiresAt && expiresAt.getTime() - now.getTime() < 20 * 60 * 1000) {
-          console.log('🔄 Refreshing session due to user activity...')
-          await supabase.auth.refreshSession()
-        }
-      }
-    } catch (err) {
-      console.warn('⚠️ Activity-based session refresh failed:', err)
-    }
-  }, 5 * 60 * 1000) // Wait 5 minutes after last activity (reduced frequency)
-}
+// With autoRefreshToken: true, Supabase automatically handles session refresh
+// No need for manual session management - Supabase handles it internally
 
 onMounted(async () => {
   // Initialize theme from localStorage
@@ -167,65 +95,14 @@ onMounted(async () => {
     store.dispatch('setLoading', false)
   }
 
-  // Auth listener is now handled globally by useAuth.ts
-  // No need for redundant session restoration or auth listeners here
-
-  // Handle tab visibility changes to refresh session when tab becomes active
-  document.addEventListener('visibilitychange', handleVisibilityChange)
-  
-  // Add activity listeners for session refresh (reduced frequency to avoid excessive checks)
-  // Only listen to less frequent events to reduce session check calls
-  const activityEvents = ['mousedown', 'keypress', 'click']
-  activityEvents.forEach(event => {
-    document.addEventListener(event, handleUserActivity, { passive: true })
-  })
-  
-  // Also check session periodically (every 2 minutes) as a backup
-  sessionCheckInterval = window.setInterval(async () => {
-    if (!document.hidden) {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session) {
-          const expiresAt = session.expires_at ? new Date(session.expires_at * 1000) : null
-          const now = new Date()
-          
-          // Refresh if expiring in less than 20 minutes
-          if (expiresAt && expiresAt.getTime() - now.getTime() < 20 * 60 * 1000) {
-            console.log('🔄 Periodic session refresh...')
-            await supabase.auth.refreshSession()
-          }
-        }
-      } catch (err) {
-        console.warn('⚠️ Periodic session check failed:', err)
-      }
-    }
-  }, 5 * 60 * 1000) // Check every 5 minutes (reduced frequency to minimize session checks)
+  // Auth listener is handled globally by useAuth.ts
+  // With autoRefreshToken: true, Supabase automatically manages session refresh
+  // No manual session management needed
 })
 
 onUnmounted(() => {
-  // Clean up auth listener to prevent memory leaks and duplicate listeners
+  // Clean up auth listener to prevent memory leaks
   cleanupAuthListener()
-
-  // Clean up visibility change listener
-  document.removeEventListener('visibilitychange', handleVisibilityChange)
-  
-  // Clean up activity listeners
-  const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click']
-  activityEvents.forEach(event => {
-    document.removeEventListener(event, handleUserActivity)
-  })
-  
-  // Clean up activity timeout
-  if (activityTimeout) {
-    clearTimeout(activityTimeout)
-    activityTimeout = null
-  }
-  
-  // Clean up interval
-  if (sessionCheckInterval !== null) {
-    clearInterval(sessionCheckInterval)
-    sessionCheckInterval = null
-  }
 
   // Safety: Reset body overflow on unmount
   document.body.style.overflow = ''

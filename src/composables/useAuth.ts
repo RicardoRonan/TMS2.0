@@ -27,8 +27,6 @@ export async function initializeAuthListener(store: any) {
   
   // Check if Supabase is configured before initializing listener
   if (!isSupabaseConfigured()) {
-    console.error('⚠️ Cannot initialize auth listener: Supabase environment variables are missing')
-    console.error('💡 Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Netlify environment variables')
     return
   }
 
@@ -41,29 +39,14 @@ export async function initializeAuthListener(store: any) {
       switch (event) {
         case 'INITIAL_SESSION':
           // This is the primary way sessions are restored on page reload
+          // With autoRefreshToken: true, Supabase automatically handles token refresh
+          // We should trust the session provided by Supabase
           if (session?.user) {
-            
-            // Verify session is not expired
-            if (session.expires_at) {
-              const expiresAt = new Date(session.expires_at * 1000)
-              const now = new Date()
-              if (expiresAt < now) {
-                console.warn('⚠️ useAuth: Session expired, clearing user data', {
-                  expiresAt: expiresAt.toISOString(),
-                  now: now.toISOString()
-                })
-                store.dispatch('setUser', null)
-                break
-              }
-            }
-            
             try {
               await loadUserDataForStore(session.user, store)
             } catch (err: any) {
-              console.warn('⚠️ useAuth: Failed to load user data, using basic auth data')
               // If loading user data fails, still set basic auth data
               // This ensures the user stays logged in even if profile fetch fails
-              // This will also update localStorage with the fresh session data
               store.dispatch('setUser', {
                 uid: session.user.id,
                 email: session.user.email,
@@ -76,7 +59,6 @@ export async function initializeAuthListener(store: any) {
             }
           } else {
             // No session in INITIAL_SESSION event - clear user data
-            // Supabase client should have already restored session from localStorage if it exists
             store.dispatch('setUser', null)
           }
           break
@@ -151,8 +133,6 @@ export async function initializeAuthListener(store: any) {
     } catch (err: any) {
       // If any error occurs in auth state change handler, log it but don't break
       // This ensures the app continues to work even if session restoration fails
-      console.error('Auth state change error:', err)
-      
       // If we have a session but error occurred, try to set basic user data
       if (session?.user) {
         try {
@@ -183,21 +163,8 @@ export async function initializeAuthListener(store: any) {
 // Helper function to load user data (used by both initializeAuthListener and useAuth)
 // This function ensures Supabase session and store are always in sync
 async function loadUserDataForStore(supabaseUser: User, store: any) {
-  // First, verify we still have a valid Supabase session
-  // This prevents stale data from being loaded
-  try {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-    
-    if (sessionError || !session || session.user.id !== supabaseUser.id) {
-      // Session is invalid or changed - clear store
-      store.dispatch('setUser', null)
-      return
-    }
-  } catch (sessionCheckErr) {
-    // If we can't verify session, still try to load user data
-    // But this is a warning sign
-    console.warn('Could not verify session during user data load')
-  }
+  // With autoRefreshToken: true, Supabase automatically manages session validity
+  // We can trust the session provided by onAuthStateChange
 
   try {
     // Try to get user profile from database
@@ -219,10 +186,7 @@ async function loadUserDataForStore(supabaseUser: User, store: any) {
 
     // PGRST116 is "not found" - user might not have profile yet, that's okay
     // TIMEOUT means the query took too long - continue with auth data
-    if (profileError && profileError.code !== 'PGRST116' && profileError.code !== 'TIMEOUT') {
-      // Other errors are logged but we continue with auth data
-      console.warn('Profile fetch error (non-critical):', profileError.message)
-    }
+    // Other errors are silently handled - we continue with auth data
 
     // Update store with complete user data
     store.dispatch('setUser', {
@@ -280,7 +244,6 @@ export function useAuth() {
       const { isSupabaseConfigured } = await import('../supabase')
       if (!isSupabaseConfigured()) {
         const errorMsg = 'Supabase is not configured. Please check your environment variables (VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY).'
-        console.error('❌ Sign-in failed:', errorMsg)
         throw new Error(errorMsg)
       }
 
@@ -296,7 +259,6 @@ export function useAuth() {
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => {
           const errorMsg = 'Sign-in request timed out after 35 seconds. This usually means requests are not reaching Supabase. Check your network connection and Supabase project status.'
-          console.error('⏱️ Sign-in timeout:', errorMsg)
           reject(new Error(errorMsg))
         }, 35000)
       )
@@ -309,7 +271,6 @@ export function useAuth() {
       const { data, error: authError } = result || { data: null, error: null }
 
       if (authError) {
-        console.error('❌ Sign-in error:', authError)
         throw authError
       }
       
@@ -541,7 +502,7 @@ export function useAuth() {
       
       if (signOutError) {
         // Log error but don't throw - user is already logged out locally
-        console.warn('Sign out error (non-critical):', signOutError)
+        // Sign out error - non-critical, continue with clearing store
       }
       
       // Ensure store is cleared regardless of Supabase response
