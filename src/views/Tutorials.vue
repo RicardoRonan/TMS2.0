@@ -469,6 +469,13 @@ const getCategoryIcon = (iconName: string | null | undefined) => {
 }
 
 const fetchTopLevelGroups = async () => {
+  // Check cache first
+  const cached = store.getters.getCachedData('tutorialGroups')
+  if (cached && Array.isArray(cached) && cached.length > 0) {
+    topLevelGroups.value = cached
+    // Fetch fresh data in background
+  }
+
   try {
     const { data, error } = await supabase
       .from('tutorial_top_level_groups')
@@ -488,6 +495,8 @@ const fetchTopLevelGroups = async () => {
     
     if (data && data.length > 0) {
       topLevelGroups.value = data
+      // Cache the fetched data
+      store.dispatch('setCachedData', { type: 'tutorialGroups', data })
     } else {
       topLevelGroups.value = []
     }
@@ -503,6 +512,13 @@ const fetchTopLevelGroups = async () => {
 }
 
 const fetchCategories = async () => {
+  // Check cache first
+  const cached = store.getters.getCachedData('categories')
+  if (cached && Array.isArray(cached) && cached.length > 0) {
+    categories.value = cached
+    // Fetch fresh data in background
+  }
+
   try {
     const { data, error } = await supabase
       .from('tutorials_category')
@@ -517,6 +533,8 @@ const fetchCategories = async () => {
     // Use fetched data if available, otherwise fall back to dummy data
     if (data && data.length > 0) {
       categories.value = data
+      // Cache the fetched data
+      store.dispatch('setCachedData', { type: 'categories', data })
     } else {
       categories.value = dummyCategories
     }
@@ -533,6 +551,15 @@ const fetchCategories = async () => {
 }
 
 const fetchPages = async () => {
+  // Check cache first - note: pages are cached as part of tutorials, but we can cache them separately
+  // For now, we'll cache them as 'tutorialPages' but they're used differently
+  // Actually, let's use a more specific cache key or just cache the pages array
+  const cached = store.getters.getCachedData('tutorialPages')
+  if (cached && Array.isArray(cached) && cached.length > 0) {
+    pages.value = cached
+    // Fetch fresh data in background
+  }
+
   try {
     const { data, error } = await supabase
       .from('tutorial_pages')
@@ -547,6 +574,8 @@ const fetchPages = async () => {
     // Use fetched data if available, otherwise fall back to dummy data
     if (data && data.length > 0) {
       pages.value = data
+      // Cache the fetched data
+      store.dispatch('setCachedData', { type: 'tutorialPages', data })
     } else {
       pages.value = dummyPages
     }
@@ -563,7 +592,29 @@ const fetchPages = async () => {
 }
 
 onMounted(async () => {
-  loading.value = true
+  // Check cache first for instant display
+  const cachedGroups = store.getters.getCachedData('tutorialGroups')
+  const cachedCategories = store.getters.getCachedData('categories')
+  const cachedPages = store.getters.getCachedData('tutorialPages')
+  
+  if (cachedGroups && Array.isArray(cachedGroups) && cachedGroups.length > 0) {
+    topLevelGroups.value = cachedGroups
+  }
+  
+  if (cachedCategories && Array.isArray(cachedCategories) && cachedCategories.length > 0) {
+    categories.value = cachedCategories
+  }
+  
+  if (cachedPages && Array.isArray(cachedPages) && cachedPages.length > 0) {
+    pages.value = cachedPages
+  }
+  
+  // Only show loading if we don't have cached data
+  if (!cachedGroups && !cachedCategories && !cachedPages) {
+    loading.value = true
+  }
+  
+  // Fetch fresh data in background
   await Promise.all([fetchTopLevelGroups(), fetchCategories(), fetchPages()])
   loading.value = false
 })

@@ -33,8 +33,8 @@ onMounted(async () => {
     }
     
     if (data.session) {
-      // Successfully authenticated, redirect to home
-      router.push('/')
+      // Successfully authenticated, reload the page to refresh all state
+      window.location.reload()
     } else {
       // No session found, redirect to home
       router.push('/')

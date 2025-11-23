@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import App from './App.vue'
 import router from './router'
 import './styles/main.css'
+import { getCachedData as getCache, setCachedData as setCache, clearCache as clearCacheUtil, hasValidCache, type CacheType } from './utils/cache'
 
 // Create Vuex store
 const store = createStore({
@@ -16,7 +17,12 @@ const store = createStore({
     adminMode: false,
     editHistory: [],
     currentHistoryIndex: -1,
-    pendingChanges: {} // Map of entityId -> { type, entityId, changes: { field: { oldValue, newValue } } }
+    pendingChanges: {}, // Map of entityId -> { type, entityId, changes: { field: { oldValue, newValue } } }
+    // Cache state - data is persisted in localStorage via cache utils
+    cache: {
+      // Cache metadata is stored in localStorage, this is just for reactive access
+      lastUpdated: {} as Record<CacheType, number>
+    }
   },
   mutations: {
     SET_USER(state, user) {
@@ -117,6 +123,10 @@ const store = createStore({
         // Update the newValue
         state.pendingChanges[key].changes[field].newValue = newValue
       }
+    },
+    // Cache mutations
+    UPDATE_CACHE_TIMESTAMP(state, { type, timestamp }) {
+      state.cache.lastUpdated[type] = timestamp
     }
   },
   actions: {
@@ -186,6 +196,26 @@ const store = createStore({
     },
     cancelChanges({ commit }) {
       commit('CLEAR_PENDING_CHANGES')
+    },
+    // Cache actions
+    setCachedData({ commit }, { type, data, ttl }) {
+      setCache(type, data, ttl)
+      commit('UPDATE_CACHE_TIMESTAMP', { type, timestamp: Date.now() })
+    },
+    getCachedData({ commit }, type) {
+      const data = getCache(type)
+      if (data) {
+        commit('UPDATE_CACHE_TIMESTAMP', { type, timestamp: Date.now() })
+      }
+      return data
+    },
+    clearCache({ commit, state }, type) {
+      clearCacheUtil(type)
+      if (type) {
+        delete state.cache.lastUpdated[type]
+      } else {
+        state.cache.lastUpdated = {}
+      }
     }
   },
   getters: {
@@ -200,7 +230,14 @@ const store = createStore({
     canRedo: state => state.currentHistoryIndex < state.editHistory.length - 1,
     hasPendingChanges: state => Object.keys(state.pendingChanges).length > 0,
     pendingChanges: state => state.pendingChanges,
-    editHistory: state => state.editHistory
+    editHistory: state => state.editHistory,
+    // Cache getters
+    getCachedData: () => (type: CacheType) => {
+      return getCache(type)
+    },
+    hasValidCache: () => (type: CacheType) => {
+      return hasValidCache(type)
+    }
   }
 })
 
@@ -241,20 +278,14 @@ async function initializeApp() {
     const { isSupabaseConfigured } = await import('./supabase')
     
     if (isSupabaseConfigured()) {
-      // Ensure Supabase client is fully initialized before setting up auth listener
       // Import supabase module to trigger client initialization
+      // Supabase client automatically restores session from localStorage
       await import('./supabase')
       
-      // Small delay to ensure client is ready
-      await new Promise(resolve => setTimeout(resolve, 50))
-      
       // Initialize auth listener (this will verify and sync the session)
-      // The listener will update user data from Supabase if session is valid
+      // The INITIAL_SESSION event will fire immediately if session exists
       const { initializeAuthListener } = await import('./composables/useAuth')
       await initializeAuthListener(store)
-      
-      // Additional delay to let INITIAL_SESSION event fire and process
-      await new Promise(resolve => setTimeout(resolve, 150))
     } else {
       // Supabase not configured - show notification but don't break app
       console.warn('⚠️ Supabase not configured - auth features disabled')

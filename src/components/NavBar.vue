@@ -655,10 +655,8 @@ const handleLoginSuccess = () => {
     const authenticated = store.getters.isAuthenticated
     
     if (authenticated && user) {
-      // User is actually signed in, navigate if needed
-      if (route.path === '/auth' || route.path.includes('/auth')) {
-        router.push('/')
-      }
+      // User is actually signed in, reload the page to refresh all state
+      window.location.reload()
     } else {
       // User not actually signed in - show error
       store.dispatch('addNotification', {

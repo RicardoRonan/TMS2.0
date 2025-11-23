@@ -816,7 +816,49 @@ const dummyCategories: Record<string, any> = {
 // Fetch tutorial page function
 const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
   try {
-    loading.value = true
+    // Check cache first
+    const cachedPages = store.getters.getCachedData('tutorialPages')
+    const cachedCategories = store.getters.getCachedData('categories')
+    
+    // Try to find page and category from cache
+    if (cachedPages && Array.isArray(cachedPages)) {
+      const cachedPage = cachedPages.find((p: any) => p.slug === pageSlug)
+      if (cachedPage) {
+        page.value = {
+          ...cachedPage,
+          created_at: cachedPage.created_at || new Date().toISOString()
+        }
+        
+        // Find category from cache
+        if (cachedCategories && Array.isArray(cachedCategories)) {
+          const cachedCategory = cachedCategories.find((c: any) => c.slug === categorySlug)
+          if (cachedCategory) {
+            category.value = cachedCategory
+          }
+        }
+        
+        // Get all pages in category for navigation
+        if (cachedPage.category_id) {
+          const categoryPages = cachedPages.filter((p: any) => p.category_id === cachedPage.category_id)
+          allPages.value = categoryPages.sort((a: any, b: any) => (a.page_order || 0) - (b.page_order || 0))
+          totalPages.value = allPages.value.length
+        }
+        
+        // Only show loading if we don't have cached data
+        if (!page.value || !category.value) {
+          loading.value = true
+        } else {
+          loading.value = false
+        }
+        
+        // Fetch fresh data in background
+      } else {
+        loading.value = true
+      }
+    } else {
+      loading.value = true
+    }
+    
     error.value = null
     
     // Fetch category
@@ -895,6 +937,28 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
     }
     allPages.value = allPagesData.sort((a, b) => a.page_order - b.page_order)
     totalPages.value = allPages.value.length
+    
+    // Update cache - add/update this page in the cached pages array
+    const cachedPagesForUpdate = store.getters.getCachedData('tutorialPages') || []
+    const pageIndex = cachedPagesForUpdate.findIndex((p: any) => p.id === pageData.id)
+    if (pageIndex >= 0) {
+      cachedPagesForUpdate[pageIndex] = pageData
+    } else {
+      cachedPagesForUpdate.push(pageData)
+    }
+    store.dispatch('setCachedData', { type: 'tutorialPages', data: cachedPagesForUpdate })
+    
+    // Update categories cache if needed
+    if (categoryData) {
+      const cachedCategories = store.getters.getCachedData('categories') || []
+      const catIndex = cachedCategories.findIndex((c: any) => c.category_id === categoryData.category_id)
+      if (catIndex >= 0) {
+        cachedCategories[catIndex] = categoryData
+      } else {
+        cachedCategories.push(categoryData)
+      }
+      store.dispatch('setCachedData', { type: 'categories', data: cachedCategories })
+    }
   } catch (err: any) {
     console.error('Error fetching tutorial page:', err)
     error.value = err.message || 'Failed to load page. Please try again later.'

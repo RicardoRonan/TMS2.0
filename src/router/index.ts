@@ -196,6 +196,20 @@ router.beforeEach(async (to, from, next) => {
   // Supabase session is automatically managed by the auth listener in useAuth
   // No need to call getSession() here - it's unnecessary and can cause delays
   
+  // Cache validation for common routes
+  // Components will check cache on mount, but we can validate cache exists here
+  // This helps ensure seamless navigation with cached data
+  if (to.name === 'Blog' || to.name === 'Tutorials' || to.name === 'Tools') {
+    // Cache is checked in components, but we can verify it's available
+    // This is a non-blocking check - components handle their own cache logic
+    const hasCache = store.getters.hasValidCache(
+      to.name === 'Blog' ? 'blogs' : 
+      to.name === 'Tutorials' ? 'categories' : 
+      'tools'
+    )
+    // Cache will be used by components if available, no action needed here
+  }
+  
   // Check authentication
   if (to.meta.requiresAuth && !store.getters.isAuthenticated) {
     next({ name: 'Home' })

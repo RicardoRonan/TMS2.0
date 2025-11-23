@@ -260,6 +260,18 @@ const formatDate = (dateString: string) => {
 }
 
 const fetchBlogs = async (force = false) => {
+  // Check cache first
+  if (!force) {
+    const cached = store.getters.getCachedData('blogs')
+    if (cached && Array.isArray(cached) && cached.length > 0) {
+      posts.value = cached
+      loading.value = false
+      updateCategories()
+      // Fetch fresh data in background
+      force = true
+    }
+  }
+
   // Skip if data was recently fetched (unless forced)
   const now = Date.now()
   if (!force && now - lastFetchTime.value < FETCH_CACHE_TIME && posts.value.length > 0) {
@@ -267,7 +279,10 @@ const fetchBlogs = async (force = false) => {
   }
 
   try {
-    loading.value = true
+    // Only show loading if we don't have cached data
+    if (posts.value.length === 0) {
+      loading.value = true
+    }
     
     // Fetch blogs with author_id
     const { data, error } = await supabase
@@ -330,6 +345,9 @@ const fetchBlogs = async (force = false) => {
     // Update categories - will be set by fetchBlogCategories
     updateCategories()
     lastFetchTime.value = now
+    
+    // Cache the fetched data
+    store.dispatch('setCachedData', { type: 'blogs', data: posts.value })
   } catch (error: any) {
     posts.value = []
     const errorMessage = error?.message || error?.code || 'Failed to load blog posts'
@@ -345,6 +363,14 @@ const fetchBlogs = async (force = false) => {
 
 // Fetch blog categories from blog_categories table
 const fetchBlogCategories = async () => {
+  // Check cache first
+  const cached = store.getters.getCachedData('blogCategories')
+  if (cached && Array.isArray(cached) && cached.length > 0) {
+    blogCategories.value = cached
+    updateCategories()
+    // Fetch fresh data in background
+  }
+
   try {
     console.log('Fetching blog categories from Supabase...')
     const { data, error } = await supabase
@@ -376,6 +402,11 @@ const fetchBlogCategories = async () => {
 
     console.log('Fetched blog categories:', data)
     blogCategories.value = data || []
+    
+    // Cache the fetched categories
+    if (blogCategories.value.length > 0) {
+      store.dispatch('setCachedData', { type: 'blogCategories', data: blogCategories.value })
+    }
     
     // If we got categories from the table, use them as primary source
     if (blogCategories.value.length > 0) {
@@ -420,6 +451,24 @@ const updateCategories = () => {
 }
 
 onMounted(async () => {
+  // Check cache first for instant display
+  const cachedBlogs = store.getters.getCachedData('blogs')
+  const cachedCategories = store.getters.getCachedData('blogCategories')
+  
+  if (cachedBlogs && Array.isArray(cachedBlogs) && cachedBlogs.length > 0) {
+    posts.value = cachedBlogs
+    loading.value = false
+  }
+  
+  if (cachedCategories && Array.isArray(cachedCategories) && cachedCategories.length > 0) {
+    blogCategories.value = cachedCategories
+  }
+  
+  if (posts.value.length > 0) {
+    updateCategories()
+  }
+  
+  // Fetch fresh data in background
   // Fetch categories first, then blogs
   // This ensures categories are available when posts are loaded
   await fetchBlogCategories()

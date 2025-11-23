@@ -476,7 +476,24 @@ const handleShareCopied = () => {
 // Fetch blog post function
 const fetchBlogPost = async (slug: string) => {
   try {
-    loading.value = true
+    // Check cache first
+    const cachedBlogs = store.getters.getCachedData('blogs')
+    let cachedPost = null
+    
+    if (cachedBlogs && Array.isArray(cachedBlogs)) {
+      cachedPost = cachedBlogs.find((p: any) => p.slug === slug)
+      if (cachedPost) {
+        // We have cached post data, but we need to fetch full content and author info
+        // For now, we'll use cached data for basic info and fetch full details
+        // Actually, cached blogs might not have full content, so we'll still fetch
+        // But we can show basic info immediately if available
+      }
+    }
+    
+    // Only show loading if we don't have cached basic data
+    if (!cachedPost) {
+      loading.value = true
+    }
     error.value = null
     
     const { data, error: fetchError } = await supabase
@@ -586,6 +603,32 @@ const fetchBlogPost = async (slug: string) => {
 
     likeCount.value = likeCountValue
 
+    // Update cache - add/update this post in the cached blogs array
+    const cachedBlogs = store.getters.getCachedData('blogs') || []
+    const postIndex = cachedBlogs.findIndex((p: any) => p.id === data.id)
+    const postData = {
+      id: data.id,
+      title: data.title,
+      excerpt: data.excerpt || '',
+      category: data.category,
+      slug: data.slug,
+      createdAt: data.created_at,
+      readTime: data.read_time || 5,
+      featuredImageUrl: data.featured_image_url,
+      author: {
+        name: authorName,
+        email: authorEmail,
+        photoUrl: authorPhotoUrl
+      }
+    }
+    
+    if (postIndex >= 0) {
+      cachedBlogs[postIndex] = postData
+    } else {
+      cachedBlogs.push(postData)
+    }
+    store.dispatch('setCachedData', { type: 'blogs', data: cachedBlogs })
+    
     // Fetch comments after post is loaded
     await fetchComments(data.id)
   } catch (err: any) {

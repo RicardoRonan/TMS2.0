@@ -26,41 +26,12 @@ export async function initializeAuthListener(store: any) {
   isListenerInitialized = false
   
   // Check if Supabase is configured before initializing listener
-  // Use static import (already imported at top of file)
   if (!isSupabaseConfigured()) {
     console.error('⚠️ Cannot initialize auth listener: Supabase environment variables are missing')
     console.error('💡 Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Netlify environment variables')
     return
   }
 
-  // Ensure Supabase client is fully initialized before setting up listener
-  // Wait a moment for the client to be ready (especially important on page reload)
-  await new Promise(resolve => setTimeout(resolve, 50))
-  
-  // Verify client is accessible
-  try {
-    await supabase.auth.getSession()
-  } catch (err) {
-    console.warn('⚠️ Supabase client not ready yet, retrying...', err)
-    // Wait a bit longer and retry
-    await new Promise(resolve => setTimeout(resolve, 100))
-  }
-  
-  // Check for Supabase session in localStorage BEFORE setting up listener
-  // This helps us understand if there's a session that should be restored
-  try {
-    const supabaseSessionStr = localStorage.getItem('supabase.auth.token')
-    if (supabaseSessionStr) {
-      try {
-        const supabaseSession = JSON.parse(supabaseSessionStr)
-      } catch (e) {
-        console.warn('⚠️ Could not parse Supabase session from localStorage:', e)
-      }
-    }
-  } catch (err) {
-    console.warn('⚠️ Error checking Supabase session in localStorage:', err)
-  }
-  
   isListenerInitialized = true
 
   // Set up the auth state change listener FIRST
@@ -104,45 +75,9 @@ export async function initializeAuthListener(store: any) {
               })
             }
           } else {
-            // Check if we have a stored user in localStorage before clearing
-            // This prevents clearing valid user data if Supabase session hasn't loaded yet
-            const storedUser = localStorage.getItem('user')
-            const storedSupabaseSession = localStorage.getItem('supabase.auth.token')
-            
-            // No session in INITIAL_SESSION event
-            
-            // Only clear if we're sure there's no Supabase session
-            // Wait a bit for Supabase to fully initialize
-            setTimeout(async () => {
-              try {
-                const { data: { session: delayedSession } } = await supabase.auth.getSession()
-                if (!delayedSession) {
-                  // Confirmed no Supabase session after delay - clearing user data
-                  store.dispatch('setUser', null)
-                } else {
-                  // Found Supabase session after delay, restoring user
-                  if (delayedSession.user) {
-                    try {
-                      await loadUserDataForStore(delayedSession.user, store)
-                    } catch (err: any) {
-                      store.dispatch('setUser', {
-                        uid: delayedSession.user.id,
-                        email: delayedSession.user.email,
-                        displayName: delayedSession.user.user_metadata?.display_name || 'User',
-                        photoURL: delayedSession.user.user_metadata?.avatar_url,
-                        isAdmin: false,
-                        createdAt: delayedSession.user.created_at || new Date().toISOString(),
-                        lastLoginAt: new Date().toISOString()
-                      })
-                    }
-                  }
-                }
-              } catch (err) {
-                console.warn('⚠️ useAuth: Error checking delayed session:', err)
-                // If we have stored user but can't verify session, keep the user for now
-                // The backup session check will handle this
-              }
-            }, 500) // Wait 500ms for Supabase to fully initialize
+            // No session in INITIAL_SESSION event - clear user data
+            // Supabase client should have already restored session from localStorage if it exists
+            store.dispatch('setUser', null)
           }
           break
         
@@ -241,84 +176,8 @@ export async function initializeAuthListener(store: any) {
     }
   })
 
-  // Also check for existing session as a backup (with longer timeout for production)
-  // This runs after the listener is set up, so INITIAL_SESSION should handle it first
-  // This ensures Supabase session and store are always in sync
-  // Use a longer timeout on reload to account for network delays
-  const sessionPromise = supabase.auth.getSession()
-  const timeoutPromise = new Promise((resolve) => 
-    setTimeout(() => resolve({ data: { session: null } }), 10000)
-  )
-  
-  Promise.race([sessionPromise, timeoutPromise]).then(async (result: any) => {
-    try {
-      const { data: { session }, error } = result || { data: { session: null }, error: null }
-      const currentUser = store.getters.currentUser
-      
-      // Backup session check completed
-      
-      // Sync check: Ensure Supabase session matches store state
-      if (!error && session?.user) {
-        // We have a Supabase session - verify it's still valid
-        try {
-          // Verify session is still valid by checking token
-          const { data: { user } } = await supabase.auth.getUser()
-          
-          if (user && user.id === session.user.id) {
-            // Session is valid - sync store
-            if (!currentUser || currentUser.uid !== session.user.id) {
-              // Store is out of sync - update it
-              try {
-                await loadUserDataForStore(session.user, store)
-              } catch (loadErr) {
-                // If loading fails, set basic auth data to keep user logged in
-                store.dispatch('setUser', {
-                  uid: session.user.id,
-                  email: session.user.email,
-                  displayName: session.user.user_metadata?.display_name || 'User',
-                  photoURL: session.user.user_metadata?.avatar_url,
-                  isAdmin: false,
-                  createdAt: session.user.created_at || new Date().toISOString(),
-                  lastLoginAt: new Date().toISOString()
-                })
-              }
-            }
-          } else {
-            // Session is invalid - clear store
-            store.dispatch('setUser', null)
-          }
-        } catch (verifyErr) {
-          // If verification fails, still try to use the session we have
-          if (!currentUser || currentUser.uid !== session.user.id) {
-            store.dispatch('setUser', {
-              uid: session.user.id,
-              email: session.user.email,
-              displayName: session.user.user_metadata?.display_name || 'User',
-              photoURL: session.user.user_metadata?.avatar_url,
-              isAdmin: false,
-              createdAt: session.user.created_at || new Date().toISOString(),
-              lastLoginAt: new Date().toISOString()
-            })
-          }
-        }
-      } else {
-        // No Supabase session - clear store and localStorage if it has a user
-        // This ensures localStorage doesn't have stale data when session expires
-        if (currentUser) {
-          // No Supabase session found - clearing user data from store and localStorage
-          store.dispatch('setUser', null)
-        }
-      }
-    } catch (err) {
-      // If session check fails completely, don't break the app
-      // The auth listener will handle state changes
-      console.warn('Session check failed (non-critical):', err)
-    }
-  }).catch((err) => {
-    // If session check fails completely, don't break the app
-    // The auth listener will handle state changes
-    console.warn('Session check failed (non-critical):', err)
-  })
+  // The INITIAL_SESSION event from the auth listener handles session restoration
+  // No need for redundant backup checks - Supabase client automatically restores from localStorage
 }
 
 // Helper function to load user data (used by both initializeAuthListener and useAuth)
