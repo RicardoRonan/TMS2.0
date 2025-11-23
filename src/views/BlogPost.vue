@@ -456,7 +456,6 @@ const toggleLike = async () => {
       })
     }
   } catch (err: any) {
-    console.error('Error toggling like:', err)
     store.dispatch('addNotification', {
       type: 'error',
       message: err.message || 'Failed to update like. Please try again.'
@@ -477,7 +476,7 @@ const handleShareCopied = () => {
 const fetchBlogPost = async (slug: string) => {
   try {
     // Check cache first
-    const cachedBlogs = store.getters.getCachedData('blogs')
+    let cachedBlogs = store.getters.getCachedData('blogs') || []
     let cachedPost = null
     
     if (cachedBlogs && Array.isArray(cachedBlogs)) {
@@ -532,7 +531,6 @@ const fetchBlogPost = async (slug: string) => {
         }
       } catch (err) {
         // If fetching author fails (e.g., RLS), use defaults
-        console.warn('Could not fetch author information:', err)
       }
     }
     
@@ -581,7 +579,6 @@ const fetchBlogPost = async (slug: string) => {
       }
     } catch (err) {
       // Table might not exist yet, that's okay - just use defaults
-      console.log('Likes table may not exist yet:', err)
     }
 
     post.value = {
@@ -604,7 +601,10 @@ const fetchBlogPost = async (slug: string) => {
     likeCount.value = likeCountValue
 
     // Update cache - add/update this post in the cached blogs array
-    const cachedBlogs = store.getters.getCachedData('blogs') || []
+    // Reuse cachedBlogs variable (ensure it's an array)
+    if (!cachedBlogs || !Array.isArray(cachedBlogs)) {
+      cachedBlogs = []
+    }
     const postIndex = cachedBlogs.findIndex((p: any) => p.id === data.id)
     const postData = {
       id: data.id,
@@ -632,7 +632,6 @@ const fetchBlogPost = async (slug: string) => {
     // Fetch comments after post is loaded
     await fetchComments(data.id)
   } catch (err: any) {
-    console.error('Error fetching blog post:', err)
     error.value = err.message || 'Failed to load article. Please try again later.'
   } finally {
     loading.value = false
@@ -692,7 +691,6 @@ const fetchComments = async (blogId: string) => {
     // Count only top-level comments (not replies)
     commentCount.value = comments.value.filter(c => !c.parent_id).length
   } catch (err: any) {
-    console.error('Error fetching comments:', err)
     comments.value = []
     commentCount.value = 0
   } finally {
@@ -775,7 +773,6 @@ const submitComment = async () => {
       message: 'Comment posted successfully'
     })
   } catch (err: any) {
-    console.error('Error submitting comment:', err)
     store.dispatch('addNotification', {
       type: 'error',
       message: err.message || 'Failed to post comment. Please try again.'
@@ -821,7 +818,6 @@ const updateComment = async () => {
       message: 'Comment updated successfully'
     })
   } catch (err: any) {
-    console.error('Error updating comment:', err)
     store.dispatch('addNotification', {
       type: 'error',
       message: err.message || 'Failed to update comment. Please try again.'
@@ -863,7 +859,6 @@ const handleDelete = async (commentId: string) => {
       message: 'Comment deleted successfully'
     })
   } catch (err: any) {
-    console.error('Error deleting comment:', err)
     store.dispatch('addNotification', {
       type: 'error',
       message: err.message || 'Failed to delete comment. Please try again.'
@@ -957,7 +952,6 @@ const handleSubmitReply = async (content: string, parentId: string) => {
       message: 'Reply posted successfully'
     })
   } catch (err: any) {
-    console.error('Error submitting reply:', err)
     store.dispatch('addNotification', {
       type: 'error',
       message: err.message || 'Failed to post reply. Please try again.'
