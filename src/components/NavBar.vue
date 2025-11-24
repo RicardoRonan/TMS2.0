@@ -212,6 +212,18 @@
                   >
                     Settings
                   </router-link>
+                  <button
+                    v-if="currentUser?.isAdmin"
+                    class="block w-full text-left px-4 py-2 text-sm text-text-primary hover:bg-bg-tertiary transition-colors flex items-center justify-between"
+                    @click="handleToggleAdminMode"
+                  >
+                    <span>{{ isAdminMode ? 'Disable Admin Mode' : 'Enable Admin Mode' }}</span>
+                    <Icon 
+                      :name="isAdminMode ? 'check-circle' : 'circle'" 
+                      :size="16" 
+                      :class="isAdminMode ? 'text-primary-500' : 'text-text-tertiary'"
+                    />
+                  </button>
                   <div class="border-t border-border-primary my-1"></div>
                   <button
                     class="block w-full text-left px-4 py-2 text-sm text-danger hover:bg-bg-tertiary transition-colors"
@@ -388,6 +400,18 @@
             >
               Settings
             </router-link>
+            <button
+              v-if="isAuthenticated && currentUser?.isAdmin"
+              class="block w-full text-left px-4 py-3.5 text-sm text-text-primary hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors flex items-center justify-between"
+              @click="handleToggleAdminMode"
+            >
+              <span>{{ isAdminMode ? 'Disable Admin Mode' : 'Enable Admin Mode' }}</span>
+              <Icon 
+                :name="isAdminMode ? 'check-circle' : 'circle'" 
+                :size="16" 
+                :class="isAdminMode ? 'text-primary-500' : 'text-text-tertiary'"
+              />
+            </button>
             <router-link
               to="/about"
               class="block px-4 py-3.5 text-sm text-text-primary hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
@@ -491,7 +515,8 @@ const {
   hasPendingChanges,
   undoEdit,
   redoEdit,
-  saveChanges
+  saveChanges,
+  toggleAdminMode
 } = useAdminMode()
 
 const saving = ref(false)
@@ -597,6 +622,12 @@ const closeResourcesMenu = () => {
 
 const toggleResourcesMobileMenu = () => {
   showResourcesMobileMenu.value = !showResourcesMobileMenu.value
+}
+
+const handleToggleAdminMode = () => {
+  toggleAdminMode()
+  closeUserMenu()
+  closeMenuOverlay()
 }
 
 const handleLogout = async () => {
