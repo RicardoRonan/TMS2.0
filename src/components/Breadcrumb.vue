@@ -11,7 +11,7 @@
         </router-link>
         <a
           v-else-if="item.to && item.onClick"
-          @click.prevent="item.onClick"
+          @click.prevent="item.onClick()"
           class="hover:text-primary-500 transition-colors cursor-pointer"
         >
           {{ item.label }}

@@ -23,9 +23,17 @@ onMounted(async () => {
     const urlParams = new URLSearchParams(window.location.search)
     const code = urlParams.get('code')
     
+    // Timeout protection: prevent hanging if API becomes unresponsive
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Auth callback timed out after 10 seconds')), 10000)
+    )
+    
     if (code) {
-      // PKCE flow: Exchange authorization code for session
-      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+      // PKCE flow: Exchange authorization code for session (with timeout)
+      const exchangePromise = supabase.auth.exchangeCodeForSession(code)
+      const result = await Promise.race([exchangePromise, timeoutPromise]) as any
+      
+      const { data, error } = result || { data: null, error: null }
       
       if (error) {
         // Error exchanging code - redirect to home
@@ -33,21 +41,24 @@ onMounted(async () => {
         return
       }
       
-      if (data.session) {
+      if (data?.session) {
         // Successfully authenticated, reload the page to refresh all state
         window.location.href = '/'
         return
       }
     } else {
-      // Non-PKCE flow: Check for existing session
-      const { data, error } = await supabase.auth.getSession()
+      // Non-PKCE flow: Check for existing session (with timeout)
+      const sessionPromise = supabase.auth.getSession()
+      const result = await Promise.race([sessionPromise, timeoutPromise]) as any
+      
+      const { data, error } = result || { data: null, error: null }
       
       if (error) {
         router.push('/')
         return
       }
       
-      if (data.session) {
+      if (data?.session) {
         // Successfully authenticated, reload the page to refresh all state
         window.location.href = '/'
         return
@@ -57,7 +68,7 @@ onMounted(async () => {
     // No session found, redirect to home
     router.push('/')
   } catch (error) {
-    // Error handling auth callback - redirect to home
+    // Error handling auth callback (including timeout) - redirect to home
     router.push('/')
   }
 })
