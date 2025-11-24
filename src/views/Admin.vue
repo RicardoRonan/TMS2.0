@@ -94,50 +94,50 @@
                   </svg>
                 </button>
                 <div v-if="expandedCategorySections.tutorial">
-                  <div v-if="loadingCategories" class="text-center py-12">
-                    <HIGSpinner />
-                    <p class="text-text-secondary mt-4">Loading categories...</p>
-                  </div>
-                  <div v-else-if="categories.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <HIGCard v-for="category in categories" :key="category.category_id" class="hover:shadow-hig-lg transition-shadow">
-                      <div class="p-4">
-                        <div class="flex items-start justify-between mb-2">
-                          <div class="flex-1">
-                            <h4 class="text-base font-semibold text-text-primary mb-1">{{ category.title }}</h4>
-                            <p class="text-text-secondary text-sm line-clamp-2">{{ category.description || 'No description' }}</p>
-                            <div class="flex items-center space-x-2 mt-1.5 text-xs text-text-tertiary">
-                              <span>{{ category.level }}</span>
-                              <span>•</span>
-                              <span>{{ category.duration }} min</span>
-                            </div>
+                <div v-if="loadingCategories" class="text-center py-12">
+                  <HIGSpinner />
+                  <p class="text-text-secondary mt-4">Loading categories...</p>
+                </div>
+                <div v-else-if="categories.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <HIGCard v-for="category in categories" :key="category.category_id" class="hover:shadow-hig-lg transition-shadow">
+                    <div class="p-4">
+                      <div class="flex items-start justify-between mb-2">
+                        <div class="flex-1">
+                          <h4 class="text-base font-semibold text-text-primary mb-1">{{ category.title }}</h4>
+                          <p class="text-text-secondary text-sm line-clamp-2">{{ category.description || 'No description' }}</p>
+                          <div class="flex items-center space-x-2 mt-1.5 text-xs text-text-tertiary">
+                            <span>{{ category.level }}</span>
+                            <span>•</span>
+                            <span>{{ category.duration }} min</span>
                           </div>
                         </div>
-                        <div class="flex items-center justify-end space-x-1 mt-3 pt-3 border-t border-border-primary">
-                          <button
-                            class="p-1.5 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
-                            @click="editCategory(category)"
-                            title="Edit category"
-                            aria-label="Edit category"
-                          >
-                            <Icon name="edit" :size="16" />
-                          </button>
-                          <button
-                            class="p-1.5 text-text-primary hover:text-danger active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
-                            @click="confirmDeleteCategory(category)"
-                            title="Delete category"
-                            aria-label="Delete category"
-                          >
-                            <Icon name="delete" :size="16" />
-                          </button>
-                        </div>
                       </div>
-                    </HIGCard>
-                  </div>
-                  <HIGCard v-else>
-                    <div class="p-6 text-center py-12 text-text-secondary">
-                      <p>No categories yet. Create your first category!</p>
+                      <div class="flex items-center justify-end space-x-1 mt-3 pt-3 border-t border-border-primary">
+                        <button
+                          class="p-1.5 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
+                          @click="editCategory(category)"
+                          title="Edit category"
+                          aria-label="Edit category"
+                        >
+                          <Icon name="edit" :size="16" />
+                        </button>
+                        <button
+                          class="p-1.5 text-text-primary hover:text-danger active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
+                          @click="confirmDeleteCategory(category)"
+                          title="Delete category"
+                          aria-label="Delete category"
+                        >
+                          <Icon name="delete" :size="16" />
+                        </button>
+                      </div>
                     </div>
                   </HIGCard>
+                </div>
+                <HIGCard v-else>
+                  <div class="p-6 text-center py-12 text-text-secondary">
+                    <p>No categories yet. Create your first category!</p>
+                  </div>
+                </HIGCard>
                 </div>
               </div>
 
@@ -244,48 +244,48 @@
                   </svg>
                 </button>
                 <div v-if="expandedCategorySections.blog">
-                  <div v-if="loadingBlogCategories" class="text-center py-12">
-                    <HIGSpinner />
-                    <p class="text-text-secondary mt-4">Loading categories...</p>
-                  </div>
-                  <div v-else-if="blogCategoriesList.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <HIGCard v-for="category in blogCategoriesList" :key="category.id" class="hover:shadow-hig-lg transition-shadow">
-                      <div class="p-4">
-                        <div class="flex items-start justify-between mb-2">
-                          <div class="flex-1">
-                            <h4 class="text-base font-semibold text-text-primary mb-1">{{ category.name }}</h4>
-                            <p v-if="category.description" class="text-text-secondary text-sm line-clamp-2">{{ category.description }}</p>
-                            <div class="flex items-center space-x-2 mt-1.5 text-xs text-text-tertiary">
-                              <span>{{ getBlogsInCategory(category.name).length }} posts</span>
-                            </div>
+                <div v-if="loadingBlogCategories" class="text-center py-12">
+                  <HIGSpinner />
+                  <p class="text-text-secondary mt-4">Loading categories...</p>
+                </div>
+                <div v-else-if="blogCategoriesList.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <HIGCard v-for="category in blogCategoriesList" :key="category.id" class="hover:shadow-hig-lg transition-shadow">
+                    <div class="p-4">
+                      <div class="flex items-start justify-between mb-2">
+                        <div class="flex-1">
+                          <h4 class="text-base font-semibold text-text-primary mb-1">{{ category.name }}</h4>
+                          <p v-if="category.description" class="text-text-secondary text-sm line-clamp-2">{{ category.description }}</p>
+                          <div class="flex items-center space-x-2 mt-1.5 text-xs text-text-tertiary">
+                            <span>{{ getBlogsInCategory(category.name).length }} posts</span>
                           </div>
                         </div>
-                        <div class="flex items-center justify-end space-x-1 mt-3 pt-3 border-t border-border-primary">
-                          <button
-                            class="p-1.5 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
-                            @click="editBlogCategory(category)"
-                            title="Edit category"
-                            aria-label="Edit category"
-                          >
-                            <Icon name="edit" :size="16" />
-                          </button>
-                          <button
-                            class="p-1.5 text-text-primary hover:text-danger active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
-                            @click="confirmDeleteBlogCategory(category)"
-                            title="Delete category"
-                            aria-label="Delete category"
-                          >
-                            <Icon name="delete" :size="16" />
-                          </button>
-                        </div>
                       </div>
-                    </HIGCard>
-                  </div>
-                  <HIGCard v-else>
-                    <div class="p-6 text-center py-12 text-text-secondary">
-                      <p>No categories yet. Create your first category!</p>
+                      <div class="flex items-center justify-end space-x-1 mt-3 pt-3 border-t border-border-primary">
+                        <button
+                          class="p-1.5 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
+                          @click="editBlogCategory(category)"
+                          title="Edit category"
+                          aria-label="Edit category"
+                        >
+                          <Icon name="edit" :size="16" />
+                        </button>
+                        <button
+                          class="p-1.5 text-text-primary hover:text-danger active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
+                          @click="confirmDeleteBlogCategory(category)"
+                          title="Delete category"
+                          aria-label="Delete category"
+                        >
+                          <Icon name="delete" :size="16" />
+                        </button>
+                      </div>
                     </div>
                   </HIGCard>
+                </div>
+                <HIGCard v-else>
+                  <div class="p-6 text-center py-12 text-text-secondary">
+                    <p>No categories yet. Create your first category!</p>
+                  </div>
+                </HIGCard>
                 </div>
               </div>
 

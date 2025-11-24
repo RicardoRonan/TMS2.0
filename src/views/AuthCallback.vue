@@ -19,28 +19,45 @@ const router = useRouter()
 
 onMounted(async () => {
   try {
-    // Handle the OAuth callback (with timeout to prevent hanging)
-    const sessionPromise = supabase.auth.getSession()
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Session check timed out')), 10000)
-    )
-    const { data, error } = await Promise.race([sessionPromise, timeoutPromise]) as any
+    // Check if we're using PKCE flow (code parameter in URL)
+    const urlParams = new URLSearchParams(window.location.search)
+    const code = urlParams.get('code')
     
-    if (error) {
-      console.error('Error handling auth callback:', error)
-      router.push('/')
-      return
-    }
-    
-    if (data.session) {
-      // Successfully authenticated, reload the page to refresh all state
-      window.location.reload()
+    if (code) {
+      // PKCE flow: Exchange authorization code for session
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+      
+      if (error) {
+        // Error exchanging code - redirect to home
+        router.push('/')
+        return
+      }
+      
+      if (data.session) {
+        // Successfully authenticated, reload the page to refresh all state
+        window.location.href = '/'
+        return
+      }
     } else {
-      // No session found, redirect to home
-      router.push('/')
+      // Non-PKCE flow: Check for existing session
+      const { data, error } = await supabase.auth.getSession()
+      
+      if (error) {
+        router.push('/')
+        return
+      }
+      
+      if (data.session) {
+        // Successfully authenticated, reload the page to refresh all state
+        window.location.href = '/'
+        return
+      }
     }
+    
+    // No session found, redirect to home
+    router.push('/')
   } catch (error) {
-    console.error('Error handling auth callback:', error)
+    // Error handling auth callback - redirect to home
     router.push('/')
   }
 })

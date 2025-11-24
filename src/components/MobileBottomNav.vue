@@ -5,7 +5,7 @@
         v-for="item in navItems"
         :key="item.name"
         :to="item.href"
-        class="flex flex-col items-center justify-center flex-1 min-w-0 px-2 py-1 transition-colors relative"
+        class="flex flex-col items-center justify-center flex-1 min-w-0 px-2 py-1 transition-colors relative pt-2"
         :class="bottomNavLinkClasses(item.href)"
       >
         <Icon :name="item.icon" :size="22" />
@@ -59,6 +59,7 @@ const bottomNavLinkClasses = (href: string) => {
   height: 3px;
   background-color: var(--color-primary-500);
   border-radius: 0 0 3px 3px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>
 

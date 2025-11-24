@@ -95,8 +95,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import Breadcrumb from '../components/Breadcrumb.vue'
@@ -115,12 +115,32 @@ import {
 import { supabase } from '../supabase'
 
 const router = useRouter()
+const route = useRoute()
 const store = useStore()
 const loading = ref(true)
 const topLevelGroups = ref<any[]>([])
 const categories = ref<any[]>([])
 const pages = ref<any[]>([])
 const selectedCategory = ref<any>(null)
+
+// Handle category selection from query parameter or reset when navigating to base /tutorials route
+watch(() => [route.path, route.query.category], ([newPath, categorySlug]) => {
+  if (newPath === '/tutorials') {
+    if (categorySlug && categories.value.length > 0) {
+      // Find and select the category by slug
+      const category = categories.value.find(cat => cat.slug === categorySlug)
+      if (category && selectedCategory.value?.slug !== category.slug) {
+        selectedCategory.value = category
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        return
+      }
+    }
+    // No category query param, reset selection
+    if (!categorySlug && selectedCategory.value) {
+      selectedCategory.value = null
+    }
+  }
+}, { immediate: true })
 
 // Dummy data - will be replaced with real data from Supabase
 const dummyCategories = [
@@ -421,9 +441,14 @@ const selectCategory = (category: any) => {
 
 const breadcrumbItems = computed(() => {
   if (!selectedCategory.value) return []
+  const categorySlug = selectedCategory.value.slug
+  const categoryPath = categorySlug ? `/tutorials?category=${categorySlug}` : '/tutorials'
   return [
     { label: 'Tutorials', to: '/tutorials' },
-    { label: selectedCategory.value.title || 'Category' }
+    { 
+      label: selectedCategory.value.title || 'Category', 
+      to: categoryPath
+    }
   ]
 })
 
@@ -617,6 +642,16 @@ onMounted(async () => {
   // Fetch fresh data in background
   await Promise.all([fetchTopLevelGroups(), fetchCategories(), fetchPages()])
   loading.value = false
+  
+  // After categories are loaded, check for category query parameter
+  const categorySlug = route.query.category as string
+  if (categorySlug && categories.value.length > 0 && !selectedCategory.value) {
+    const category = categories.value.find(cat => cat.slug === categorySlug)
+    if (category) {
+      selectedCategory.value = category
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
 })
 </script>
 

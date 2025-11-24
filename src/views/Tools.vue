@@ -93,7 +93,7 @@
                 <div class="flex items-center justify-center space-x-2">
                   <a 
                     :href="tool.url" 
-                    target="_blank"
+                    target="_blank" 
                     rel="noopener noreferrer"
                     class="text-primary-500 hover:text-primary-600 transition-colors"
                     :title="`Visit ${tool.name}`"

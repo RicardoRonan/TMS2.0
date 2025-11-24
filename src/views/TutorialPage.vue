@@ -225,9 +225,11 @@ const renderedContent = computed(() => {
 })
 
 const breadcrumbItems = computed(() => {
+  const categorySlug = category.value?.slug
+  const categoryPath = categorySlug ? `/tutorials?category=${categorySlug}` : '/tutorials'
   return [
     { label: 'Tutorials', to: '/tutorials' },
-    { label: category.value?.title || 'Category' },
+    { label: category.value?.title || 'Category', to: categoryPath },
     { label: page.value?.title || '' }
   ]
 })
