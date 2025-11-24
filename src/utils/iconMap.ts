@@ -83,6 +83,7 @@ const iconImportMap: Record<string, () => Promise<{ default: IconDefinition }>> 
   'minus': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faMinus })),
   'info': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faCircleInfo })),
   'warning': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faTriangleExclamation })),
+  'alert-triangle': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faTriangleExclamation })),
   'error': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faTriangleExclamation })),
   'success': () => import('@fortawesome/free-solid-svg-icons').then(m => ({ default: m.faCheckCircle })),
   
