@@ -7,7 +7,13 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    flowType: 'pkce' // Use PKCE flow for better security and CORS handling
+  },
+  global: {
+    headers: {
+      'x-client-info': 'supabase-js-vue'
+    }
   }
 })
 
