@@ -9,6 +9,46 @@ let isListenerInitialized = false
 let lastTokenRefreshTime = 0
 const TOKEN_REFRESH_DEBOUNCE_MS = 60000 // Only reload user data once per minute for token refreshes
 
+// Helper function to extract display name from user metadata
+// Handles different OAuth providers (Google uses full_name, email signup uses display_name)
+function getDisplayNameFromMetadata(userMetadata: Record<string, any> | undefined, email?: string): string {
+  if (!userMetadata) {
+    // If no metadata, try to extract a name from email
+    return extractNameFromEmail(email)
+  }
+  
+  // Check various possible name fields (in order of preference)
+  const name = userMetadata.display_name || // Email signup
+               userMetadata.full_name ||    // Google OAuth
+               userMetadata.name ||          // Other OAuth providers
+               ''
+  
+  if (name && name.trim()) {
+    return name.trim()
+  }
+  
+  // Fallback: extract name from email
+  return extractNameFromEmail(email)
+}
+
+// Extract a display name from email (e.g., "john.doe@gmail.com" -> "John Doe")
+function extractNameFromEmail(email?: string): string {
+  if (!email) return 'User'
+  
+  const localPart = email.split('@')[0]
+  if (!localPart) return 'User'
+  
+  // Replace dots, underscores, and hyphens with spaces, then capitalize each word
+  const name = localPart
+    .replace(/[._-]/g, ' ')
+    .split(' ')
+    .filter(word => word.length > 0)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
+  
+  return name || 'User'
+}
+
 // Initialize auth listener immediately (called from main.ts)
 export async function initializeAuthListener(store: any) {
   // Always re-initialize on reload to ensure connection is fresh
@@ -50,7 +90,7 @@ export async function initializeAuthListener(store: any) {
               store.dispatch('setUser', {
                 uid: session.user.id,
                 email: session.user.email,
-                displayName: session.user.user_metadata?.display_name || 'User',
+                displayName: getDisplayNameFromMetadata(session.user.user_metadata, session.user.email),
                 photoURL: session.user.user_metadata?.avatar_url,
                 isAdmin: false,
                 createdAt: session.user.created_at || new Date().toISOString(),
@@ -72,7 +112,7 @@ export async function initializeAuthListener(store: any) {
               store.dispatch('setUser', {
                 uid: session.user.id,
                 email: session.user.email,
-                displayName: session.user.user_metadata?.display_name || 'User',
+                displayName: getDisplayNameFromMetadata(session.user.user_metadata, session.user.email),
                 photoURL: session.user.user_metadata?.avatar_url,
                 isAdmin: false,
                 createdAt: session.user.created_at || new Date().toISOString(),
@@ -119,7 +159,7 @@ export async function initializeAuthListener(store: any) {
             store.dispatch('setUser', {
               uid: session.user.id,
               email: session.user.email,
-              displayName: session.user.user_metadata?.display_name || 'User',
+              displayName: getDisplayNameFromMetadata(session.user.user_metadata, session.user.email),
               photoURL: session.user.user_metadata?.avatar_url,
               isAdmin: false,
               createdAt: session.user.created_at || new Date().toISOString(),
@@ -139,7 +179,7 @@ export async function initializeAuthListener(store: any) {
           store.dispatch('setUser', {
             uid: session.user.id,
             email: session.user.email,
-            displayName: session.user.user_metadata?.display_name || 'User',
+            displayName: getDisplayNameFromMetadata(session.user.user_metadata, session.user.email),
             photoURL: session.user.user_metadata?.avatar_url,
             isAdmin: false,
             createdAt: session.user.created_at || new Date().toISOString(),
@@ -184,15 +224,91 @@ async function loadUserDataForStore(supabaseUser: User, store: any) {
       timeoutPromise
     ]) as any
 
-    // PGRST116 is "not found" - user might not have profile yet, that's okay
+    // PGRST116 is "not found" - user might not have profile yet (e.g., first OAuth sign-in)
+    // In this case, create the profile with proper name from OAuth metadata
+    if (profileError && profileError.code === 'PGRST116') {
+      const displayName = getDisplayNameFromMetadata(supabaseUser.user_metadata, supabaseUser.email)
+      
+      try {
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert({
+            id: supabaseUser.id,
+            email: supabaseUser.email,
+            display_name: displayName,
+            photo_url: supabaseUser.user_metadata?.avatar_url,
+            is_admin: false,
+            created_at: new Date().toISOString(),
+            last_login_at: new Date().toISOString()
+          })
+
+        if (!insertError) {
+          // Fetch the newly created profile
+          const { data: newUserData } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', supabaseUser.id)
+            .single()
+
+          if (newUserData) {
+            store.dispatch('setUser', {
+              uid: supabaseUser.id,
+              email: supabaseUser.email,
+              displayName: newUserData.display_name || displayName,
+              photoURL: newUserData.photo_url || supabaseUser.user_metadata?.avatar_url,
+              isAdmin: newUserData.is_admin || false,
+              createdAt: newUserData.created_at || supabaseUser.created_at || new Date().toISOString(),
+              lastLoginAt: new Date().toISOString()
+            })
+            return
+          }
+        }
+      } catch (insertErr) {
+        // If insert fails, continue with auth data only
+      }
+      
+      // Fallback: set store with auth metadata
+      store.dispatch('setUser', {
+        uid: supabaseUser.id,
+        email: supabaseUser.email,
+        displayName,
+        photoURL: supabaseUser.user_metadata?.avatar_url,
+        isAdmin: false,
+        createdAt: supabaseUser.created_at || new Date().toISOString(),
+        lastLoginAt: new Date().toISOString()
+      })
+      return
+    }
+
     // TIMEOUT means the query took too long - continue with auth data
     // Other errors are silently handled - we continue with auth data
+
+    // Check if existing user has generic "User" name but we can get a better one from metadata
+    let finalDisplayName = userData?.display_name
+    if (userData && userData.display_name === 'User') {
+      const betterName = getDisplayNameFromMetadata(supabaseUser.user_metadata, supabaseUser.email)
+      if (betterName && betterName !== 'User') {
+        // Update the database with the better name
+        try {
+          await supabase
+            .from('users')
+            .update({ display_name: betterName })
+            .eq('id', supabaseUser.id)
+          finalDisplayName = betterName
+        } catch (updateErr) {
+          // Non-critical, continue with existing name
+        }
+      }
+    }
+    if (!finalDisplayName) {
+      finalDisplayName = getDisplayNameFromMetadata(supabaseUser.user_metadata, supabaseUser.email)
+    }
 
     // Update store with complete user data
     store.dispatch('setUser', {
       uid: supabaseUser.id,
       email: supabaseUser.email,
-      displayName: userData?.display_name || supabaseUser.user_metadata?.display_name || 'User',
+      displayName: finalDisplayName,
       photoURL: userData?.photo_url || supabaseUser.user_metadata?.avatar_url,
       isAdmin: userData?.is_admin || false,
       createdAt: userData?.created_at || supabaseUser.created_at || new Date().toISOString(),
@@ -204,7 +320,7 @@ async function loadUserDataForStore(supabaseUser: User, store: any) {
     store.dispatch('setUser', {
       uid: supabaseUser.id,
       email: supabaseUser.email,
-      displayName: supabaseUser.user_metadata?.display_name || 'User',
+      displayName: getDisplayNameFromMetadata(supabaseUser.user_metadata, supabaseUser.email),
       photoURL: supabaseUser.user_metadata?.avatar_url,
       isAdmin: false,
       createdAt: supabaseUser.created_at || new Date().toISOString(),
@@ -285,7 +401,7 @@ export function useAuth() {
         store.dispatch('setUser', {
           uid: data.user.id,
           email: data.user.email,
-          displayName: data.user.user_metadata?.display_name || 'User',
+          displayName: getDisplayNameFromMetadata(data.user.user_metadata, data.user.email),
           photoURL: data.user.user_metadata?.avatar_url,
           isAdmin: false,
           createdAt: data.user.created_at || new Date().toISOString(),
@@ -308,7 +424,7 @@ export function useAuth() {
                 .insert({
                   id: data.user.id,
                   email: data.user.email,
-                  display_name: data.user.user_metadata?.display_name || 'User',
+                  display_name: getDisplayNameFromMetadata(data.user.user_metadata, data.user.email),
                   photo_url: data.user.user_metadata?.avatar_url,
                   is_admin: false,
                   created_at: new Date().toISOString(),
@@ -328,7 +444,7 @@ export function useAuth() {
                   store.dispatch('setUser', {
                     uid: data.user.id,
                     email: data.user.email,
-                    displayName: newUserData.display_name || data.user.user_metadata?.display_name || 'User',
+                    displayName: newUserData.display_name || getDisplayNameFromMetadata(data.user.user_metadata, data.user.email),
                     photoURL: newUserData.photo_url || data.user.user_metadata?.avatar_url,
                     isAdmin: newUserData.is_admin || false,
                     createdAt: newUserData.created_at || data.user.created_at || new Date().toISOString(),
@@ -344,7 +460,7 @@ export function useAuth() {
             store.dispatch('setUser', {
               uid: data.user.id,
               email: data.user.email,
-              displayName: userData.display_name || data.user.user_metadata?.display_name || 'User',
+              displayName: userData.display_name || getDisplayNameFromMetadata(data.user.user_metadata, data.user.email),
               photoURL: userData.photo_url || data.user.user_metadata?.avatar_url,
               isAdmin: userData.is_admin || false,
               createdAt: userData.created_at || data.user.created_at || new Date().toISOString(),
