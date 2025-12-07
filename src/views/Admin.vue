@@ -756,6 +756,22 @@
           placeholder="Write page content here..."
           required
         />
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Page Type <span class="text-danger">*</span></label>
+          <select
+            v-model="pageForm.page_type"
+            class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+            required
+          >
+            <option value="content">Content</option>
+            <option value="qa">Q&A Exercise</option>
+            <option value="mini_project">Mini Project</option>
+            <option value="capstone">Capstone Project</option>
+          </select>
+          <p class="text-sm text-text-secondary mt-1">
+            Select the type of page. Q&A, Mini Projects, and Capstone pages will show interactive exercises.
+          </p>
+        </div>
         <HIGInput
           v-model.number="pageForm.page_order"
           label="Order"
@@ -779,6 +795,327 @@
           </HIGButton>
           <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
             {{ submitting ? 'Saving...' : (editingPage ? 'Update' : 'Create') }}
+          </HIGButton>
+        </div>
+      </form>
+    </HIGModal>
+
+    <!-- Exercise Management Modal -->
+    <HIGModal
+      v-model:is-open="showExerciseModal"
+      :title="editingExercise ? 'Edit Exercise' : 'Create New Exercise'"
+      size="xl"
+    >
+      <form @submit.prevent="handleSubmitExercise" class="space-y-4">
+        <div class="text-sm text-text-secondary mb-4">
+          Page: <strong>{{ currentPageForExercise?.title }}</strong>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Exercise Type <span class="text-danger">*</span></label>
+          <select
+            v-model="exerciseForm.exercise_type"
+            class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+            required
+          >
+            <option value="code_editor">Code Editor</option>
+            <option value="multiple_choice">Multiple Choice</option>
+            <option value="text_input">Text Input</option>
+            <option value="mixed">Mixed</option>
+          </select>
+        </div>
+        <div v-if="exerciseForm.exercise_type === 'code_editor' || exerciseForm.exercise_type === 'mixed'">
+          <div>
+            <label class="block text-sm font-medium text-text-primary mb-2">Language</label>
+            <select
+              v-model="exerciseForm.language"
+              class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="javascript">JavaScript</option>
+              <option value="typescript">TypeScript</option>
+              <option value="python">Python</option>
+              <option value="java">Java</option>
+              <option value="cpp">C++</option>
+            </select>
+          </div>
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-text-primary mb-2">Starter Code</label>
+            <textarea
+              v-model="exerciseForm.starter_code"
+              rows="8"
+              class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
+              placeholder="// Write starter code here..."
+            ></textarea>
+          </div>
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-text-primary mb-2">Solution Code (Optional)</label>
+            <textarea
+              v-model="exerciseForm.solution_code"
+              rows="8"
+              class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
+              placeholder="// Write solution code here..."
+            ></textarea>
+          </div>
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-text-primary mb-2">Test Cases (JSON)</label>
+            <textarea
+              v-model="testCasesJson"
+              rows="6"
+              class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
+              placeholder='[{"input": "test", "expected_output": "result", "description": "Test case 1"}]'
+            ></textarea>
+            <p class="text-xs text-text-secondary mt-1">Format: Array of objects with input, expected_output, and optional description</p>
+          </div>
+        </div>
+        <div v-if="exerciseForm.exercise_type === 'multiple_choice' || exerciseForm.exercise_type === 'mixed'">
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-text-primary mb-2">Options (JSON)</label>
+            <textarea
+              v-model="optionsJson"
+              rows="6"
+              class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
+              placeholder='[{"value": "A", "label": "Option A"}, {"value": "B", "label": "Option B"}]'
+            ></textarea>
+            <p class="text-xs text-text-secondary mt-1">Format: Array of objects with value and label</p>
+          </div>
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-text-primary mb-2">Correct Answer(s)</label>
+            <HIGInput
+              v-model="exerciseForm.correct_answer"
+              placeholder="A or A,B for multiple"
+            />
+          </div>
+        </div>
+        <div v-if="exerciseForm.exercise_type === 'text_input' || exerciseForm.exercise_type === 'mixed'">
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-text-primary mb-2">Correct Answer</label>
+            <HIGInput
+              v-model="exerciseForm.correct_answer"
+              placeholder="Expected answer"
+            />
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Instructions <span class="text-danger">*</span></label>
+          <MarkdownEditor
+            v-model="exerciseForm.instructions"
+            :rows="6"
+            placeholder="Write exercise instructions here..."
+            required
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Hints (JSON Array)</label>
+          <textarea
+            v-model="hintsJson"
+            rows="4"
+            class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
+            placeholder='["Hint 1", "Hint 2"]'
+          ></textarea>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <HIGInput
+            v-model.number="exerciseForm.points"
+            label="Points"
+            type="number"
+            placeholder="10"
+          />
+        </div>
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
+          <HIGButton variant="tertiary" type="button" @click="closeExerciseModal" class="w-full sm:w-auto">
+            Cancel
+          </HIGButton>
+          <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
+            {{ submitting ? 'Saving...' : (editingExercise ? 'Update' : 'Create') }}
+          </HIGButton>
+        </div>
+      </form>
+    </HIGModal>
+
+    <!-- Q&A Question Management Modal -->
+    <HIGModal
+      v-model:is-open="showQAModal"
+      :title="editingQA ? 'Edit Q&A Question' : 'Create New Q&A Question'"
+      size="xl"
+    >
+      <form @submit.prevent="handleSubmitQA" class="space-y-4">
+        <div class="text-sm text-text-secondary mb-4">
+          Page: <strong>{{ currentPageForQA?.title }}</strong>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Question Type <span class="text-danger">*</span></label>
+          <select
+            v-model="qaForm.question_type"
+            class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+            required
+          >
+            <option value="multiple_choice">Multiple Choice</option>
+            <option value="text_input">Text Input</option>
+            <option value="code">Code</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Question Text <span class="text-danger">*</span></label>
+          <MarkdownEditor
+            v-model="qaForm.question_text"
+            :rows="4"
+            placeholder="Enter your question here..."
+            required
+          />
+        </div>
+        <div v-if="qaForm.question_type === 'multiple_choice'">
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-text-primary mb-2">Options (JSON)</label>
+            <textarea
+              v-model="qaOptionsJson"
+              rows="6"
+              class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
+              placeholder='[{"value": "A", "label": "Option A"}, {"value": "B", "label": "Option B"}]'
+            ></textarea>
+          </div>
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-text-primary mb-2">Correct Answer(s)</label>
+            <HIGInput
+              v-model="qaCorrectAnswersJson"
+              placeholder='["A"] or ["A", "B"] for multiple correct answers'
+            />
+            <p class="text-xs text-text-secondary mt-1">JSON array of correct answer values</p>
+          </div>
+        </div>
+        <div v-if="qaForm.question_type === 'text_input'">
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-text-primary mb-2">Correct Answer</label>
+            <HIGInput
+              v-model="qaForm.correct_answer"
+              placeholder="Expected answer"
+            />
+          </div>
+        </div>
+        <div v-if="qaForm.question_type === 'code'">
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-text-primary mb-2">Language</label>
+            <select
+              v-model="qaForm.language"
+              class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="javascript">JavaScript</option>
+              <option value="typescript">TypeScript</option>
+              <option value="python">Python</option>
+            </select>
+          </div>
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-text-primary mb-2">Correct Answer (Code)</label>
+            <textarea
+              v-model="qaForm.correct_answer"
+              rows="6"
+              class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
+              placeholder="// Expected code solution"
+            ></textarea>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Explanation</label>
+          <MarkdownEditor
+            v-model="qaForm.explanation"
+            :rows="4"
+            placeholder="Explanation shown after answering..."
+          />
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <HIGInput
+            v-model.number="qaForm.points"
+            label="Points"
+            type="number"
+            placeholder="5"
+          />
+          <HIGInput
+            v-model.number="qaForm.order_index"
+            label="Order Index"
+            type="number"
+            placeholder="0"
+          />
+        </div>
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
+          <HIGButton variant="tertiary" type="button" @click="closeQAModal" class="w-full sm:w-auto">
+            Cancel
+          </HIGButton>
+          <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
+            {{ submitting ? 'Saving...' : (editingQA ? 'Update' : 'Create') }}
+          </HIGButton>
+        </div>
+      </form>
+    </HIGModal>
+
+    <!-- Project Management Modal -->
+    <HIGModal
+      v-model:is-open="showProjectModal"
+      :title="editingProject ? 'Edit Project' : 'Configure Project'"
+      size="xl"
+    >
+      <form @submit.prevent="handleSubmitProject" class="space-y-4">
+        <div class="text-sm text-text-secondary mb-4">
+          Page: <strong>{{ currentPageForProject?.title }}</strong>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Language</label>
+          <select
+            v-model="projectForm.language"
+            class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+          >
+            <option value="javascript">JavaScript</option>
+            <option value="typescript">TypeScript</option>
+            <option value="python">Python</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Starter Code</label>
+          <textarea
+            v-model="projectForm.starter_code"
+            rows="10"
+            class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
+            placeholder="// Write starter code here..."
+          ></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Requirements (One per line)</label>
+          <textarea
+            v-model="requirementsText"
+            rows="6"
+            class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+            placeholder="Requirement 1&#10;Requirement 2&#10;Requirement 3"
+          ></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Test Cases (JSON)</label>
+          <textarea
+            v-model="projectTestCasesJson"
+            rows="6"
+            class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
+            placeholder='[{"input": "test", "expected_output": "result", "description": "Test case 1"}]'
+          ></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Hints (One per line)</label>
+          <textarea
+            v-model="projectHintsText"
+            rows="4"
+            class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+            placeholder="Hint 1&#10;Hint 2"
+          ></textarea>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <HIGInput
+            v-model.number="projectForm.points"
+            label="Points"
+            type="number"
+            placeholder="50"
+          />
+        </div>
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
+          <HIGButton variant="tertiary" type="button" @click="closeProjectModal" class="w-full sm:w-auto">
+            Cancel
+          </HIGButton>
+          <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
+            {{ submitting ? 'Saving...' : (editingProject ? 'Update' : 'Create') }}
           </HIGButton>
         </div>
       </form>
@@ -1130,6 +1467,9 @@ const showDeletePageModal = ref(false)
 const showDeleteToolModal = ref(false)
 const showBlogCategoryModal = ref(false)
 const showDeleteBlogCategoryModal = ref(false)
+const showExerciseModal = ref(false)
+const showQAModal = ref(false)
+const showProjectModal = ref(false)
 
 // Editing states
 const editingBlog = ref<any>(null)
@@ -1138,6 +1478,14 @@ const editingPage = ref<any>(null)
 const editingTool = ref<any>(null)
 const editingUser = ref<any>(null)
 const editingBlogCategory = ref<any>(null)
+const editingExercise = ref<any>(null)
+const editingQA = ref<any>(null)
+const editingProject = ref<any>(null)
+
+// Current page context for exercises/QA/projects
+const currentPageForExercise = ref<any>(null)
+const currentPageForQA = ref<any>(null)
+const currentPageForProject = ref<any>(null)
 
 // Delete targets
 const blogToDelete = ref<any>(null)
@@ -1173,8 +1521,45 @@ const pageForm = ref({
   slug: '',
   content: '',
   page_order: 0,
+  page_type: 'content',
   published: false
 })
+
+// Exercise form
+const exerciseForm = ref({
+  exercise_type: 'code_editor',
+  language: 'javascript',
+  starter_code: '',
+  solution_code: '',
+  instructions: '',
+  points: 10
+})
+const testCasesJson = ref('[]')
+const optionsJson = ref('[]')
+const hintsJson = ref('[]')
+
+// QA form
+const qaForm = ref({
+  question_type: 'multiple_choice',
+  question_text: '',
+  correct_answer: '',
+  explanation: '',
+  points: 5,
+  order_index: 0,
+  language: 'javascript'
+})
+const qaOptionsJson = ref('[]')
+const qaCorrectAnswersJson = ref('[]')
+
+// Project form
+const projectForm = ref({
+  language: 'javascript',
+  starter_code: '',
+  points: 50
+})
+const requirementsText = ref('')
+const projectTestCasesJson = ref('[]')
+const projectHintsText = ref('')
 
 const toolForm = ref({
   name: '',
@@ -1938,6 +2323,7 @@ const openCreatePageModal = () => {
     slug: '',
     content: '',
     page_order: 0,
+    page_type: 'content',
     published: false
   }
   showPageModal.value = true
@@ -1951,6 +2337,7 @@ const editPage = (page: any) => {
     slug: page.slug,
     content: page.content || '',
     page_order: page.page_order || 0,
+    page_type: page.page_type || 'content',
     published: page.published || false
   }
   showPageModal.value = true
@@ -2011,6 +2398,362 @@ const handleSubmitPage = async () => {
 const confirmDeletePage = (page: any) => {
   pageToDelete.value = page
   showDeletePageModal.value = true
+}
+
+// Exercise management functions
+const manageExercises = async (page: any) => {
+  currentPageForExercise.value = page
+  editingExercise.value = null
+  exerciseForm.value = {
+    exercise_type: 'code_editor',
+    language: 'javascript',
+    starter_code: '',
+    solution_code: '',
+    instructions: '',
+    points: 10
+  }
+  testCasesJson.value = '[]'
+  optionsJson.value = '[]'
+  hintsJson.value = '[]'
+  
+  // Load existing exercises for this page
+  try {
+    const { data, error } = await supabase
+      .from('tutorial_exercises')
+      .select('*')
+      .eq('tutorial_page_id', page.id)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+    
+    if (!error && data) {
+      editingExercise.value = data
+      exerciseForm.value = {
+        exercise_type: data.exercise_type || 'code_editor',
+        language: data.language || 'javascript',
+        starter_code: data.starter_code || '',
+        solution_code: data.solution_code || '',
+        instructions: data.instructions || '',
+        points: data.points || 10
+      }
+      testCasesJson.value = JSON.stringify(data.test_cases || [], null, 2)
+      optionsJson.value = JSON.stringify(data.options || [], null, 2)
+      hintsJson.value = JSON.stringify(data.hints || [], null, 2)
+    }
+  } catch (error) {
+    console.error('Error loading exercise:', error)
+  }
+  
+  showExerciseModal.value = true
+}
+
+const closeExerciseModal = () => {
+  showExerciseModal.value = false
+  editingExercise.value = null
+  currentPageForExercise.value = null
+}
+
+const handleSubmitExercise = async () => {
+  try {
+    submitting.value = true
+    
+    let testCases = []
+    let options = []
+    let hints = []
+    
+    try {
+      testCases = JSON.parse(testCasesJson.value || '[]')
+    } catch {
+      testCases = []
+    }
+    
+    try {
+      options = JSON.parse(optionsJson.value || '[]')
+    } catch {
+      options = []
+    }
+    
+    try {
+      hints = JSON.parse(hintsJson.value || '[]')
+    } catch {
+      hints = []
+    }
+    
+    const exerciseData = {
+      tutorial_page_id: currentPageForExercise.value.id,
+      exercise_type: exerciseForm.value.exercise_type,
+      language: exerciseForm.value.language,
+      starter_code: exerciseForm.value.starter_code,
+      solution_code: exerciseForm.value.solution_code,
+      test_cases: testCases,
+      instructions: exerciseForm.value.instructions,
+      hints: hints,
+      points: exerciseForm.value.points,
+      options: options,
+      correct_answer: exerciseForm.value.correct_answer
+    }
+    
+    if (editingExercise.value) {
+      const { error } = await supabase
+        .from('tutorial_exercises')
+        .update(exerciseData)
+        .eq('id', editingExercise.value.id)
+      
+      if (error) throw error
+      store.dispatch('addNotification', {
+        type: 'success',
+        message: 'Exercise updated successfully'
+      })
+    } else {
+      const { error } = await supabase
+        .from('tutorial_exercises')
+        .insert(exerciseData)
+      
+      if (error) throw error
+      store.dispatch('addNotification', {
+        type: 'success',
+        message: 'Exercise created successfully'
+      })
+    }
+    
+    closeExerciseModal()
+  } catch (error: any) {
+    console.error('Error saving exercise:', error)
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: error.message || 'Failed to save exercise'
+    })
+  } finally {
+    submitting.value = false
+  }
+}
+
+const manageQAQuestions = async (page: any) => {
+  currentPageForQA.value = page
+  editingQA.value = null
+  qaForm.value = {
+    question_type: 'multiple_choice',
+    question_text: '',
+    correct_answer: '',
+    explanation: '',
+    points: 5,
+    order_index: 0,
+    language: 'javascript'
+  }
+  qaOptionsJson.value = '[]'
+  qaCorrectAnswersJson.value = '[]'
+  showQAModal.value = true
+}
+
+const closeQAModal = () => {
+  showQAModal.value = false
+  editingQA.value = null
+  currentPageForQA.value = null
+}
+
+const handleSubmitQA = async () => {
+  try {
+    submitting.value = true
+    
+    let options = []
+    let correctAnswers = []
+    
+    try {
+      options = JSON.parse(qaOptionsJson.value || '[]')
+    } catch {
+      options = []
+    }
+    
+    try {
+      correctAnswers = JSON.parse(qaCorrectAnswersJson.value || '[]')
+    } catch {
+      if (qaForm.value.correct_answer) {
+        correctAnswers = [qaForm.value.correct_answer]
+      }
+    }
+    
+    const qaData = {
+      tutorial_page_id: currentPageForQA.value.id,
+      question_type: qaForm.value.question_type,
+      question_text: qaForm.value.question_text,
+      options: options.length > 0 ? options : null,
+      correct_answer: qaForm.value.correct_answer,
+      correct_answers: correctAnswers.length > 0 ? correctAnswers : null,
+      explanation: qaForm.value.explanation,
+      points: qaForm.value.points,
+      order_index: qaForm.value.order_index
+    }
+    
+    if (editingQA.value) {
+      const { error } = await supabase
+        .from('tutorial_qa_questions')
+        .update(qaData)
+        .eq('id', editingQA.value.id)
+      
+      if (error) throw error
+      store.dispatch('addNotification', {
+        type: 'success',
+        message: 'Q&A question updated successfully'
+      })
+    } else {
+      const { error } = await supabase
+        .from('tutorial_qa_questions')
+        .insert(qaData)
+      
+      if (error) throw error
+      store.dispatch('addNotification', {
+        type: 'success',
+        message: 'Q&A question created successfully'
+      })
+    }
+    
+    closeQAModal()
+  } catch (error: any) {
+    console.error('Error saving Q&A question:', error)
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: error.message || 'Failed to save Q&A question'
+    })
+  } finally {
+    submitting.value = false
+  }
+}
+
+const manageProject = async (page: any) => {
+  currentPageForProject.value = page
+  editingProject.value = null
+  projectForm.value = {
+    language: 'javascript',
+    starter_code: '',
+    points: 50
+  }
+  requirementsText.value = ''
+  projectTestCasesJson.value = '[]'
+  projectHintsText.value = ''
+  
+  // Load existing project config
+  try {
+    const { data, error } = await supabase
+      .from('tutorial_exercises')
+      .select('*')
+      .eq('tutorial_page_id', page.id)
+      .limit(1)
+      .maybeSingle()
+    
+    if (!error && data) {
+      editingProject.value = data
+      projectForm.value = {
+        language: data.language || 'javascript',
+        starter_code: data.starter_code || '',
+        points: data.points || 50
+      }
+      projectTestCasesJson.value = JSON.stringify(data.test_cases || [], null, 2)
+      projectHintsText.value = Array.isArray(data.hints) ? data.hints.join('\n') : ''
+      
+      if (page.exercise_config?.requirements) {
+        requirementsText.value = Array.isArray(page.exercise_config.requirements) 
+          ? page.exercise_config.requirements.join('\n')
+          : ''
+      }
+    } else if (page.exercise_config) {
+      projectForm.value.language = page.exercise_config.language || 'javascript'
+      projectForm.value.starter_code = page.exercise_config.starter_code || ''
+      if (page.exercise_config.requirements) {
+        requirementsText.value = Array.isArray(page.exercise_config.requirements)
+          ? page.exercise_config.requirements.join('\n')
+          : ''
+      }
+    }
+  } catch (error) {
+    console.error('Error loading project:', error)
+  }
+  
+  showProjectModal.value = true
+}
+
+const closeProjectModal = () => {
+  showProjectModal.value = false
+  editingProject.value = null
+  currentPageForProject.value = null
+}
+
+const handleSubmitProject = async () => {
+  try {
+    submitting.value = true
+    
+    let testCases = []
+    let hints = []
+    let requirements = []
+    
+    try {
+      testCases = JSON.parse(projectTestCasesJson.value || '[]')
+    } catch {
+      testCases = []
+    }
+    
+    hints = projectHintsText.value.split('\n').filter(h => h.trim())
+    requirements = requirementsText.value.split('\n').filter(r => r.trim())
+    
+    // Update page exercise_config
+    const exerciseConfig = {
+      language: projectForm.value.language,
+      starter_code: projectForm.value.starter_code,
+      requirements: requirements,
+      test_cases: testCases,
+      hints: hints,
+      points: projectForm.value.points
+    }
+    
+    const { error: pageError } = await supabase
+      .from('tutorial_pages')
+      .update({ exercise_config: exerciseConfig })
+      .eq('id', currentPageForProject.value.id)
+    
+    if (pageError) throw pageError
+    
+    // Also create/update exercise entry
+    const exerciseData = {
+      tutorial_page_id: currentPageForProject.value.id,
+      exercise_type: 'code_editor',
+      language: projectForm.value.language,
+      starter_code: projectForm.value.starter_code,
+      test_cases: testCases,
+      instructions: currentPageForProject.value.content || '',
+      hints: hints,
+      points: projectForm.value.points
+    }
+    
+    if (editingProject.value) {
+      const { error } = await supabase
+        .from('tutorial_exercises')
+        .update(exerciseData)
+        .eq('id', editingProject.value.id)
+      
+      if (error) throw error
+    } else {
+      const { error } = await supabase
+        .from('tutorial_exercises')
+        .insert(exerciseData)
+      
+      if (error) throw error
+    }
+    
+    store.dispatch('addNotification', {
+      type: 'success',
+      message: 'Project configured successfully'
+    })
+    
+    closeProjectModal()
+    await reloadAllData()
+  } catch (error: any) {
+    console.error('Error saving project:', error)
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: error.message || 'Failed to save project'
+    })
+  } finally {
+    submitting.value = false
+  }
 }
 
 const handleDeletePage = async () => {

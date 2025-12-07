@@ -32,9 +32,12 @@
               v-for="(page, index) in getCategoryPages(selectedCategory.category_id)"
               :key="page.id"
               @click.prevent="openPage(selectedCategory, page)"
-              class="lesson-link"
+              class="lesson-link flex items-center space-x-2"
             >
-              {{ index + 1 }}. {{ page.title }}
+              <span>{{ index + 1 }}. {{ page.title }}</span>
+              <span v-if="page.page_type && page.page_type !== 'content'" class="page-type-badge" :class="getPageTypeBadgeClass(page.page_type)">
+                {{ getPageTypeLabel(page.page_type) }}
+              </span>
             </a>
           </div>
         </div>
@@ -493,6 +496,27 @@ const getCategoryIcon = (iconName: string | null | undefined) => {
   return iconMap[iconName.toLowerCase()] || faBook
 }
 
+// Helper functions for page type display
+const getPageTypeLabel = (type: string): string => {
+  const labels: Record<string, string> = {
+    'qa': 'Q&A',
+    'mini_project': 'Project',
+    'capstone': 'Capstone',
+    'content': ''
+  }
+  return labels[type] || ''
+}
+
+const getPageTypeBadgeClass = (type: string): string => {
+  const classes: Record<string, string> = {
+    'qa': 'badge-primary',
+    'mini_project': 'badge-secondary',
+    'capstone': 'badge-primary',
+    'content': ''
+  }
+  return classes[type] || ''
+}
+
 const fetchTopLevelGroups = async () => {
   // Check cache first
   const cached = store.getters.getCachedData('tutorialGroups')
@@ -709,5 +733,17 @@ onMounted(async () => {
   color: var(--color-primary-600);
   text-decoration: underline;
   padding-left: 8px;
+}
+
+.page-type-badge {
+  @apply px-2 py-0.5 text-xs font-semibold rounded;
+}
+
+.page-type-badge.badge-primary {
+  @apply bg-primary-500/20 text-primary-500;
+}
+
+.page-type-badge.badge-secondary {
+  @apply bg-bg-tertiary text-text-secondary;
 }
 </style>

@@ -83,8 +83,15 @@
           </div>
         </header>
 
-        <!-- Page Content -->
-        <div ref="markdownContentRef" class="markdown-content prose prose-invert max-w-none">
+        <!-- Page Type Badge -->
+        <div v-if="pageType !== 'content'" class="mb-6">
+          <span class="badge" :class="getPageTypeBadgeClass(pageType)">
+            {{ getPageTypeLabel(pageType) }}
+          </span>
+        </div>
+
+        <!-- Page Content (for content pages) -->
+        <div v-if="pageType === 'content'" ref="markdownContentRef" class="markdown-content prose prose-invert max-w-none">
           <EditableField
             v-if="isAdminMode && page"
             :model-value="page.content || ''"
@@ -111,6 +118,58 @@
             class="text-lg text-text-secondary leading-relaxed"
             v-html="renderedContent"
           ></div>
+        </div>
+
+        <!-- Q&A Exercise Component -->
+        <div v-if="pageType === 'qa'">
+          <!-- Show page content if it exists -->
+          <div v-if="page.content" ref="markdownContentRef" class="markdown-content prose prose-invert max-w-none mb-8">
+            <div 
+              class="text-lg text-text-secondary leading-relaxed"
+              v-html="renderedContent"
+            ></div>
+          </div>
+          
+          <!-- Show Q&A questions -->
+          <QAExercise
+            v-if="qaQuestions.length > 0"
+            :questions="qaQuestions"
+            :tutorial-page-id="page.id"
+          />
+          
+          <!-- Show message if no questions yet -->
+          <div v-else class="p-6 bg-bg-tertiary rounded-lg text-center">
+            <p class="text-text-secondary">No questions have been added to this Q&A exercise yet.</p>
+          </div>
+        </div>
+
+        <!-- Exercise Component -->
+        <div v-if="pageType === 'content' && exercises.length > 0" class="space-y-6">
+          <Exercise
+            v-for="exercise in exercises"
+            :key="exercise.id"
+            :exercise="exercise"
+            :tutorial-page-id="page.id"
+            :category-id="category?.category_id"
+          />
+        </div>
+
+        <!-- Mini Project Component -->
+        <div v-if="pageType === 'mini_project' && project">
+          <ProjectExercise
+            :project="project"
+            :tutorial-page-id="page.id"
+            project-type="mini_project"
+          />
+        </div>
+
+        <!-- Capstone Project Component -->
+        <div v-if="pageType === 'capstone' && project">
+          <ProjectExercise
+            :project="project"
+            :tutorial-page-id="page.id"
+            project-type="capstone"
+          />
         </div>
         
         <!-- Scroll Indicator -->
@@ -190,6 +249,9 @@ import { renderMarkdown } from '../utils/markdown'
 import { useAdminMode } from '../composables/useAdminMode'
 import { useStore } from 'vuex'
 import { useAuth } from '../composables/useAuth'
+import Exercise from '../components/tutorial/Exercise.vue'
+import QAExercise from '../components/tutorial/QAExercise.vue'
+import ProjectExercise from '../components/tutorial/ProjectExercise.vue'
 import 'highlight.js/styles/vs2015.css'
 
 const route = useRoute()
@@ -205,6 +267,9 @@ const category = ref<any>(null)
 const allPages = ref<any[]>([])
 const totalPages = ref(0)
 const markdownContentRef = ref<HTMLElement | null>(null)
+const exercises = ref<any[]>([])
+const qaQuestions = ref<any[]>([])
+const project = ref<any>(null)
 
 // Tutorial progress state
 const isPageComplete = ref(false)
@@ -222,6 +287,10 @@ const formatDate = (dateString: string) => {
 const renderedContent = computed(() => {
   if (!page.value?.content) return '<p>Content coming soon...</p>'
   return renderMarkdown(page.value.content)
+})
+
+const pageType = computed(() => {
+  return page.value?.page_type || 'content'
 })
 
 const breadcrumbItems = computed(() => {
@@ -1221,6 +1290,16 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
     allPages.value = allPagesData.sort((a, b) => a.page_order - b.page_order)
     totalPages.value = allPages.value.length
     
+    // Fetch exercises, QA questions, or project based on page type
+    const pageTypeValue = pageData.page_type || 'content'
+    if (pageTypeValue === 'qa') {
+      await fetchQAQuestions(pageData.id)
+    } else if (pageTypeValue === 'mini_project' || pageTypeValue === 'capstone') {
+      await fetchProject(pageData.id, pageTypeValue)
+    } else if (pageTypeValue === 'content') {
+      await fetchExercises(pageData.id)
+    }
+    
     // Check and update progress after page is loaded
     if (currentUser.value?.uid) {
       // First check existing progress, then auto-update if needed
@@ -1276,6 +1355,102 @@ watch(() => [route.params.categorySlug, route.params.pageSlug], ([newCategorySlu
     fetchTutorialPage(newCategorySlug as string, newPageSlug as string)
   }
 })
+
+// Fetch exercises for content pages
+const fetchExercises = async (pageId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('tutorial_exercises')
+      .select('*')
+      .eq('tutorial_page_id', pageId)
+      .order('created_at', { ascending: true })
+
+    if (error) throw error
+    exercises.value = data || []
+  } catch (error) {
+    console.error('Error fetching exercises:', error)
+    exercises.value = []
+  }
+}
+
+// Fetch QA questions for Q&A pages
+const fetchQAQuestions = async (pageId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('tutorial_qa_questions')
+      .select('*')
+      .eq('tutorial_page_id', pageId)
+      .order('order_index', { ascending: true })
+
+    if (error) throw error
+    qaQuestions.value = data || []
+  } catch (error) {
+    console.error('Error fetching QA questions:', error)
+    qaQuestions.value = []
+  }
+}
+
+// Fetch project for mini project or capstone pages
+const fetchProject = async (pageId: string, projectType: string) => {
+  try {
+    // For projects, we use the page itself as the project data
+    // But we can also fetch from exercises table if needed
+    const { data, error } = await supabase
+      .from('tutorial_exercises')
+      .select('*')
+      .eq('tutorial_page_id', pageId)
+      .limit(1)
+      .maybeSingle()
+
+    if (error && error.code !== 'PGRST116') throw error
+    
+    if (data) {
+      project.value = {
+        ...data,
+        ...page.value,
+        project_type: projectType
+      }
+    } else {
+      // Use page data as project
+      project.value = {
+        ...page.value,
+        project_type: projectType,
+        instructions: page.value.content,
+        exercise_config: page.value.exercise_config || {}
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching project:', error)
+    // Fallback to page data
+    project.value = {
+      ...page.value,
+      project_type: projectType,
+      instructions: page.value.content,
+      exercise_config: page.value.exercise_config || {}
+    }
+  }
+}
+
+// Helper functions for page type display
+const getPageTypeLabel = (type: string): string => {
+  const labels: Record<string, string> = {
+    'qa': 'Q&A Exercise',
+    'mini_project': 'Mini Project',
+    'capstone': 'Capstone Project',
+    'content': 'Content'
+  }
+  return labels[type] || 'Content'
+}
+
+const getPageTypeBadgeClass = (type: string): string => {
+  const classes: Record<string, string> = {
+    'qa': 'badge-primary',
+    'mini_project': 'badge-secondary',
+    'capstone': 'badge-primary',
+    'content': 'badge-secondary'
+  }
+  return classes[type] || 'badge-secondary'
+}
 
 // Handle navigation within the same component
 onBeforeRouteUpdate((to, from, next) => {
