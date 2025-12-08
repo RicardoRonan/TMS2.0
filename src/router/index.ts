@@ -16,6 +16,8 @@ const Admin = () => import('../views/Admin.vue')
 const Profile = () => import('../views/Profile.vue')
 const Settings = () => import('../views/Settings.vue')
 const AuthCallback = () => import('../views/AuthCallback.vue')
+const ForgotPassword = () => import('../views/ForgotPassword.vue')
+const ResetPassword = () => import('../views/ResetPassword.vue')
 const NotFound = () => import('../views/NotFound.vue')
 const ComingSoon = () => import('../views/ComingSoon.vue')
 const PrivacyPolicy = () => import('../views/PrivacyPolicy.vue')
@@ -111,6 +113,18 @@ const routes = [
     name: 'AuthCallback',
     component: AuthCallback,
     meta: { title: 'Signing in...' }
+  },
+  {
+    path: '/forgot-password',
+    name: 'ForgotPassword',
+    component: ForgotPassword,
+    meta: { title: 'Forgot Password - MetaStack' }
+  },
+  {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: ResetPassword,
+    meta: { title: 'Reset Password - MetaStack' }
   },
   {
     path: '/coming-soon',

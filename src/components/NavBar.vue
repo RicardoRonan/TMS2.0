@@ -3,15 +3,15 @@
   <nav class="md:hidden fixed top-0 left-0 right-0 z-50 bg-bg-secondary border-b border-border-primary">
     <div class="flex items-center justify-between h-14 px-4">
       <!-- Logo/Brand on left (clickable to home) -->
-      <router-link 
-        to="/" 
+      <router-link
+        to="/"
         class="flex items-center space-x-2 active:opacity-70 transition-opacity"
         @click="closeMenuOverlay"
       >
         <img src="@/assets/meta-stack-logo.png" alt="MetaStack Logo" class="w-8 h-8" />
         <span class="text-xl font-semibold text-text-primary">MetaStack</span>
       </router-link>
-      
+
       <!-- Auth buttons / Menu button -->
       <div class="flex items-center space-x-1">
         <!-- Admin mode buttons: Save, Undo, Redo -->
@@ -83,7 +83,7 @@
           >
             {{ item.name }}
           </router-link>
-          
+
           <!-- Resources Dropdown -->
           <div
             class="relative"
@@ -100,9 +100,9 @@
               ]"
             >
               <span>Resources</span>
-              <Icon 
-                name="chevron-down" 
-                :size="16" 
+              <Icon
+                name="chevron-down"
+                :size="16"
                 :class="[
                   'transition-transform duration-200 ease-in-out',
                   { 'rotate-180': showResourcesMenu }
@@ -140,7 +140,7 @@
               </div>
             </Transition>
           </div>
-          
+
           <!-- Contact -->
           <router-link
             to="/contact"
@@ -161,10 +161,10 @@
           >
             Admin Mode
           </span>
-          
+
           <template v-if="isAuthenticated">
-            <div 
-              class="relative" 
+            <div
+              class="relative"
               ref="userMenuRef"
               @mouseenter="showUserMenu = true"
               @mouseleave="showUserMenu = false"
@@ -173,8 +173,8 @@
                 class="flex items-center space-x-2 text-text-primary hover:text-primary-500 transition-colors"
               >
                 <div v-if="currentUser?.photoURL" class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-bg-tertiary">
-                  <img 
-                    :src="currentUser.photoURL" 
+                  <img
+                    :src="currentUser.photoURL"
                     :alt="currentUser?.displayName || 'User'"
                     class="w-full h-full object-cover"
                   />
@@ -185,9 +185,9 @@
                   </span>
                 </div>
                 <span class="text-sm">{{ currentUser?.displayName || 'User' }}</span>
-                <Icon 
-                  name="chevron-down" 
-                  :size="16" 
+                <Icon
+                  name="chevron-down"
+                  :size="16"
                   :class="[
                     'transition-transform duration-200 ease-in-out',
                     { 'rotate-180': showUserMenu }
@@ -218,9 +218,9 @@
                     @click="handleToggleAdminMode"
                   >
                     <span>{{ isAdminMode ? 'Disable Admin Mode' : 'Enable Admin Mode' }}</span>
-                    <Icon 
-                      :name="isAdminMode ? 'check-circle' : 'circle'" 
-                      :size="16" 
+                    <Icon
+                      :name="isAdminMode ? 'check-circle' : 'circle'"
+                      :size="16"
                       :class="isAdminMode ? 'text-primary-500' : 'text-text-tertiary'"
                     />
                   </button>
@@ -273,7 +273,7 @@
             >
               {{ item.name }}
             </router-link>
-            
+
             <!-- Resources Mobile Dropdown -->
             <div>
               <button
@@ -312,7 +312,7 @@
                 </div>
               </Transition>
             </div>
-            
+
             <!-- Contact -->
             <router-link
               to="/contact"
@@ -322,7 +322,7 @@
               Contact
             </router-link>
           </div>
-          
+
           <div v-if="isAuthenticated" class="px-4 mt-4 pt-4 border-t border-border-primary space-y-2">
             <router-link
               to="/profile"
@@ -339,7 +339,7 @@
               Settings
             </router-link>
           </div>
-          
+
           <div v-if="!isAuthenticated" class="px-4 mt-4 pt-4 border-t border-border-primary space-y-2">
             <HIGButton
               variant="tertiary"
@@ -406,9 +406,9 @@
               @click="handleToggleAdminMode"
             >
               <span>{{ isAdminMode ? 'Disable Admin Mode' : 'Enable Admin Mode' }}</span>
-              <Icon 
-                :name="isAdminMode ? 'check-circle' : 'circle'" 
-                :size="16" 
+              <Icon
+                :name="isAdminMode ? 'check-circle' : 'circle'"
+                :size="16"
                 :class="isAdminMode ? 'text-primary-500' : 'text-text-tertiary'"
               />
             </button>
@@ -476,7 +476,10 @@
       title="Sign In"
       size="sm"
     >
-      <LoginForm @success="handleLoginSuccess" />
+      <LoginForm
+        @success="handleLoginSuccess"
+        @forgot-password="handleForgotPassword"
+      />
     </HIGModal>
 
     <!-- Register Modal -->
@@ -657,6 +660,11 @@ const handleMenuSignIn = () => {
   showLoginModal.value = true
 }
 
+const handleForgotPassword = () => {
+  showLoginModal.value = false
+  router.push('/forgot-password')
+}
+
 // Admin mode handlers
 const handleUndo = () => {
   undoEdit()
@@ -679,12 +687,12 @@ const handleSave = async () => {
 
 const handleLoginSuccess = () => {
   showLoginModal.value = false
-  
+
   // Wait a moment for store to update, then verify user is actually signed in
   setTimeout(() => {
     const user = store.getters.currentUser
     const authenticated = store.getters.isAuthenticated
-    
+
     if (authenticated && user) {
       // User is actually signed in, reload the page to refresh all state
       window.location.reload()
@@ -700,17 +708,17 @@ const handleLoginSuccess = () => {
 
 const handleRegisterSuccess = () => {
   showRegisterModal.value = false
-  
+
   // Remove signup query parameter
   if (route.query.signup) {
     router.replace({ query: {} })
   }
-  
+
   // Wait a moment for store to update, then verify user is actually signed in
   setTimeout(() => {
     const user = store.getters.currentUser
     const authenticated = store.getters.isAuthenticated
-    
+
     if (authenticated && user) {
       // User is actually signed in, navigate if needed
       if (route.path === '/auth' || route.path.includes('/auth')) {

@@ -697,6 +697,26 @@ export function useAuth() {
     }
   }
 
+  // Update password (used after password reset)
+  const updatePassword = async (newPassword: string) => {
+    try {
+      loading.value = true
+      error.value = null
+
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword
+      })
+
+      if (updateError) throw updateError
+    } catch (err: any) {
+      const errorInfo = getErrorMessage(err)
+      error.value = errorInfo.message
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   // Auth listener is now initialized at app startup in main.ts
   // No need to initialize here - it's already set up globally
   onMounted(() => {
@@ -798,6 +818,7 @@ export function useAuth() {
     signInWithGoogle,
     logout,
     resetPassword,
+    updatePassword,
     updateProfile
   }
 }

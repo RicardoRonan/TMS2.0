@@ -19,6 +19,13 @@ build/
 .env.local
 .env.*.local
 
+# Vite
+.vite/
+*.local
+
+# TypeScript
+*.tsbuildinfo
+
 # Logs
 logs
 *.log

@@ -34,8 +34,8 @@
       <div class="max-w-4xl mx-auto">
         <!-- Admin Edit Button -->
         <div v-if="isAdminMode" class="mb-6 flex justify-end">
-          <HIGButton 
-            variant="primary" 
+          <HIGButton
+            variant="primary"
             size="sm"
             @click="navigateToEdit"
             class="flex items-center space-x-2"
@@ -56,7 +56,7 @@
               <span>{{ category.duration }} min</span>
             </div>
           </div>
-          
+
           <EditableField
             v-if="isAdminMode && page"
             :model-value="page.title"
@@ -73,7 +73,7 @@
           <h1 v-else class="text-4xl md:text-5xl font-bold text-text-primary mb-6">
             {{ page.title }}
           </h1>
-          
+
           <div class="flex flex-wrap items-center gap-4 text-sm text-text-secondary">
             <div class="flex items-center space-x-2">
               <span>Page {{ page.page_order + 1 }}</span>
@@ -107,13 +107,13 @@
             @update:model-value="handleContentUpdate"
           >
             <template #default="{ value }">
-              <div 
+              <div
                 class="text-lg text-text-secondary leading-relaxed"
                 v-html="renderMarkdown(value || '')"
               ></div>
             </template>
           </EditableField>
-          <div 
+          <div
             v-else
             class="text-lg text-text-secondary leading-relaxed"
             v-html="renderedContent"
@@ -124,19 +124,19 @@
         <div v-if="pageType === 'qa'">
           <!-- Show page content if it exists -->
           <div v-if="page.content" ref="markdownContentRef" class="markdown-content prose prose-invert max-w-none mb-8">
-            <div 
+            <div
               class="text-lg text-text-secondary leading-relaxed"
               v-html="renderedContent"
             ></div>
           </div>
-          
+
           <!-- Show Q&A questions -->
           <QAExercise
             v-if="qaQuestions.length > 0"
             :questions="qaQuestions"
             :tutorial-page-id="page.id"
           />
-          
+
           <!-- Show message if no questions yet -->
           <div v-else class="p-6 bg-bg-tertiary rounded-lg text-center">
             <p class="text-text-secondary">No questions have been added to this Q&A exercise yet.</p>
@@ -171,7 +171,7 @@
             project-type="capstone"
           />
         </div>
-        
+
         <!-- Scroll Indicator -->
         <ScrollIndicator :content-ref="markdownContentRef" />
 
@@ -193,10 +193,10 @@
                 {{ isTogglingProgress ? 'Saving...' : 'Track your progress through this tutorial' }}
               </p>
             </div>
-            <Icon 
-              v-if="isPageComplete && !isTogglingProgress" 
-              name="check" 
-              :size="20" 
+            <Icon
+              v-if="isPageComplete && !isTogglingProgress"
+              name="check"
+              :size="20"
               class="text-primary-500"
             />
             <div v-if="isTogglingProgress" class="w-5 h-5 flex items-center justify-center">
@@ -208,22 +208,22 @@
         <!-- Navigation -->
         <div class="mt-12 pt-8 border-t border-border-primary">
           <div class="flex items-center justify-between">
-            <HIGButton 
-              v-if="previousPage" 
-              variant="secondary" 
+            <HIGButton
+              v-if="previousPage"
+              variant="secondary"
               @click="navigateToPage(previousPage)"
             >
               ← Previous: {{ previousPage.title }}
             </HIGButton>
             <div v-else></div>
-            
+
             <HIGButton variant="tertiary" @click="$router.push('/tutorials')">
               Back to Tutorials
             </HIGButton>
-            
-            <HIGButton 
-              v-if="nextPage" 
-              variant="primary" 
+
+            <HIGButton
+              v-if="nextPage"
+              variant="primary"
               @click="navigateToPage(nextPage)"
             >
               Next: {{ nextPage.title }} →
@@ -245,7 +245,7 @@ import Icon from '../components/Icon.vue'
 import EditableField from '../components/EditableField.vue'
 import Breadcrumb from '../components/Breadcrumb.vue'
 import ScrollIndicator from '../components/ScrollIndicator.vue'
-import { renderMarkdown } from '../utils/markdown'
+import { renderMarkdown, parseQAQuestionsFromMarkdown } from '../utils/markdown'
 import { useAdminMode } from '../composables/useAdminMode'
 import { useStore } from 'vuex'
 import { useAuth } from '../composables/useAuth'
@@ -277,10 +277,10 @@ const isTogglingProgress = ref(false)
 const currentUser = computed(() => store.getters.currentUser)
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   })
 }
 
@@ -378,7 +378,7 @@ const checkPageProgress = async () => {
         .eq('tutorial_category_id', category.value.category_id)
         .eq('completed', true)
         .maybeSingle()
-      
+
       data = result.data
       error = result.error
     }
@@ -412,7 +412,7 @@ const updateTutorialProgress = async () => {
     // First try checking with tutorial_page_id
     let existingProgress = null
     let checkError = null
-    
+
     let result = await supabase
       .from('tutorial_progress')
       .select('*')
@@ -420,7 +420,7 @@ const updateTutorialProgress = async () => {
       .eq('tutorial_category_id', category.value.category_id)
       .eq('tutorial_page_id', page.value.id)
       .maybeSingle()
-    
+
     existingProgress = result.data
     checkError = result.error
 
@@ -432,7 +432,7 @@ const updateTutorialProgress = async () => {
         .eq('user_id', currentUser.value.uid)
         .eq('tutorial_category_id', category.value.category_id)
         .maybeSingle()
-      
+
       existingProgress = fallbackResult.data
       checkError = fallbackResult.error
     }
@@ -445,7 +445,7 @@ const updateTutorialProgress = async () => {
     // If progress doesn't exist, create it automatically
     if (!existingProgress) {
       let insertError = null
-      
+
       // Try with tutorial_page_id first
       let insertResult = await supabase
         .from('tutorial_progress')
@@ -456,7 +456,7 @@ const updateTutorialProgress = async () => {
           completed: true,
           completed_at: new Date().toISOString()
         })
-      
+
       insertError = insertResult.error
 
       // If insert fails due to missing column, try without tutorial_page_id
@@ -471,9 +471,9 @@ const updateTutorialProgress = async () => {
           }, {
             onConflict: 'user_id,tutorial_category_id'
           })
-        
+
         insertError = fallbackResult.error
-        
+
         if (insertError) {
           console.error('Error saving progress (fallback):', insertError)
         } else {
@@ -532,9 +532,9 @@ const togglePageProgress = async (event: Event) => {
           }, {
             onConflict: 'user_id,tutorial_category_id'
           })
-        
+
         error = fallbackResult.error
-        
+
         if (error) {
           console.error('Error saving progress (fallback):', error)
           throw error
@@ -543,7 +543,7 @@ const togglePageProgress = async (event: Event) => {
         console.error('Error saving progress:', error)
         throw error
       }
-      
+
       isPageComplete.value = true
     } else {
       // Unmark as complete - delete the progress entry
@@ -564,9 +564,9 @@ const togglePageProgress = async (event: Event) => {
           .delete()
           .eq('user_id', currentUser.value.uid)
           .eq('tutorial_category_id', category.value.category_id)
-        
+
         error = fallbackResult.error
-        
+
         if (error) {
           console.error('Error deleting progress (fallback):', error)
           throw error
@@ -575,7 +575,7 @@ const togglePageProgress = async (event: Event) => {
         console.error('Error deleting progress:', error)
         throw error
       }
-      
+
       isPageComplete.value = false
     }
   } catch (err: any) {
@@ -1166,7 +1166,7 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
     // Check cache first
     const cachedPages = store.getters.getCachedData('tutorialPages')
     const cachedCategories = store.getters.getCachedData('categories')
-    
+
     // Try to find page and category from cache
     if (cachedPages && Array.isArray(cachedPages)) {
       const cachedPage = cachedPages.find((p: any) => p.slug === pageSlug)
@@ -1175,7 +1175,7 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
           ...cachedPage,
           created_at: cachedPage.created_at || new Date().toISOString()
         }
-        
+
         // Find category from cache
         if (cachedCategories && Array.isArray(cachedCategories)) {
           const cachedCategory = cachedCategories.find((c: any) => c.slug === categorySlug)
@@ -1183,14 +1183,14 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
             category.value = cachedCategory
           }
         }
-        
+
         // Get all pages in category for navigation
         if (cachedPage.category_id) {
           const categoryPages = cachedPages.filter((p: any) => p.category_id === cachedPage.category_id)
           allPages.value = categoryPages.sort((a: any, b: any) => (a.page_order || 0) - (b.page_order || 0))
           totalPages.value = allPages.value.length
         }
-        
+
         // Check and update progress if we have cached data
         if (currentUser.value?.uid && page.value && category.value) {
           // First check existing progress, then auto-update if needed
@@ -1198,14 +1198,14 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
             updateTutorialProgress()
           })
         }
-        
+
         // Only show loading if we don't have cached data
         if (!page.value || !category.value) {
           loading.value = true
         } else {
           loading.value = false
         }
-        
+
         // Fetch fresh data in background
       } else {
         loading.value = true
@@ -1213,9 +1213,9 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
     } else {
       loading.value = true
     }
-    
+
     error.value = null
-    
+
     // Fetch category
     let categoryData = null
     try {
@@ -1289,7 +1289,7 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
     }
     allPages.value = allPagesData.sort((a, b) => a.page_order - b.page_order)
     totalPages.value = allPages.value.length
-    
+
     // Fetch exercises, QA questions, or project based on page type
     const pageTypeValue = pageData.page_type || 'content'
     if (pageTypeValue === 'qa') {
@@ -1299,7 +1299,7 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
     } else if (pageTypeValue === 'content') {
       await fetchExercises(pageData.id)
     }
-    
+
     // Check and update progress after page is loaded
     if (currentUser.value?.uid) {
       // First check existing progress, then auto-update if needed
@@ -1307,7 +1307,7 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
       // Automatically mark as complete when page is viewed (if not already complete)
       await updateTutorialProgress()
     }
-    
+
     // Update cache - add/update this page in the cached pages array
     const cachedPagesForUpdate = store.getters.getCachedData('tutorialPages') || []
     const pageIndex = cachedPagesForUpdate.findIndex((p: any) => p.id === pageData.id)
@@ -1317,7 +1317,7 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
       cachedPagesForUpdate.push(pageData)
     }
     store.dispatch('setCachedData', { type: 'tutorialPages', data: cachedPagesForUpdate })
-    
+
     // Update categories cache if needed
     if (categoryData) {
       const cachedCategories = store.getters.getCachedData('categories') || []
@@ -1383,10 +1383,106 @@ const fetchQAQuestions = async (pageId: string) => {
       .order('order_index', { ascending: true })
 
     if (error) throw error
-    qaQuestions.value = data || []
+
+    // Ensure options are properly parsed (in case they come as strings)
+    if (data && data.length > 0) {
+      data.forEach((q: any) => {
+        if (q.options && typeof q.options === 'string') {
+          try {
+            q.options = JSON.parse(q.options)
+          } catch (e) {
+            console.warn('Failed to parse options:', e)
+          }
+        }
+        if (q.correct_answers && typeof q.correct_answers === 'string') {
+          try {
+            q.correct_answers = JSON.parse(q.correct_answers)
+          } catch (e) {
+            console.warn('Failed to parse correct_answers:', e)
+          }
+        }
+      })
+    }
+
+    // If no questions in database, try parsing from markdown content
+    if ((!data || data.length === 0) && page.value?.content) {
+      const parsedQuestions = parseQAQuestionsFromMarkdown(page.value.content)
+      if (parsedQuestions.length > 0) {
+        // Save parsed questions to database
+        try {
+          const questionsToInsert = parsedQuestions.map((q, index) => ({
+            tutorial_page_id: pageId,
+            question_type: q.question_type || 'multiple_choice',
+            question_text: q.question_text,
+            options: q.options,
+            correct_answer: q.correct_answer || '',
+            correct_answers: q.correct_answers || (q.correct_answer ? [q.correct_answer] : []),
+            explanation: q.explanation || '',
+            points: q.points || 5,
+            order_index: q.order_index !== undefined ? q.order_index : index
+          }))
+
+          const { data: insertedData, error: insertError } = await supabase
+            .from('tutorial_qa_questions')
+            .insert(questionsToInsert)
+            .select()
+
+          if (insertError) {
+            console.warn('Failed to save parsed questions to database:', insertError)
+            // Still use parsed questions even if save fails
+            qaQuestions.value = parsedQuestions.map((q, index) => ({
+              ...q,
+              id: `parsed-${pageId}-${index}`,
+              tutorial_page_id: pageId,
+              options: Array.isArray(q.options) ? q.options : [],
+              correct_answers: Array.isArray(q.correct_answers) ? q.correct_answers : (q.correct_answer ? [q.correct_answer] : [])
+            }))
+          } else {
+            // Ensure inserted data has proper structure
+            qaQuestions.value = (insertedData || []).map((q: any) => ({
+              ...q,
+              options: Array.isArray(q.options) ? q.options : (q.options ? JSON.parse(q.options) : []),
+              correct_answers: Array.isArray(q.correct_answers) ? q.correct_answers : (q.correct_answers ? JSON.parse(q.correct_answers) : [])
+            }))
+          }
+        } catch (saveError) {
+          console.warn('Error saving parsed questions:', saveError)
+          // Use parsed questions with generated IDs
+          qaQuestions.value = parsedQuestions.map((q, index) => ({
+            ...q,
+            id: `parsed-${pageId}-${index}`,
+            tutorial_page_id: pageId,
+            options: Array.isArray(q.options) ? q.options : [],
+            correct_answers: Array.isArray(q.correct_answers) ? q.correct_answers : (q.correct_answer ? [q.correct_answer] : [])
+          }))
+        }
+        return
+      }
+    }
+
+    // Ensure all questions have proper structure
+    qaQuestions.value = (data || []).map((q: any) => ({
+      ...q,
+      options: Array.isArray(q.options) ? q.options : (q.options && typeof q.options === 'string' ? JSON.parse(q.options) : []),
+      correct_answers: Array.isArray(q.correct_answers) ? q.correct_answers : (q.correct_answers && typeof q.correct_answers === 'string' ? JSON.parse(q.correct_answers) : (q.correct_answer ? [q.correct_answer] : []))
+    }))
   } catch (error) {
     console.error('Error fetching QA questions:', error)
     qaQuestions.value = []
+
+    // Fallback: try parsing from markdown if database fetch fails
+    if (page.value?.content) {
+      const parsedQuestions = parseQAQuestionsFromMarkdown(page.value.content)
+      if (parsedQuestions.length > 0) {
+        qaQuestions.value = parsedQuestions.map((q, index) => ({
+          ...q,
+          id: `parsed-${pageId}-${index}`,
+          tutorial_page_id: pageId,
+          options: Array.isArray(q.options) ? q.options : [],
+          correct_answers: Array.isArray(q.correct_answers) ? q.correct_answers : (q.correct_answer ? [q.correct_answer] : [])
+        }))
+      }
+    }
   }
 }
 
@@ -1403,7 +1499,7 @@ const fetchProject = async (pageId: string, projectType: string) => {
       .maybeSingle()
 
     if (error && error.code !== 'PGRST116') throw error
-    
+
     if (data) {
       project.value = {
         ...data,
