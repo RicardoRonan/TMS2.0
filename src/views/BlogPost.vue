@@ -1,47 +1,73 @@
 <template>
   <div class="min-h-screen bg-bg-primary">
     <!-- Loading State -->
-    <div v-if="loading" class="container mx-auto px-4 py-16">
+    <div
+      v-if="loading"
+      class="container mx-auto px-4 py-16"
+    >
       <div class="max-w-4xl mx-auto">
         <div class="animate-pulse space-y-6">
-          <div class="h-12 bg-bg-tertiary rounded w-3/4"></div>
-          <div class="h-4 bg-bg-tertiary rounded w-1/4"></div>
-          <div class="aspect-video bg-bg-tertiary rounded-lg"></div>
+          <div class="h-12 bg-bg-tertiary rounded w-3/4" />
+          <div class="h-4 bg-bg-tertiary rounded w-1/4" />
+          <div class="aspect-video bg-bg-tertiary rounded-lg" />
           <div class="space-y-3">
-            <div class="h-4 bg-bg-tertiary rounded w-full"></div>
-            <div class="h-4 bg-bg-tertiary rounded w-full"></div>
-            <div class="h-4 bg-bg-tertiary rounded w-5/6"></div>
+            <div class="h-4 bg-bg-tertiary rounded w-full" />
+            <div class="h-4 bg-bg-tertiary rounded w-full" />
+            <div class="h-4 bg-bg-tertiary rounded w-5/6" />
           </div>
         </div>
       </div>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="container mx-auto px-4 py-16">
+    <div
+      v-else-if="error"
+      class="container mx-auto px-4 py-16"
+    >
       <div class="max-w-4xl mx-auto text-center">
         <div class="w-24 h-24 bg-bg-tertiary rounded-full flex items-center justify-center mx-auto mb-6">
-          <Icon name="error" :size="48" class="text-text-tertiary" />
+          <Icon
+            name="error"
+            :size="48"
+            class="text-text-tertiary"
+          />
         </div>
-        <h2 class="text-2xl font-bold text-text-primary mb-4">Article Not Found</h2>
-        <p class="text-text-secondary mb-8">{{ error }}</p>
-        <HIGButton variant="primary" @click="$router.push('/blog')">
+        <h2 class="text-2xl font-bold text-text-primary mb-4">
+          Article Not Found
+        </h2>
+        <p class="text-text-secondary mb-8">
+          {{ error }}
+        </p>
+        <HIGButton
+          variant="primary"
+          @click="$router.push('/blog')"
+        >
           Back to Blog
         </HIGButton>
       </div>
     </div>
 
     <!-- Article Content -->
-    <article v-else-if="post" class="container mx-auto px-4 py-16">
+    <article
+      v-else-if="post"
+      class="container mx-auto px-4 py-16"
+    >
       <div class="max-w-4xl mx-auto">
         <!-- Admin Edit Button -->
-        <div v-if="isAdminMode" class="mb-6 flex justify-end">
+        <div
+          v-if="isAdminMode"
+          class="mb-6 flex justify-end"
+        >
           <HIGButton 
             variant="primary" 
             size="sm"
-            @click="navigateToEdit"
             class="flex items-center space-x-2"
+            @click="navigateToEdit"
           >
-            <Icon name="edit" :size="16" />
+            <Icon
+              name="edit"
+              :size="16"
+            />
             <span>Edit Post</span>
           </HIGButton>
         </div>
@@ -51,7 +77,6 @@
 
         <!-- Header -->
         <header class="mb-12">
-          
           <EditableField
             v-if="isAdminMode && post"
             :model-value="post.title"
@@ -65,32 +90,46 @@
             input-class="text-4xl md:text-5xl font-bold"
             @update:model-value="handleTitleUpdate"
           />
-          <h1 v-else class="text-4xl md:text-5xl font-bold text-text-primary mb-6">
+          <h1
+            v-else
+            class="text-4xl md:text-5xl font-bold text-text-primary mb-6"
+          >
             {{ post.title }}
           </h1>
           
           <div class="flex flex-wrap items-center gap-4 text-sm text-text-secondary">
             <div class="flex items-center space-x-2">
-              <div v-if="post.authorPhotoUrl" class="w-10 h-10 rounded-full overflow-hidden">
+              <div
+                v-if="post.authorPhotoUrl"
+                class="w-10 h-10 rounded-full overflow-hidden"
+              >
                 <img 
                   :src="post.authorPhotoUrl" 
                   :alt="post.author"
                   class="w-full h-full object-cover"
                   loading="lazy"
-                />
+                >
               </div>
-              <div v-else class="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center">
+              <div
+                v-else
+                class="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center"
+              >
                 <span class="text-white font-medium">{{ post.authorInitials }}</span>
               </div>
               <div>
-                <div class="font-medium text-text-primary">{{ post.author }}</div>
+                <div class="font-medium text-text-primary">
+                  {{ post.author }}
+                </div>
                 <div>{{ formatDate(post.createdAt) }}</div>
               </div>
             </div>
             <div class="flex items-center space-x-4">
               <span class="badge badge-secondary">{{ post.category }}</span>
               <span>{{ post.readTime }} min read</span>
-              <span v-if="commentCount > 0" class="text-text-tertiary">
+              <span
+                v-if="commentCount > 0"
+                class="text-text-tertiary"
+              >
                 {{ commentCount }} {{ commentCount === 1 ? 'comment' : 'comments' }}
               </span>
             </div>
@@ -107,7 +146,10 @@
         </div> -->
 
         <!-- Article Content -->
-        <div ref="markdownContentRef" class="markdown-content prose prose-invert max-w-none">
+        <div
+          ref="markdownContentRef"
+          class="markdown-content prose prose-invert max-w-none"
+        >
           <EditableField
             v-if="isAdminMode && post"
             :model-value="post.content"
@@ -126,22 +168,27 @@
               <div 
                 class="text-lg text-text-secondary leading-relaxed"
                 v-html="renderMarkdown(value || '')"
-              ></div>
+              />
             </template>
           </EditableField>
           <div 
             v-else
             class="text-lg text-text-secondary leading-relaxed"
             v-html="renderedContent"
-          ></div>
+          />
         </div>
         
         <!-- Scroll Indicator -->
         <ScrollIndicator :content-ref="markdownContentRef" />
 
         <!-- Tags -->
-        <div v-if="post.tags && post.tags.length" class="mt-12 pt-8 border-t border-border-primary">
-          <h3 class="text-sm font-semibold text-text-primary mb-4">Tags</h3>
+        <div
+          v-if="post.tags && post.tags.length"
+          class="mt-12 pt-8 border-t border-border-primary"
+        >
+          <h3 class="text-sm font-semibold text-text-primary mb-4">
+            Tags
+          </h3>
           <div class="flex flex-wrap gap-2">
             <span
               v-for="tag in post.tags"
@@ -155,7 +202,10 @@
 
         <!-- Actions -->
         <div class="mt-12 pt-8 border-t border-border-primary flex items-center justify-between">
-          <HIGButton variant="secondary" @click="$router.push('/blog')">
+          <HIGButton
+            variant="secondary"
+            @click="$router.push('/blog')"
+          >
             ← Back to Blog
           </HIGButton>
           
@@ -167,7 +217,10 @@
               :disabled="isLiking"
               @click="toggleLike"
             >
-              <Icon name="heart" :size="20" />
+              <Icon
+                name="heart"
+                :size="20"
+              />
               <span class="text-sm font-medium">{{ likeCount }}</span>
             </button>
             <button
@@ -175,7 +228,10 @@
               title="Share"
               @click="showShareModal = true"
             >
-              <Icon name="share" :size="20" />
+              <Icon
+                name="share"
+                :size="20"
+              />
             </button>
           </div>
         </div>
@@ -184,23 +240,35 @@
         <div class="mt-12 pt-8 border-t border-border-primary">
           <h2 class="text-2xl font-bold text-text-primary mb-6">
             Comments
-            <span v-if="commentCount > 0" class="text-lg font-normal text-text-tertiary">
+            <span
+              v-if="commentCount > 0"
+              class="text-lg font-normal text-text-tertiary"
+            >
               ({{ commentCount }})
             </span>
           </h2>
 
           <!-- Comment Form -->
-          <div v-if="isAuthenticated" class="mb-8 comment-form">
+          <div
+            v-if="isAuthenticated"
+            class="mb-8 comment-form"
+          >
             <div class="flex items-start space-x-4">
-              <div v-if="currentUser?.photoURL" class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+              <div
+                v-if="currentUser?.photoURL"
+                class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0"
+              >
                 <img 
                   :src="currentUser.photoURL" 
                   :alt="currentUser.displayName || 'User'"
                   class="w-full h-full object-cover"
                   loading="lazy"
-                />
+                >
               </div>
-              <div v-else class="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <div
+                v-else
+                class="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0"
+              >
                 <span class="text-white font-medium text-sm">{{ getCurrentUserInitials() }}</span>
               </div>
               <div class="flex-1">
@@ -234,22 +302,42 @@
               </div>
             </div>
           </div>
-          <div v-else class="mb-8 p-4 bg-bg-secondary rounded-lg border border-border-primary">
-            <p class="text-text-secondary mb-3">Please sign in to leave a comment.</p>
-            <HIGButton variant="primary" size="sm" @click="$router.push('/auth')">
+          <div
+            v-else
+            class="mb-8 p-4 bg-bg-secondary rounded-lg border border-border-primary"
+          >
+            <p class="text-text-secondary mb-3">
+              Please sign in to leave a comment.
+            </p>
+            <HIGButton
+              variant="primary"
+              size="sm"
+              @click="$router.push('/auth')"
+            >
               Sign In
             </HIGButton>
           </div>
 
           <!-- Comments List -->
-          <div v-if="loadingComments" class="text-center py-8">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-            <p class="text-text-tertiary mt-2">Loading comments...</p>
+          <div
+            v-if="loadingComments"
+            class="text-center py-8"
+          >
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500" />
+            <p class="text-text-tertiary mt-2">
+              Loading comments...
+            </p>
           </div>
-          <div v-else-if="comments.length === 0" class="text-center py-8 text-text-tertiary">
+          <div
+            v-else-if="comments.length === 0"
+            class="text-center py-8 text-text-tertiary"
+          >
             <p>No comments yet. Be the first to comment!</p>
           </div>
-          <div v-else class="space-y-6">
+          <div
+            v-else
+            class="space-y-6"
+          >
             <div
               v-for="comment in topLevelComments"
               :key="comment.id"

@@ -1,8 +1,15 @@
 <template>
   <div class="space-y-2">
-    <label v-if="label" :for="inputId" class="block text-sm font-medium text-text-primary">
+    <label
+      v-if="label"
+      :for="inputId"
+      class="block text-sm font-medium text-text-primary"
+    >
       {{ label }}
-      <span v-if="required" class="text-danger ml-1">*</span>
+      <span
+        v-if="required"
+        class="text-danger ml-1"
+      >*</span>
     </label>
     
     <div class="relative">
@@ -14,30 +21,55 @@
         :disabled="disabled"
         :required="required"
         :class="inputClasses"
+        v-bind="$attrs"
         @input="handleInput"
         @blur="handleBlur"
         @focus="handleFocus"
-        v-bind="$attrs"
-      />
+      >
       
-      <div v-if="icon" class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <component :is="icon" class="h-5 w-5 text-text-tertiary" />
+      <div
+        v-if="icon"
+        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+      >
+        <component
+          :is="icon"
+          class="h-5 w-5 text-text-tertiary"
+        />
       </div>
       
-      <div v-if="rightIcon" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+      <div
+        v-if="rightIcon"
+        class="absolute inset-y-0 right-0 pr-3 flex items-center"
+      >
         <button
           type="button"
           class="text-text-tertiary hover:text-text-primary transition-colors"
           @click="handleRightIconClick"
         >
-          <component :is="rightIcon" class="h-5 w-5" />
+          <component
+            :is="rightIcon"
+            class="h-5 w-5"
+          />
         </button>
       </div>
     </div>
     
-    <div v-if="error || hint" class="text-sm">
-      <p v-if="error" class="text-danger">{{ error }}</p>
-      <p v-else-if="hint" class="text-text-tertiary">{{ hint }}</p>
+    <div
+      v-if="error || hint"
+      class="text-sm"
+    >
+      <p
+        v-if="error"
+        class="text-danger"
+      >
+        {{ error }}
+      </p>
+      <p
+        v-else-if="hint"
+        class="text-text-tertiary"
+      >
+        {{ hint }}
+      </p>
     </div>
   </div>
 </template>

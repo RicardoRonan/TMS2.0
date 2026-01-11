@@ -17,22 +17,34 @@
     <!-- Categories and Pages View -->
     <section class="py-8">
       <div class="container mx-auto px-4">
-        <div v-if="loading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <HIGSkeleton v-for="n in 8" :key="n" type="tutorial-category" />
+        <div
+          v-if="loading"
+          class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+        >
+          <HIGSkeleton
+            v-for="n in 8"
+            :key="n"
+            type="tutorial-category"
+          />
         </div>
 
         <!-- Category Detail View (when a category is selected) -->
-        <div v-else-if="selectedCategory" class="max-w-4xl mx-auto">
+        <div
+          v-else-if="selectedCategory"
+          class="max-w-4xl mx-auto"
+        >
           <!-- Breadcrumb -->
           <Breadcrumb :items="breadcrumbItems" />
           
-          <h2 class="text-3xl font-bold text-text-primary mb-8">{{ selectedCategory.title }}</h2>
+          <h2 class="text-3xl font-bold text-text-primary mb-8">
+            {{ selectedCategory.title }}
+          </h2>
           <div class="space-y-2">
             <a
               v-for="(page, index) in getCategoryPages(selectedCategory.category_id)"
               :key="page.id"
-              @click.prevent="openPage(selectedCategory, page)"
               class="lesson-link"
+              @click.prevent="openPage(selectedCategory, page)"
             >
               {{ index + 1 }}. {{ page.title }}
             </a>
@@ -40,26 +52,36 @@
         </div>
 
         <!-- Categories Grid View -->
-        <div v-else class="space-y-12">
+        <div
+          v-else
+          class="space-y-12"
+        >
           <!-- Grouped by Top-Level Group -->
-          <template v-for="group in topLevelGroups" :key="group.id">
+          <template
+            v-for="group in topLevelGroups"
+            :key="group.id"
+          >
             <div v-if="getGroupCategories(group.id).length > 0">
               <!-- Category Heading -->
-              <h2 class="text-2xl font-bold text-text-primary mb-6">{{ group.title }}</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-6">
+                {{ group.title }}
+              </h2>
               
               <!-- Categories Grid -->
               <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-12">
                 <div
                   v-for="category in getGroupCategories(group.id)"
                   :key="category.category_id"
-                  @click="selectCategory(category)"
                   class="category-square"
+                  @click="selectCategory(category)"
                 >
                   <FontAwesomeIcon 
                     :icon="getCategoryIcon(category.icon)" 
                     class="category-icon"
                   />
-                  <h3 class="category-square-title">{{ category.title }}</h3>
+                  <h3 class="category-square-title">
+                    {{ category.title }}
+                  </h3>
                 </div>
               </div>
             </div>
@@ -67,25 +89,32 @@
 
           <!-- Categories without a group -->
           <div v-if="getUncategorizedCategories().length > 0">
-            <h2 class="text-2xl font-bold text-text-primary mb-6">Other Tutorials</h2>
+            <h2 class="text-2xl font-bold text-text-primary mb-6">
+              Other Tutorials
+            </h2>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               <div
                 v-for="category in getUncategorizedCategories()"
                 :key="category.category_id"
-                @click="selectCategory(category)"
                 class="category-square"
+                @click="selectCategory(category)"
               >
                 <FontAwesomeIcon 
                   :icon="getCategoryIcon(category.icon)" 
                   class="category-icon"
                 />
-                <h3 class="category-square-title">{{ category.title }}</h3>
+                <h3 class="category-square-title">
+                  {{ category.title }}
+                </h3>
               </div>
             </div>
           </div>
 
           <!-- Empty State -->
-          <div v-if="categories.length === 0" class="text-center py-12 text-text-secondary">
+          <div
+            v-if="categories.length === 0"
+            class="text-center py-12 text-text-secondary"
+          >
             <p>No tutorial categories available yet.</p>
           </div>
         </div>

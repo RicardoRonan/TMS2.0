@@ -5,7 +5,10 @@
     :class="overlayClass"
   >
     <slot />
-    <AdminEditButton :title="editTitle" @click="$emit('edit')" />
+    <AdminEditButton
+      :title="editTitle"
+      @click="$emit('edit')"
+    />
   </div>
   <div v-else>
     <slot />

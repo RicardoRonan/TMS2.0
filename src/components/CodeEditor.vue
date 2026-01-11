@@ -1,13 +1,19 @@
 <template>
-  <div class="code-editor-wrapper" :class="wrapperClass">
+  <div
+    class="code-editor-wrapper"
+    :class="wrapperClass"
+  >
     <div 
       ref="editorContainerRef" 
       class="code-editor-container"
       :style="{ minHeight: `${minHeight}px` }"
-    ></div>
-    <div v-if="loading" class="code-editor-loading">
+    />
+    <div
+      v-if="loading"
+      class="code-editor-loading"
+    >
       <div class="flex items-center justify-center p-4 text-text-secondary">
-        <div class="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+        <div class="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mr-2" />
         <span>Loading editor...</span>
       </div>
     </div>

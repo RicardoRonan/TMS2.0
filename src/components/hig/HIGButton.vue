@@ -5,7 +5,11 @@
     :type="type"
     @click="handleClick"
   >
-    <HIGSpinner v-if="loading" size="md" class="mr-2" />
+    <HIGSpinner
+      v-if="loading"
+      size="md"
+      class="mr-2"
+    />
     <slot />
   </button>
 </template>

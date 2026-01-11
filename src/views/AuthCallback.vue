@@ -4,7 +4,9 @@
       <div class="mb-4">
         <HIGSpinner class="mx-auto" />
       </div>
-      <p class="text-text-primary text-lg">Completing sign in...</p>
+      <p class="text-text-primary text-lg">
+        Completing sign in...
+      </p>
     </div>
   </div>
 </template>

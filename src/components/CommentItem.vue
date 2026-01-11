@@ -2,14 +2,20 @@
   <div class="comment-item">
     <div class="flex items-start space-x-4">
       <!-- Avatar -->
-      <div v-if="comment.user?.photo_url" class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+      <div
+        v-if="comment.user?.photo_url"
+        class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0"
+      >
         <img 
           :src="comment.user.photo_url" 
           :alt="getAuthorName()"
           class="w-full h-full object-cover"
-        />
+        >
       </div>
-      <div v-else class="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0">
+      <div
+        v-else
+        class="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0"
+      >
         <span class="text-white font-medium text-sm">{{ getAuthorInitials() }}</span>
       </div>
 
@@ -20,11 +26,17 @@
             <div class="flex items-center space-x-2">
               <span class="font-medium text-text-primary">{{ getAuthorName() }}</span>
               <span class="text-sm text-text-tertiary">{{ formatDate(comment.created_at) }}</span>
-              <span v-if="comment.updated_at !== comment.created_at" class="text-xs text-text-tertiary">
+              <span
+                v-if="comment.updated_at !== comment.created_at"
+                class="text-xs text-text-tertiary"
+              >
                 (edited)
               </span>
             </div>
-            <div v-if="canEditOrDelete" class="flex items-center space-x-2">
+            <div
+              v-if="canEditOrDelete"
+              class="flex items-center space-x-2"
+            >
               <button
                 v-if="canEdit"
                 class="text-xs text-text-tertiary hover:text-primary-500 transition-colors"
@@ -40,7 +52,9 @@
               </button>
             </div>
           </div>
-          <p class="text-text-secondary whitespace-pre-wrap">{{ comment.content }}</p>
+          <p class="text-text-secondary whitespace-pre-wrap">
+            {{ comment.content }}
+          </p>
         </div>
 
         <!-- Reply Button -->
@@ -51,13 +65,19 @@
           >
             Reply
           </button>
-          <span v-if="replies.length > 0" class="text-xs text-text-tertiary">
+          <span
+            v-if="replies.length > 0"
+            class="text-xs text-text-tertiary"
+          >
             {{ replies.length }} {{ replies.length === 1 ? 'reply' : 'replies' }}
           </span>
         </div>
 
         <!-- Inline Reply Form (shown when this comment is being replied to) -->
-        <div v-if="showReplyForm && currentUserId" class="mt-4 ml-0">
+        <div
+          v-if="showReplyForm && currentUserId"
+          class="mt-4 ml-0"
+        >
           <div class="bg-bg-secondary rounded-lg p-4 border border-border-primary">
             <div class="flex items-start space-x-3 mb-3">
               <div class="flex-1">
@@ -69,7 +89,7 @@
                   :placeholder="`Write a reply to ${getAuthorName()}...`"
                   rows="3"
                   class="w-full px-3 py-2 bg-bg-primary border border-border-primary rounded-lg text-text-primary placeholder-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-                ></textarea>
+                />
                 <div class="flex items-center justify-end space-x-2 mt-2">
                   <button
                     class="text-sm text-text-tertiary hover:text-text-primary transition-colors px-3 py-1"
@@ -89,12 +109,20 @@
             </div>
           </div>
         </div>
-        <div v-else-if="showReplyForm && !currentUserId" class="mt-4 ml-0 p-3 bg-bg-secondary rounded-lg border border-border-primary">
-          <p class="text-sm text-text-secondary mb-2">Please sign in to reply to comments.</p>
+        <div
+          v-else-if="showReplyForm && !currentUserId"
+          class="mt-4 ml-0 p-3 bg-bg-secondary rounded-lg border border-border-primary"
+        >
+          <p class="text-sm text-text-secondary mb-2">
+            Please sign in to reply to comments.
+          </p>
         </div>
 
         <!-- Nested Replies Thread -->
-        <div v-if="replies.length > 0" class="mt-4 space-y-4">
+        <div
+          v-if="replies.length > 0"
+          class="mt-4 space-y-4"
+        >
           <div class="ml-6 pl-4 border-l-2 border-border-primary space-y-4">
             <CommentItem
               v-for="reply in replies"

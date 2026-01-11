@@ -20,7 +20,9 @@
         <div class="max-w-4xl mx-auto prose prose-invert">
           <div class="space-y-8 text-text-secondary">
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">What Are Cookies</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                What Are Cookies
+              </h2>
               <p class="text-lg leading-relaxed">
                 Cookies are small text files that are placed on your computer or mobile device when you 
                 visit a website. They are widely used to make websites work more efficiently and provide 
@@ -29,7 +31,9 @@
             </div>
 
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">How We Use Cookies</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                How We Use Cookies
+              </h2>
               <p class="text-lg leading-relaxed mb-4">
                 We use cookies for a variety of reasons, including:
               </p>
@@ -42,24 +46,32 @@
             </div>
 
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">Types of Cookies We Use</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                Types of Cookies We Use
+              </h2>
               <div class="space-y-4">
                 <div>
-                  <h3 class="text-xl font-semibold text-text-primary mb-2">Essential Cookies</h3>
+                  <h3 class="text-xl font-semibold text-text-primary mb-2">
+                    Essential Cookies
+                  </h3>
                   <p class="text-lg leading-relaxed">
                     These cookies are necessary for the website to function properly. They enable core 
                     functionality such as security, network management, and accessibility.
                   </p>
                 </div>
                 <div>
-                  <h3 class="text-xl font-semibold text-text-primary mb-2">Analytics Cookies</h3>
+                  <h3 class="text-xl font-semibold text-text-primary mb-2">
+                    Analytics Cookies
+                  </h3>
                   <p class="text-lg leading-relaxed">
                     These cookies help us understand how visitors interact with our website by collecting 
                     and reporting information anonymously.
                   </p>
                 </div>
                 <div>
-                  <h3 class="text-xl font-semibold text-text-primary mb-2">Functional Cookies</h3>
+                  <h3 class="text-xl font-semibold text-text-primary mb-2">
+                    Functional Cookies
+                  </h3>
                   <p class="text-lg leading-relaxed">
                     These cookies allow the website to remember choices you make and provide enhanced, 
                     more personal features.
@@ -69,7 +81,9 @@
             </div>
 
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">Managing Cookies</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                Managing Cookies
+              </h2>
               <p class="text-lg leading-relaxed">
                 You can control and manage cookies in various ways. Please keep in mind that removing 
                 or blocking cookies can impact your user experience and parts of our website may no longer 
@@ -79,7 +93,9 @@
             </div>
 
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">Third-Party Cookies</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                Third-Party Cookies
+              </h2>
               <p class="text-lg leading-relaxed">
                 In addition to our own cookies, we may also use various third-party cookies to report 
                 usage statistics of the service and deliver advertisements on and through the service.
@@ -87,10 +103,17 @@
             </div>
 
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">Contact Us</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                Contact Us
+              </h2>
               <p class="text-lg leading-relaxed">
                 If you have any questions about our use of cookies, please contact us at 
-                <router-link to="/contact" class="text-primary-500 hover:text-primary-600">our contact page</router-link>.
+                <router-link
+                  to="/contact"
+                  class="text-primary-500 hover:text-primary-600"
+                >
+                  our contact page
+                </router-link>.
               </p>
             </div>
           </div>

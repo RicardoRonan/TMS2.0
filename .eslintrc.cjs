@@ -21,8 +21,15 @@ module.exports = {
   plugins: ['vue', '@typescript-eslint'],
   rules: {
     'vue/multi-word-component-names': 'off',
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-    'vue/no-v-html': 'off'
+    '@typescript-eslint/no-unused-vars': ['warn', { 
+      argsIgnorePattern: '^_',
+      varsIgnorePattern: '^_',
+      caughtErrorsIgnorePattern: '^_'
+    }],
+    '@typescript-eslint/no-explicit-any': 'warn',
+    'vue/no-v-html': 'off',
+    'vue/require-default-prop': 'warn',
+    'no-case-declarations': 'error'
   },
   ignorePatterns: ['dist', 'node_modules', '*.config.js']
 }

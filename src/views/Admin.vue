@@ -22,26 +22,42 @@
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
             <HIGCard>
               <div class="p-6 text-center">
-                <div class="text-3xl font-bold text-primary-500 mb-2">{{ stats.blogs }}</div>
-                <div class="text-text-secondary">Blog Posts</div>
+                <div class="text-3xl font-bold text-primary-500 mb-2">
+                  {{ stats.blogs }}
+                </div>
+                <div class="text-text-secondary">
+                  Blog Posts
+                </div>
               </div>
             </HIGCard>
             <HIGCard>
               <div class="p-6 text-center">
-                <div class="text-3xl font-bold text-primary-500 mb-2">{{ stats.tutorials }}</div>
-                <div class="text-text-secondary">Tutorial Categories</div>
+                <div class="text-3xl font-bold text-primary-500 mb-2">
+                  {{ stats.tutorials }}
+                </div>
+                <div class="text-text-secondary">
+                  Tutorial Categories
+                </div>
               </div>
             </HIGCard>
             <HIGCard>
               <div class="p-6 text-center">
-                <div class="text-3xl font-bold text-primary-500 mb-2">{{ stats.tools }}</div>
-                <div class="text-text-secondary">Tools</div>
+                <div class="text-3xl font-bold text-primary-500 mb-2">
+                  {{ stats.tools }}
+                </div>
+                <div class="text-text-secondary">
+                  Tools
+                </div>
               </div>
             </HIGCard>
             <HIGCard>
               <div class="p-6 text-center">
-                <div class="text-3xl font-bold text-primary-500 mb-2">{{ stats.users }}</div>
-                <div class="text-text-secondary">Total Users</div>
+                <div class="text-3xl font-bold text-primary-500 mb-2">
+                  {{ stats.users }}
+                </div>
+                <div class="text-text-secondary">
+                  Total Users
+                </div>
               </div>
             </HIGCard>
           </div>
@@ -53,8 +69,8 @@
                 v-for="tab in tabs"
                 :key="tab.id"
                 :class="tabButtonClasses(tab.id)"
-                @click="activeTab = tab.id"
                 class="whitespace-nowrap px-3 md:px-4 py-2 text-sm md:text-base"
+                @click="activeTab = tab.id"
               >
                 {{ tab.label }}
               </button>
@@ -64,14 +80,27 @@
           <!-- Tab Content -->
           <div>
             <!-- Tutorials Management -->
-            <div v-if="activeTab === 'tutorials'" class="space-y-6">
+            <div
+              v-if="activeTab === 'tutorials'"
+              class="space-y-6"
+            >
               <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-                <h2 class="text-xl sm:text-2xl font-bold text-text-primary">Tutorials Management</h2>
+                <h2 class="text-xl sm:text-2xl font-bold text-text-primary">
+                  Tutorials Management
+                </h2>
                 <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                  <HIGButton variant="secondary" @click="openCreateCategoryModal" class="w-full sm:w-auto">
+                  <HIGButton
+                    variant="secondary"
+                    class="w-full sm:w-auto"
+                    @click="openCreateCategoryModal"
+                  >
                     + New Category
                   </HIGButton>
-                  <HIGButton variant="primary" @click="openCreatePageModal" class="w-full sm:w-auto">
+                  <HIGButton
+                    variant="primary"
+                    class="w-full sm:w-auto"
+                    @click="openCreatePageModal"
+                  >
                     + New Page
                   </HIGButton>
                 </div>
@@ -80,79 +109,122 @@
               <!-- Categories Section -->
               <div class="mb-8">
                 <button
-                  @click="toggleCategorySection('tutorial')"
                   class="w-full flex items-center justify-between p-4 bg-bg-secondary hover:bg-bg-tertiary rounded-lg transition-colors mb-4"
+                  @click="toggleCategorySection('tutorial')"
                 >
-                  <h3 class="text-xl font-semibold text-text-primary">Categories</h3>
+                  <h3 class="text-xl font-semibold text-text-primary">
+                    Categories
+                  </h3>
                   <svg
                     :class="['w-5 h-5 text-text-tertiary transition-transform', { 'rotate-180': expandedCategorySections.tutorial }]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
                 <div v-if="expandedCategorySections.tutorial">
-                <div v-if="loadingCategories" class="text-center py-12">
-                  <HIGSpinner />
-                  <p class="text-text-secondary mt-4">Loading categories...</p>
-                </div>
-                <div v-else-if="categories.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <HIGCard v-for="category in categories" :key="category.category_id" class="hover:shadow-hig-lg transition-shadow">
-                    <div class="p-4">
-                      <div class="flex items-start justify-between mb-2">
-                        <div class="flex-1">
-                          <h4 class="text-base font-semibold text-text-primary mb-1">{{ category.title }}</h4>
-                          <p class="text-text-secondary text-sm line-clamp-2">{{ category.description || 'No description' }}</p>
-                          <div class="flex items-center space-x-2 mt-1.5 text-xs text-text-tertiary">
-                            <span>{{ category.level }}</span>
-                            <span>•</span>
-                            <span>{{ category.duration }} min</span>
+                  <div
+                    v-if="loadingCategories"
+                    class="text-center py-12"
+                  >
+                    <HIGSpinner />
+                    <p class="text-text-secondary mt-4">
+                      Loading categories...
+                    </p>
+                  </div>
+                  <div
+                    v-else-if="categories.length > 0"
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                  >
+                    <HIGCard
+                      v-for="category in categories"
+                      :key="category.category_id"
+                      class="hover:shadow-hig-lg transition-shadow"
+                    >
+                      <div class="p-4">
+                        <div class="flex items-start justify-between mb-2">
+                          <div class="flex-1">
+                            <h4 class="text-base font-semibold text-text-primary mb-1">
+                              {{ category.title }}
+                            </h4>
+                            <p class="text-text-secondary text-sm line-clamp-2">
+                              {{ category.description || 'No description' }}
+                            </p>
+                            <div class="flex items-center space-x-2 mt-1.5 text-xs text-text-tertiary">
+                              <span>{{ category.level }}</span>
+                              <span>•</span>
+                              <span>{{ category.duration }} min</span>
+                            </div>
                           </div>
                         </div>
+                        <div class="flex items-center justify-end space-x-1 mt-3 pt-3 border-t border-border-primary">
+                          <button
+                            class="p-1.5 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
+                            title="Edit category"
+                            aria-label="Edit category"
+                            @click="editCategory(category)"
+                          >
+                            <Icon
+                              name="edit"
+                              :size="16"
+                            />
+                          </button>
+                          <button
+                            class="p-1.5 text-text-primary hover:text-danger active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
+                            title="Delete category"
+                            aria-label="Delete category"
+                            @click="confirmDeleteCategory(category)"
+                          >
+                            <Icon
+                              name="delete"
+                              :size="16"
+                            />
+                          </button>
+                        </div>
                       </div>
-                      <div class="flex items-center justify-end space-x-1 mt-3 pt-3 border-t border-border-primary">
-                        <button
-                          class="p-1.5 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
-                          @click="editCategory(category)"
-                          title="Edit category"
-                          aria-label="Edit category"
-                        >
-                          <Icon name="edit" :size="16" />
-                        </button>
-                        <button
-                          class="p-1.5 text-text-primary hover:text-danger active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
-                          @click="confirmDeleteCategory(category)"
-                          title="Delete category"
-                          aria-label="Delete category"
-                        >
-                          <Icon name="delete" :size="16" />
-                        </button>
-                      </div>
+                    </HIGCard>
+                  </div>
+                  <HIGCard v-else>
+                    <div class="p-6 text-center py-12 text-text-secondary">
+                      <p>No categories yet. Create your first category!</p>
                     </div>
                   </HIGCard>
-                </div>
-                <HIGCard v-else>
-                  <div class="p-6 text-center py-12 text-text-secondary">
-                    <p>No categories yet. Create your first category!</p>
-                  </div>
-                </HIGCard>
                 </div>
               </div>
 
               <!-- Pages Section -->
               <div>
-                <h3 class="text-xl font-semibold text-text-primary mb-4">Pages</h3>
-                <div v-if="loadingPages" class="text-center py-12">
+                <h3 class="text-xl font-semibold text-text-primary mb-4">
+                  Pages
+                </h3>
+                <div
+                  v-if="loadingPages"
+                  class="text-center py-12"
+                >
                   <HIGSpinner />
-                  <p class="text-text-secondary mt-4">Loading pages...</p>
+                  <p class="text-text-secondary mt-4">
+                    Loading pages...
+                  </p>
                 </div>
-                <div v-else-if="pages.length > 0" class="space-y-4">
-                  <div v-for="category in categoriesWithPages" :key="category.category_id" class="category-pages-group">
+                <div
+                  v-else-if="pages.length > 0"
+                  class="space-y-4"
+                >
+                  <div
+                    v-for="category in categoriesWithPages"
+                    :key="category.category_id"
+                    class="category-pages-group"
+                  >
                     <button
-                      @click="toggleCategory(category.category_id)"
                       class="w-full flex items-center justify-between p-4 bg-bg-secondary hover:bg-bg-tertiary rounded-lg transition-colors mb-2"
+                      @click="toggleCategory(category.category_id)"
                     >
                       <div class="flex items-center gap-3">
                         <span class="text-lg font-semibold text-text-primary">{{ category.title }}</span>
@@ -164,16 +236,30 @@
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M19 9l-7 7-7-7"
+                        />
                       </svg>
                     </button>
-                    <div v-if="expandedCategories[category.category_id]" class="space-y-2 ml-4">
-                      <HIGCard v-for="page in getCategoryPages(category.category_id)" :key="page.id" class="hover:shadow-hig-lg transition-shadow">
+                    <div
+                      v-if="expandedCategories[category.category_id]"
+                      class="space-y-2 ml-4"
+                    >
+                      <HIGCard
+                        v-for="page in getCategoryPages(category.category_id)"
+                        :key="page.id"
+                        class="hover:shadow-hig-lg transition-shadow"
+                      >
                         <div class="p-4 md:p-6">
                           <div class="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4">
                             <div class="flex-1 min-w-0">
                               <div class="flex flex-wrap items-center gap-2 mb-2">
-                                <h4 class="text-base sm:text-lg font-semibold text-text-primary break-words">{{ page.title }}</h4>
+                                <h4 class="text-base sm:text-lg font-semibold text-text-primary break-words">
+                                  {{ page.title }}
+                                </h4>
                                 <span 
                                   :class="[
                                     'px-2 py-1 rounded text-xs font-medium whitespace-nowrap',
@@ -192,10 +278,20 @@
                               </div>
                             </div>
                             <div class="flex items-center space-x-2 sm:ml-4 w-full sm:w-auto">
-                              <HIGButton variant="tertiary" size="sm" @click="editPage(page)" class="flex-1 sm:flex-none">
+                              <HIGButton
+                                variant="tertiary"
+                                size="sm"
+                                class="flex-1 sm:flex-none"
+                                @click="editPage(page)"
+                              >
                                 Edit
                               </HIGButton>
-                              <HIGButton variant="danger" size="sm" @click="confirmDeletePage(page)" class="flex-1 sm:flex-none">
+                              <HIGButton
+                                variant="danger"
+                                size="sm"
+                                class="flex-1 sm:flex-none"
+                                @click="confirmDeletePage(page)"
+                              >
                                 Delete
                               </HIGButton>
                             </div>
@@ -214,14 +310,27 @@
             </div>
 
             <!-- Blog Management -->
-            <div v-if="activeTab === 'blog'" class="space-y-6">
+            <div
+              v-if="activeTab === 'blog'"
+              class="space-y-6"
+            >
               <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-                <h2 class="text-xl sm:text-2xl font-bold text-text-primary">Blog Posts</h2>
+                <h2 class="text-xl sm:text-2xl font-bold text-text-primary">
+                  Blog Posts
+                </h2>
                 <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                  <HIGButton variant="secondary" @click="openCreateBlogCategoryModal" class="w-full sm:w-auto">
+                  <HIGButton
+                    variant="secondary"
+                    class="w-full sm:w-auto"
+                    @click="openCreateBlogCategoryModal"
+                  >
                     + New Category
                   </HIGButton>
-                  <HIGButton variant="primary" @click="openCreateModal" class="w-full sm:w-auto">
+                  <HIGButton
+                    variant="primary"
+                    class="w-full sm:w-auto"
+                    @click="openCreateModal"
+                  >
                     + New Post
                   </HIGButton>
                 </div>
@@ -230,62 +339,94 @@
               <!-- Blog Categories Section -->
               <div class="mb-8">
                 <button
-                  @click="toggleCategorySection('blog')"
                   class="w-full flex items-center justify-between p-4 bg-bg-secondary hover:bg-bg-tertiary rounded-lg transition-colors mb-4"
+                  @click="toggleCategorySection('blog')"
                 >
-                  <h3 class="text-xl font-semibold text-text-primary">Categories</h3>
+                  <h3 class="text-xl font-semibold text-text-primary">
+                    Categories
+                  </h3>
                   <svg
                     :class="['w-5 h-5 text-text-tertiary transition-transform', { 'rotate-180': expandedCategorySections.blog }]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
                 <div v-if="expandedCategorySections.blog">
-                <div v-if="loadingBlogCategories" class="text-center py-12">
-                  <HIGSpinner />
-                  <p class="text-text-secondary mt-4">Loading categories...</p>
-                </div>
-                <div v-else-if="blogCategoriesList.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <HIGCard v-for="category in blogCategoriesList" :key="category.id" class="hover:shadow-hig-lg transition-shadow">
-                    <div class="p-4">
-                      <div class="flex items-start justify-between mb-2">
-                        <div class="flex-1">
-                          <h4 class="text-base font-semibold text-text-primary mb-1">{{ category.name }}</h4>
-                          <p v-if="category.description" class="text-text-secondary text-sm line-clamp-2">{{ category.description }}</p>
-                          <div class="flex items-center space-x-2 mt-1.5 text-xs text-text-tertiary">
-                            <span>{{ getBlogsInCategory(category.name).length }} posts</span>
+                  <div
+                    v-if="loadingBlogCategories"
+                    class="text-center py-12"
+                  >
+                    <HIGSpinner />
+                    <p class="text-text-secondary mt-4">
+                      Loading categories...
+                    </p>
+                  </div>
+                  <div
+                    v-else-if="blogCategoriesList.length > 0"
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                  >
+                    <HIGCard
+                      v-for="category in blogCategoriesList"
+                      :key="category.id"
+                      class="hover:shadow-hig-lg transition-shadow"
+                    >
+                      <div class="p-4">
+                        <div class="flex items-start justify-between mb-2">
+                          <div class="flex-1">
+                            <h4 class="text-base font-semibold text-text-primary mb-1">
+                              {{ category.name }}
+                            </h4>
+                            <p
+                              v-if="category.description"
+                              class="text-text-secondary text-sm line-clamp-2"
+                            >
+                              {{ category.description }}
+                            </p>
+                            <div class="flex items-center space-x-2 mt-1.5 text-xs text-text-tertiary">
+                              <span>{{ getBlogsInCategory(category.name).length }} posts</span>
+                            </div>
                           </div>
                         </div>
+                        <div class="flex items-center justify-end space-x-1 mt-3 pt-3 border-t border-border-primary">
+                          <button
+                            class="p-1.5 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
+                            title="Edit category"
+                            aria-label="Edit category"
+                            @click="editBlogCategory(category)"
+                          >
+                            <Icon
+                              name="edit"
+                              :size="16"
+                            />
+                          </button>
+                          <button
+                            class="p-1.5 text-text-primary hover:text-danger active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
+                            title="Delete category"
+                            aria-label="Delete category"
+                            @click="confirmDeleteBlogCategory(category)"
+                          >
+                            <Icon
+                              name="delete"
+                              :size="16"
+                            />
+                          </button>
+                        </div>
                       </div>
-                      <div class="flex items-center justify-end space-x-1 mt-3 pt-3 border-t border-border-primary">
-                        <button
-                          class="p-1.5 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
-                          @click="editBlogCategory(category)"
-                          title="Edit category"
-                          aria-label="Edit category"
-                        >
-                          <Icon name="edit" :size="16" />
-                        </button>
-                        <button
-                          class="p-1.5 text-text-primary hover:text-danger active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
-                          @click="confirmDeleteBlogCategory(category)"
-                          title="Delete category"
-                          aria-label="Delete category"
-                        >
-                          <Icon name="delete" :size="16" />
-                        </button>
-                      </div>
+                    </HIGCard>
+                  </div>
+                  <HIGCard v-else>
+                    <div class="p-6 text-center py-12 text-text-secondary">
+                      <p>No categories yet. Create your first category!</p>
                     </div>
                   </HIGCard>
-                </div>
-                <HIGCard v-else>
-                  <div class="p-6 text-center py-12 text-text-secondary">
-                    <p>No categories yet. Create your first category!</p>
-                  </div>
-                </HIGCard>
                 </div>
               </div>
 
@@ -300,33 +441,61 @@
                   v-model="blogFilterCategory"
                   class="px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
-                  <option value="">All Categories</option>
-                  <option v-for="cat in blogCategories" :key="cat" :value="cat">{{ cat }}</option>
+                  <option value="">
+                    All Categories
+                  </option>
+                  <option
+                    v-for="cat in blogCategories"
+                    :key="cat"
+                    :value="cat"
+                  >
+                    {{ cat }}
+                  </option>
                 </select>
                 <select
                   v-model="blogFilterStatus"
                   class="px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
-                  <option value="">All Status</option>
-                  <option value="published">Published</option>
-                  <option value="draft">Draft</option>
+                  <option value="">
+                    All Status
+                  </option>
+                  <option value="published">
+                    Published
+                  </option>
+                  <option value="draft">
+                    Draft
+                  </option>
                 </select>
               </div>
               
               <!-- Loading State -->
-              <div v-if="loadingBlogs" class="text-center py-12">
+              <div
+                v-if="loadingBlogs"
+                class="text-center py-12"
+              >
                 <HIGSpinner />
-                <p class="text-text-secondary mt-4">Loading blogs...</p>
+                <p class="text-text-secondary mt-4">
+                  Loading blogs...
+                </p>
               </div>
 
               <!-- Blog List -->
-              <div v-else-if="filteredBlogs.length > 0" class="space-y-4">
-                <HIGCard v-for="blog in filteredBlogs" :key="blog.id" class="hover:shadow-hig-lg transition-shadow">
+              <div
+                v-else-if="filteredBlogs.length > 0"
+                class="space-y-4"
+              >
+                <HIGCard
+                  v-for="blog in filteredBlogs"
+                  :key="blog.id"
+                  class="hover:shadow-hig-lg transition-shadow"
+                >
                   <div class="p-4 md:p-6">
                     <div class="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4">
                       <div class="flex-1 min-w-0">
                         <div class="flex flex-wrap items-center gap-2 mb-2">
-                          <h3 class="text-lg sm:text-xl font-semibold text-text-primary break-words">{{ blog.title }}</h3>
+                          <h3 class="text-lg sm:text-xl font-semibold text-text-primary break-words">
+                            {{ blog.title }}
+                          </h3>
                           <span 
                             :class="[
                               'px-2 py-1 rounded text-xs font-medium whitespace-nowrap',
@@ -338,7 +507,9 @@
                             {{ blog.published ? 'Published' : 'Draft' }}
                           </span>
                         </div>
-                        <p class="text-text-secondary mb-3 line-clamp-2">{{ blog.excerpt || 'No excerpt' }}</p>
+                        <p class="text-text-secondary mb-3 line-clamp-2">
+                          {{ blog.excerpt || 'No excerpt' }}
+                        </p>
                         <div class="flex flex-wrap items-center gap-2 text-sm text-text-tertiary">
                           <span>{{ blog.category || 'Uncategorized' }}</span>
                           <span>•</span>
@@ -348,10 +519,20 @@
                         </div>
                       </div>
                       <div class="flex items-center space-x-2 sm:ml-4 w-full sm:w-auto">
-                        <HIGButton variant="tertiary" size="sm" @click="editBlog(blog)" class="flex-1 sm:flex-none">
+                        <HIGButton
+                          variant="tertiary"
+                          size="sm"
+                          class="flex-1 sm:flex-none"
+                          @click="editBlog(blog)"
+                        >
                           Edit
                         </HIGButton>
-                        <HIGButton variant="danger" size="sm" @click="confirmDelete(blog)" class="flex-1 sm:flex-none">
+                        <HIGButton
+                          variant="danger"
+                          size="sm"
+                          class="flex-1 sm:flex-none"
+                          @click="confirmDelete(blog)"
+                        >
                           Delete
                         </HIGButton>
                       </div>
@@ -364,8 +545,13 @@
               <HIGCard v-else>
                 <div class="p-6">
                   <div class="text-center py-12 text-text-secondary">
-                    <p class="mb-4">No blog posts found.</p>
-                    <HIGButton variant="primary" @click="openCreateModal">
+                    <p class="mb-4">
+                      No blog posts found.
+                    </p>
+                    <HIGButton
+                      variant="primary"
+                      @click="openCreateModal"
+                    >
                       Create Your First Post
                     </HIGButton>
                   </div>
@@ -373,11 +559,20 @@
               </HIGCard>
             </div>
 
-              <!-- Tools Management -->
-              <div v-if="activeTab === 'tools'" class="space-y-6">
+            <!-- Tools Management -->
+            <div
+              v-if="activeTab === 'tools'"
+              class="space-y-6"
+            >
               <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-                <h2 class="text-xl sm:text-2xl font-bold text-text-primary">Tools</h2>
-                <HIGButton variant="primary" @click="openCreateToolModal" class="w-full sm:w-auto">
+                <h2 class="text-xl sm:text-2xl font-bold text-text-primary">
+                  Tools
+                </h2>
+                <HIGButton
+                  variant="primary"
+                  class="w-full sm:w-auto"
+                  @click="openCreateToolModal"
+                >
                   + New Tool
                 </HIGButton>
               </div>
@@ -393,47 +588,92 @@
                   v-model="toolFilterCategory"
                   class="px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
-                  <option value="">All Categories</option>
-                  <option v-for="cat in toolCategories" :key="cat" :value="cat">{{ cat }}</option>
+                  <option value="">
+                    All Categories
+                  </option>
+                  <option
+                    v-for="cat in toolCategories"
+                    :key="cat"
+                    :value="cat"
+                  >
+                    {{ cat }}
+                  </option>
                 </select>
                 <select
                   v-model="toolFilterFeatured"
                   class="px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
-                  <option value="">All Tools</option>
-                  <option value="true">Featured Only</option>
+                  <option value="">
+                    All Tools
+                  </option>
+                  <option value="true">
+                    Featured Only
+                  </option>
                 </select>
               </div>
 
-              <div v-if="loadingTools" class="text-center py-12">
+              <div
+                v-if="loadingTools"
+                class="text-center py-12"
+              >
                 <HIGSpinner />
-                <p class="text-text-secondary mt-4">Loading tools...</p>
+                <p class="text-text-secondary mt-4">
+                  Loading tools...
+                </p>
               </div>
 
-              <div v-else-if="filteredTools.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <HIGCard v-for="tool in filteredTools" :key="tool.id" class="hover:shadow-hig-lg transition-shadow">
+              <div
+                v-else-if="filteredTools.length > 0"
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+              >
+                <HIGCard
+                  v-for="tool in filteredTools"
+                  :key="tool.id"
+                  class="hover:shadow-hig-lg transition-shadow"
+                >
                   <div class="p-4 md:p-6">
                     <div class="flex items-start justify-between mb-3">
                       <div class="flex-1 min-w-0">
                         <div class="flex flex-wrap items-center gap-2 mb-2">
-                          <h4 class="text-base sm:text-lg font-semibold text-text-primary break-words">{{ tool.name }}</h4>
-                          <span v-if="tool.is_featured" class="px-2 py-1 rounded text-xs font-medium bg-primary-500/20 text-primary-500 whitespace-nowrap">
+                          <h4 class="text-base sm:text-lg font-semibold text-text-primary break-words">
+                            {{ tool.name }}
+                          </h4>
+                          <span
+                            v-if="tool.is_featured"
+                            class="px-2 py-1 rounded text-xs font-medium bg-primary-500/20 text-primary-500 whitespace-nowrap"
+                          >
                             Featured
                           </span>
                         </div>
-                        <p class="text-text-secondary text-sm line-clamp-2 mb-2">{{ tool.description || 'No description' }}</p>
+                        <p class="text-text-secondary text-sm line-clamp-2 mb-2">
+                          {{ tool.description || 'No description' }}
+                        </p>
                         <div class="flex flex-wrap items-center gap-2 text-xs text-text-tertiary">
                           <span>{{ tool.category || 'Uncategorized' }}</span>
                           <span>•</span>
-                          <a :href="tool.url" target="_blank" class="text-primary-500 hover:text-primary-600 break-all">Visit</a>
+                          <a
+                            :href="tool.url"
+                            target="_blank"
+                            class="text-primary-500 hover:text-primary-600 break-all"
+                          >Visit</a>
                         </div>
                       </div>
                     </div>
                     <div class="flex items-center space-x-2 mt-4 pt-4 border-t border-border-primary">
-                      <HIGButton variant="tertiary" size="sm" @click="editTool(tool)" class="flex-1 sm:flex-none">
+                      <HIGButton
+                        variant="tertiary"
+                        size="sm"
+                        class="flex-1 sm:flex-none"
+                        @click="editTool(tool)"
+                      >
                         Edit
                       </HIGButton>
-                      <HIGButton variant="danger" size="sm" @click="confirmDeleteTool(tool)" class="flex-1 sm:flex-none">
+                      <HIGButton
+                        variant="danger"
+                        size="sm"
+                        class="flex-1 sm:flex-none"
+                        @click="confirmDeleteTool(tool)"
+                      >
                         Delete
                       </HIGButton>
                     </div>
@@ -448,11 +688,20 @@
               </HIGCard>
             </div>
 
-              <!-- Interactive Blocks Management -->
-            <div v-if="activeTab === 'interactive-blocks'" class="space-y-6">
+            <!-- Interactive Blocks Management -->
+            <div
+              v-if="activeTab === 'interactive-blocks'"
+              class="space-y-6"
+            >
               <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-                <h2 class="text-xl sm:text-2xl font-bold text-text-primary">Interactive Blocks</h2>
-                <HIGButton variant="primary" @click="openCreateInteractiveBlockModal" class="w-full sm:w-auto">
+                <h2 class="text-xl sm:text-2xl font-bold text-text-primary">
+                  Interactive Blocks
+                </h2>
+                <HIGButton
+                  variant="primary"
+                  class="w-full sm:w-auto"
+                  @click="openCreateInteractiveBlockModal"
+                >
                   + New Block
                 </HIGButton>
               </div>
@@ -466,18 +715,34 @@
                 </p>
               </div>
 
-              <div v-if="loadingInteractiveBlocks" class="text-center py-12">
+              <div
+                v-if="loadingInteractiveBlocks"
+                class="text-center py-12"
+              >
                 <HIGSpinner />
-                <p class="text-text-secondary mt-4">Loading interactive blocks...</p>
+                <p class="text-text-secondary mt-4">
+                  Loading interactive blocks...
+                </p>
               </div>
 
-              <div v-else-if="interactiveBlocks.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <HIGCard v-for="block in interactiveBlocks" :key="block.id" class="hover:shadow-hig-lg transition-shadow">
+              <div
+                v-else-if="interactiveBlocks.length > 0"
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+              >
+                <HIGCard
+                  v-for="block in interactiveBlocks"
+                  :key="block.id"
+                  class="hover:shadow-hig-lg transition-shadow"
+                >
                   <div class="p-4">
                     <div class="flex items-start justify-between mb-2">
                       <div class="flex-1">
-                        <h4 class="text-base font-semibold text-text-primary mb-1">{{ block.title }}</h4>
-                        <p class="text-text-secondary text-sm mb-2 line-clamp-2">{{ block.instructions || 'No instructions' }}</p>
+                        <h4 class="text-base font-semibold text-text-primary mb-1">
+                          {{ block.title }}
+                        </h4>
+                        <p class="text-text-secondary text-sm mb-2 line-clamp-2">
+                          {{ block.instructions || 'No instructions' }}
+                        </p>
                         <div class="flex items-center space-x-2 text-xs text-text-tertiary">
                           <span>ID: {{ block.id }}</span>
                           <span>•</span>
@@ -488,19 +753,25 @@
                     <div class="flex items-center justify-end space-x-1 mt-3 pt-3 border-t border-border-primary">
                       <button
                         class="p-1.5 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
-                        @click="editInteractiveBlock(block)"
                         title="Edit block"
                         aria-label="Edit block"
+                        @click="editInteractiveBlock(block)"
                       >
-                        <Icon name="edit" :size="16" />
+                        <Icon
+                          name="edit"
+                          :size="16"
+                        />
                       </button>
                       <button
                         class="p-1.5 text-text-primary hover:text-danger active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
-                        @click="confirmDeleteInteractiveBlock(block)"
                         title="Delete block"
                         aria-label="Delete block"
+                        @click="confirmDeleteInteractiveBlock(block)"
                       >
-                        <Icon name="delete" :size="16" />
+                        <Icon
+                          name="delete"
+                          :size="16"
+                        />
                       </button>
                     </div>
                   </div>
@@ -514,10 +785,15 @@
               </HIGCard>
             </div>
 
-              <!-- Users Management -->
-            <div v-if="activeTab === 'users'" class="space-y-6">
+            <!-- Users Management -->
+            <div
+              v-if="activeTab === 'users'"
+              class="space-y-6"
+            >
               <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-                <h2 class="text-xl sm:text-2xl font-bold text-text-primary">Users</h2>
+                <h2 class="text-xl sm:text-2xl font-bold text-text-primary">
+                  Users
+                </h2>
               </div>
 
               <!-- Search -->
@@ -529,30 +805,59 @@
                 />
               </div>
 
-              <div v-if="loadingUsers" class="text-center py-12">
+              <div
+                v-if="loadingUsers"
+                class="text-center py-12"
+              >
                 <HIGSpinner />
-                <p class="text-text-secondary mt-4">Loading users...</p>
+                <p class="text-text-secondary mt-4">
+                  Loading users...
+                </p>
               </div>
 
-              <div v-else-if="filteredUsers.length > 0" class="space-y-4">
-                <HIGCard v-for="user in filteredUsers" :key="user.id" class="hover:shadow-hig-lg transition-shadow">
+              <div
+                v-else-if="filteredUsers.length > 0"
+                class="space-y-4"
+              >
+                <HIGCard
+                  v-for="user in filteredUsers"
+                  :key="user.id"
+                  class="hover:shadow-hig-lg transition-shadow"
+                >
                   <div class="p-4 md:p-6">
                     <div class="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4">
                       <div class="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
-                        <div v-if="user.photo_url" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-bg-tertiary flex-shrink-0">
-                          <img :src="user.photo_url" :alt="user.display_name" class="w-full h-full object-cover">
+                        <div
+                          v-if="user.photo_url"
+                          class="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-bg-tertiary flex-shrink-0"
+                        >
+                          <img
+                            :src="user.photo_url"
+                            :alt="user.display_name"
+                            class="w-full h-full object-cover"
+                          >
                         </div>
-                        <div v-else class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-bg-tertiary flex items-center justify-center text-text-tertiary flex-shrink-0">
+                        <div
+                          v-else
+                          class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-bg-tertiary flex items-center justify-center text-text-tertiary flex-shrink-0"
+                        >
                           {{ (user.display_name || user.email || 'U')[0].toUpperCase() }}
                         </div>
                         <div class="flex-1 min-w-0">
                           <div class="flex flex-wrap items-center gap-2 mb-1">
-                            <h4 class="text-base sm:text-lg font-semibold text-text-primary break-words">{{ user.display_name || 'No name' }}</h4>
-                            <span v-if="user.is_admin" class="px-2 py-1 rounded text-xs font-medium bg-primary-500/20 text-primary-500 whitespace-nowrap">
+                            <h4 class="text-base sm:text-lg font-semibold text-text-primary break-words">
+                              {{ user.display_name || 'No name' }}
+                            </h4>
+                            <span
+                              v-if="user.is_admin"
+                              class="px-2 py-1 rounded text-xs font-medium bg-primary-500/20 text-primary-500 whitespace-nowrap"
+                            >
                               Admin
                             </span>
                           </div>
-                          <p class="text-text-secondary text-sm mb-2 break-words">{{ user.email }}</p>
+                          <p class="text-text-secondary text-sm mb-2 break-words">
+                            {{ user.email }}
+                          </p>
                           <div class="flex flex-wrap items-center gap-2 text-xs text-text-tertiary">
                             <span>Joined: {{ formatDate(user.created_at) }}</span>
                             <span v-if="user.last_login_at">•</span>
@@ -561,7 +866,12 @@
                         </div>
                       </div>
                       <div class="flex items-center space-x-2 sm:ml-4 w-full sm:w-auto">
-                        <HIGButton variant="tertiary" size="sm" @click="editUser(user)" class="flex-1 sm:flex-none">
+                        <HIGButton
+                          variant="tertiary"
+                          size="sm"
+                          class="flex-1 sm:flex-none"
+                          @click="editUser(user)"
+                        >
                           Edit
                         </HIGButton>
                       </div>
@@ -588,7 +898,10 @@
       :title="editingBlog ? 'Edit Blog Post' : 'Create New Blog Post'"
       size="lg"
     >
-      <form @submit.prevent="handleSubmitBlog" class="space-y-4">
+      <form
+        class="space-y-4"
+        @submit.prevent="handleSubmitBlog"
+      >
         <HIGInput
           v-model="blogForm.title"
           label="Title"
@@ -623,7 +936,9 @@
               v-model="blogForm.category"
               class="flex-1 px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
-              <option value="">Uncategorized</option>
+              <option value="">
+                Uncategorized
+              </option>
               <option 
                 v-for="cat in blogCategories" 
                 :key="cat" 
@@ -632,7 +947,12 @@
                 {{ cat }}
               </option>
             </select>
-            <HIGButton variant="tertiary" size="sm" @click="openCreateBlogCategoryModal" type="button">
+            <HIGButton
+              variant="tertiary"
+              size="sm"
+              type="button"
+              @click="openCreateBlogCategoryModal"
+            >
               + New
             </HIGButton>
           </div>
@@ -645,9 +965,9 @@
             <input
               type="file"
               accept="image/*"
-              @change="handleImageUpload($event, 'blog')"
               class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-500 file:text-white hover:file:bg-primary-600"
-            />
+              @change="handleImageUpload($event, 'blog')"
+            >
             <p class="text-xs text-text-tertiary">
               Upload an image (will be uploaded to ImgBB) or paste a URL below
             </p>
@@ -657,13 +977,16 @@
               placeholder="https://example.com/image.jpg"
               type="url"
             />
-            <div v-if="blogForm.featured_image_url" class="mt-2">
+            <div
+              v-if="blogForm.featured_image_url"
+              class="mt-2"
+            >
               <img 
                 :src="blogForm.featured_image_url" 
                 alt="Preview" 
                 class="max-w-xs h-auto rounded-lg border border-border-primary"
                 @error="blogForm.featured_image_url = ''"
-              />
+              >
             </div>
           </div>
         </div>
@@ -680,17 +1003,30 @@
               v-model="blogForm.published"
               type="checkbox"
               class="w-4 h-4 text-primary-500 bg-bg-secondary border-border-primary rounded focus:ring-primary-500"
-            />
-            <label for="published" class="text-sm font-medium text-text-primary">
+            >
+            <label
+              for="published"
+              class="text-sm font-medium text-text-primary"
+            >
               Publish immediately
             </label>
           </div>
         </div>
         <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
-          <HIGButton variant="tertiary" type="button" @click="closeBlogModal" class="w-full sm:w-auto">
+          <HIGButton
+            variant="tertiary"
+            type="button"
+            class="w-full sm:w-auto"
+            @click="closeBlogModal"
+          >
             Cancel
           </HIGButton>
-          <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
+          <HIGButton
+            variant="primary"
+            type="submit"
+            :disabled="submitting"
+            class="w-full sm:w-auto"
+          >
             {{ submitting ? 'Saving...' : (editingBlog ? 'Update' : 'Create') }}
           </HIGButton>
         </div>
@@ -708,10 +1044,19 @@
           Are you sure you want to delete "<strong>{{ blogToDelete?.title }}</strong>"? This action cannot be undone.
         </p>
         <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
-          <HIGButton variant="tertiary" @click="showDeleteModal = false" class="w-full sm:w-auto">
+          <HIGButton
+            variant="tertiary"
+            class="w-full sm:w-auto"
+            @click="showDeleteModal = false"
+          >
             Cancel
           </HIGButton>
-          <HIGButton variant="danger" @click="handleDeleteBlog" :disabled="deleting" class="w-full sm:w-auto">
+          <HIGButton
+            variant="danger"
+            :disabled="deleting"
+            class="w-full sm:w-auto"
+            @click="handleDeleteBlog"
+          >
             {{ deleting ? 'Deleting...' : 'Delete' }}
           </HIGButton>
         </div>
@@ -724,7 +1069,10 @@
       :title="editingCategory ? 'Edit Category' : 'Create New Category'"
       size="lg"
     >
-      <form @submit.prevent="handleSubmitCategory" class="space-y-4">
+      <form
+        class="space-y-4"
+        @submit.prevent="handleSubmitCategory"
+      >
         <HIGInput
           v-model="categoryForm.title"
           label="Title"
@@ -749,9 +1097,15 @@
               v-model="categoryForm.level"
               class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
-              <option value="Beginner">Beginner</option>
-              <option value="Intermediate">Intermediate</option>
-              <option value="Advanced">Advanced</option>
+              <option value="Beginner">
+                Beginner
+              </option>
+              <option value="Intermediate">
+                Intermediate
+              </option>
+              <option value="Advanced">
+                Advanced
+              </option>
             </select>
           </div>
           <HIGInput
@@ -767,16 +1121,29 @@
             v-model="categoryForm.published"
             type="checkbox"
             class="w-4 h-4 text-primary-500 bg-bg-secondary border-border-primary rounded focus:ring-primary-500"
-          />
-          <label for="categoryPublished" class="text-sm font-medium text-text-primary">
+          >
+          <label
+            for="categoryPublished"
+            class="text-sm font-medium text-text-primary"
+          >
             Publish immediately
           </label>
         </div>
         <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
-          <HIGButton variant="tertiary" type="button" @click="closeCategoryModal" class="w-full sm:w-auto">
+          <HIGButton
+            variant="tertiary"
+            type="button"
+            class="w-full sm:w-auto"
+            @click="closeCategoryModal"
+          >
             Cancel
           </HIGButton>
-          <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
+          <HIGButton
+            variant="primary"
+            type="submit"
+            :disabled="submitting"
+            class="w-full sm:w-auto"
+          >
             {{ submitting ? 'Saving...' : (editingCategory ? 'Update' : 'Create') }}
           </HIGButton>
         </div>
@@ -789,7 +1156,10 @@
       :title="editingPage ? 'Edit Page' : 'Create New Page'"
       size="lg"
     >
-      <form @submit.prevent="handleSubmitPage" class="space-y-4">
+      <form
+        class="space-y-4"
+        @submit.prevent="handleSubmitPage"
+      >
         <div>
           <label class="block text-sm font-medium text-text-primary mb-2">Category <span class="text-danger">*</span></label>
           <select
@@ -797,8 +1167,14 @@
             class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
             required
           >
-            <option value="">Select a category</option>
-            <option v-for="cat in categories" :key="cat.category_id" :value="cat.category_id">
+            <option value="">
+              Select a category
+            </option>
+            <option
+              v-for="cat in categories"
+              :key="cat.category_id"
+              :value="cat.category_id"
+            >
               {{ cat.title }}
             </option>
           </select>
@@ -822,10 +1198,14 @@
               variant="tertiary" 
               size="sm" 
               type="button"
-              @click="openInsertInteractiveBlockModal"
               class="text-xs"
+              @click="openInsertInteractiveBlockModal"
             >
-              <Icon name="code" :size="14" class="mr-1" />
+              <Icon
+                name="code"
+                :size="14"
+                class="mr-1"
+              />
               Insert Interactive Block
             </HIGButton>
           </div>
@@ -848,16 +1228,29 @@
             v-model="pageForm.published"
             type="checkbox"
             class="w-4 h-4 text-primary-500 bg-bg-secondary border-border-primary rounded focus:ring-primary-500"
-          />
-          <label for="pagePublished" class="text-sm font-medium text-text-primary">
+          >
+          <label
+            for="pagePublished"
+            class="text-sm font-medium text-text-primary"
+          >
             Publish immediately
           </label>
         </div>
         <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
-          <HIGButton variant="tertiary" type="button" @click="closePageModal" class="w-full sm:w-auto">
+          <HIGButton
+            variant="tertiary"
+            type="button"
+            class="w-full sm:w-auto"
+            @click="closePageModal"
+          >
             Cancel
           </HIGButton>
-          <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
+          <HIGButton
+            variant="primary"
+            type="submit"
+            :disabled="submitting"
+            class="w-full sm:w-auto"
+          >
             {{ submitting ? 'Saving...' : (editingPage ? 'Update' : 'Create') }}
           </HIGButton>
         </div>
@@ -870,7 +1263,10 @@
       :title="editingTool ? 'Edit Tool' : 'Create New Tool'"
       size="lg"
     >
-      <form @submit.prevent="handleSubmitTool" class="space-y-4">
+      <form
+        class="space-y-4"
+        @submit.prevent="handleSubmitTool"
+      >
         <HIGInput
           v-model="toolForm.name"
           label="Name"
@@ -902,9 +1298,9 @@
             <input
               type="file"
               accept="image/*"
-              @change="handleImageUpload($event, 'tool')"
               class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-500 file:text-white hover:file:bg-primary-600"
-            />
+              @change="handleImageUpload($event, 'tool')"
+            >
             <p class="text-xs text-text-tertiary">
               Upload a logo (will be uploaded to ImgBB) or paste a URL below
             </p>
@@ -914,13 +1310,16 @@
               placeholder="https://example.com/logo.png"
               type="url"
             />
-            <div v-if="toolForm.logo_url" class="mt-2">
+            <div
+              v-if="toolForm.logo_url"
+              class="mt-2"
+            >
               <img 
                 :src="toolForm.logo_url" 
                 alt="Logo Preview" 
                 class="max-w-xs h-auto rounded-lg border border-border-primary"
                 @error="toolForm.logo_url = ''"
-              />
+              >
             </div>
           </div>
         </div>
@@ -930,16 +1329,29 @@
             v-model="toolForm.is_featured"
             type="checkbox"
             class="w-4 h-4 text-primary-500 bg-bg-secondary border-border-primary rounded focus:ring-primary-500"
-          />
-          <label for="toolFeatured" class="text-sm font-medium text-text-primary">
+          >
+          <label
+            for="toolFeatured"
+            class="text-sm font-medium text-text-primary"
+          >
             Featured tool
           </label>
         </div>
         <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
-          <HIGButton variant="tertiary" type="button" @click="closeToolModal" class="w-full sm:w-auto">
+          <HIGButton
+            variant="tertiary"
+            type="button"
+            class="w-full sm:w-auto"
+            @click="closeToolModal"
+          >
             Cancel
           </HIGButton>
-          <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
+          <HIGButton
+            variant="primary"
+            type="submit"
+            :disabled="submitting"
+            class="w-full sm:w-auto"
+          >
             {{ submitting ? 'Saving...' : (editingTool ? 'Update' : 'Create') }}
           </HIGButton>
         </div>
@@ -952,7 +1364,10 @@
       title="Edit User"
       size="md"
     >
-      <form @submit.prevent="handleSubmitUser" class="space-y-4">
+      <form
+        class="space-y-4"
+        @submit.prevent="handleSubmitUser"
+      >
         <HIGInput
           v-model="userForm.display_name"
           label="Display Name"
@@ -972,9 +1387,9 @@
             <input
               type="file"
               accept="image/*"
-              @change="handleImageUpload($event, 'user')"
               class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-500 file:text-white hover:file:bg-primary-600"
-            />
+              @change="handleImageUpload($event, 'user')"
+            >
             <p class="text-xs text-text-tertiary">
               Upload a photo (will be uploaded to ImgBB) or paste a URL below
             </p>
@@ -984,13 +1399,16 @@
               placeholder="https://example.com/photo.jpg"
               type="url"
             />
-            <div v-if="userForm.photo_url" class="mt-2">
+            <div
+              v-if="userForm.photo_url"
+              class="mt-2"
+            >
               <img 
                 :src="userForm.photo_url" 
                 alt="Photo Preview" 
                 class="w-24 h-24 rounded-full object-cover border border-border-primary"
                 @error="userForm.photo_url = ''"
-              />
+              >
             </div>
           </div>
         </div>
@@ -1000,16 +1418,29 @@
             v-model="userForm.is_admin"
             type="checkbox"
             class="w-4 h-4 text-primary-500 bg-bg-secondary border-border-primary rounded focus:ring-primary-500"
-          />
-          <label for="userAdmin" class="text-sm font-medium text-text-primary">
+          >
+          <label
+            for="userAdmin"
+            class="text-sm font-medium text-text-primary"
+          >
             Admin privileges
           </label>
         </div>
         <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
-          <HIGButton variant="tertiary" type="button" @click="closeUserModal" class="w-full sm:w-auto">
+          <HIGButton
+            variant="tertiary"
+            type="button"
+            class="w-full sm:w-auto"
+            @click="closeUserModal"
+          >
             Cancel
           </HIGButton>
-          <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
+          <HIGButton
+            variant="primary"
+            type="submit"
+            :disabled="submitting"
+            class="w-full sm:w-auto"
+          >
             {{ submitting ? 'Saving...' : 'Update' }}
           </HIGButton>
         </div>
@@ -1027,10 +1458,19 @@
           Are you sure you want to delete "<strong>{{ categoryToDelete?.title }}</strong>"? This will also delete all pages in this category. This action cannot be undone.
         </p>
         <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
-          <HIGButton variant="tertiary" @click="showDeleteCategoryModal = false" class="w-full sm:w-auto">
+          <HIGButton
+            variant="tertiary"
+            class="w-full sm:w-auto"
+            @click="showDeleteCategoryModal = false"
+          >
             Cancel
           </HIGButton>
-          <HIGButton variant="danger" @click="handleDeleteCategory" :disabled="deleting" class="w-full sm:w-auto">
+          <HIGButton
+            variant="danger"
+            :disabled="deleting"
+            class="w-full sm:w-auto"
+            @click="handleDeleteCategory"
+          >
             {{ deleting ? 'Deleting...' : 'Delete' }}
           </HIGButton>
         </div>
@@ -1047,10 +1487,19 @@
           Are you sure you want to delete "<strong>{{ pageToDelete?.title }}</strong>"? This action cannot be undone.
         </p>
         <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
-          <HIGButton variant="tertiary" @click="showDeletePageModal = false" class="w-full sm:w-auto">
+          <HIGButton
+            variant="tertiary"
+            class="w-full sm:w-auto"
+            @click="showDeletePageModal = false"
+          >
             Cancel
           </HIGButton>
-          <HIGButton variant="danger" @click="handleDeletePage" :disabled="deleting" class="w-full sm:w-auto">
+          <HIGButton
+            variant="danger"
+            :disabled="deleting"
+            class="w-full sm:w-auto"
+            @click="handleDeletePage"
+          >
             {{ deleting ? 'Deleting...' : 'Delete' }}
           </HIGButton>
         </div>
@@ -1067,10 +1516,19 @@
           Are you sure you want to delete "<strong>{{ toolToDelete?.name }}</strong>"? This action cannot be undone.
         </p>
         <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
-          <HIGButton variant="tertiary" @click="showDeleteToolModal = false" class="w-full sm:w-auto">
+          <HIGButton
+            variant="tertiary"
+            class="w-full sm:w-auto"
+            @click="showDeleteToolModal = false"
+          >
             Cancel
           </HIGButton>
-          <HIGButton variant="danger" @click="handleDeleteTool" :disabled="deleting" class="w-full sm:w-auto">
+          <HIGButton
+            variant="danger"
+            :disabled="deleting"
+            class="w-full sm:w-auto"
+            @click="handleDeleteTool"
+          >
             {{ deleting ? 'Deleting...' : 'Delete' }}
           </HIGButton>
         </div>
@@ -1083,7 +1541,10 @@
       :title="editingBlogCategory ? 'Edit Blog Category' : 'Create New Blog Category'"
       size="lg"
     >
-      <form @submit.prevent="handleSubmitBlogCategory" class="space-y-4">
+      <form
+        class="space-y-4"
+        @submit.prevent="handleSubmitBlogCategory"
+      >
         <HIGInput
           v-model="blogCategoryForm.name"
           label="Name"
@@ -1107,10 +1568,20 @@
           />
         </div>
         <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
-          <HIGButton variant="tertiary" type="button" @click="closeBlogCategoryModal" class="w-full sm:w-auto">
+          <HIGButton
+            variant="tertiary"
+            type="button"
+            class="w-full sm:w-auto"
+            @click="closeBlogCategoryModal"
+          >
             Cancel
           </HIGButton>
-          <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
+          <HIGButton
+            variant="primary"
+            type="submit"
+            :disabled="submitting"
+            class="w-full sm:w-auto"
+          >
             {{ submitting ? 'Saving...' : (editingBlogCategory ? 'Update' : 'Create') }}
           </HIGButton>
         </div>
@@ -1133,10 +1604,19 @@
           This action cannot be undone.
         </p>
         <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
-          <HIGButton variant="tertiary" @click="showDeleteBlogCategoryModal = false" class="w-full sm:w-auto">
+          <HIGButton
+            variant="tertiary"
+            class="w-full sm:w-auto"
+            @click="showDeleteBlogCategoryModal = false"
+          >
             Cancel
           </HIGButton>
-          <HIGButton variant="danger" @click="handleDeleteBlogCategory" :disabled="deleting" class="w-full sm:w-auto">
+          <HIGButton
+            variant="danger"
+            :disabled="deleting"
+            class="w-full sm:w-auto"
+            @click="handleDeleteBlogCategory"
+          >
             {{ deleting ? 'Deleting...' : 'Delete' }}
           </HIGButton>
         </div>
@@ -1149,7 +1629,10 @@
       :title="editingInteractiveBlock ? 'Edit Interactive Block' : 'Create New Interactive Block'"
       size="lg"
     >
-      <form @submit.prevent="handleSubmitInteractiveBlock" class="space-y-4">
+      <form
+        class="space-y-4"
+        @submit.prevent="handleSubmitInteractiveBlock"
+      >
         <HIGInput
           v-model="interactiveBlockForm.id"
           label="Block ID"
@@ -1177,7 +1660,7 @@
           </label>
           <textarea
             v-model="interactiveBlockForm.starter_code"
-            placeholder='// Your code here or {"files": [{"name": "index.html", "language": "html", "content": "..."}]}'
+            placeholder="// Your code here or {&quot;files&quot;: [{&quot;name&quot;: &quot;index.html&quot;, &quot;language&quot;: &quot;html&quot;, &quot;content&quot;: &quot;...&quot;}]}"
             rows="8"
             class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-y"
           />
@@ -1191,7 +1674,9 @@
             v-model="interactiveBlockForm.run_mode"
             class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="web">Web (HTML/CSS/JS)</option>
+            <option value="web">
+              Web (HTML/CSS/JS)
+            </option>
           </select>
         </div>
         <div>
@@ -1200,7 +1685,7 @@
           </label>
           <textarea
             v-model="interactiveBlockForm.checks"
-            placeholder='[{"type": "stdout_includes", "value": "Hello", "message": "Output should include Hello"}]'
+            placeholder="[{&quot;type&quot;: &quot;stdout_includes&quot;, &quot;value&quot;: &quot;Hello&quot;, &quot;message&quot;: &quot;Output should include Hello&quot;}]"
             rows="6"
             class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-y"
           />
@@ -1214,7 +1699,7 @@
           </label>
           <textarea
             v-model="interactiveBlockForm.hints"
-            placeholder='["Hint 1", "Hint 2"]'
+            placeholder="[&quot;Hint 1&quot;, &quot;Hint 2&quot;]"
             rows="4"
             class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-y"
           />
@@ -1229,10 +1714,20 @@
           placeholder="10"
         />
         <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
-          <HIGButton variant="tertiary" type="button" @click="closeInteractiveBlockModal" class="w-full sm:w-auto">
+          <HIGButton
+            variant="tertiary"
+            type="button"
+            class="w-full sm:w-auto"
+            @click="closeInteractiveBlockModal"
+          >
             Cancel
           </HIGButton>
-          <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
+          <HIGButton
+            variant="primary"
+            type="submit"
+            :disabled="submitting"
+            class="w-full sm:w-auto"
+          >
             {{ submitting ? 'Saving...' : (editingInteractiveBlock ? 'Update' : 'Create') }}
           </HIGButton>
         </div>
@@ -1251,10 +1746,19 @@
           This will also delete all user progress for this block. This action cannot be undone.
         </p>
         <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
-          <HIGButton variant="tertiary" @click="showDeleteInteractiveBlockModal = false" class="w-full sm:w-auto">
+          <HIGButton
+            variant="tertiary"
+            class="w-full sm:w-auto"
+            @click="showDeleteInteractiveBlockModal = false"
+          >
             Cancel
           </HIGButton>
-          <HIGButton variant="danger" @click="handleDeleteInteractiveBlock" :disabled="deleting" class="w-full sm:w-auto">
+          <HIGButton
+            variant="danger"
+            :disabled="deleting"
+            class="w-full sm:w-auto"
+            @click="handleDeleteInteractiveBlock"
+          >
             {{ deleting ? 'Deleting...' : 'Delete' }}
           </HIGButton>
         </div>
@@ -1271,19 +1775,27 @@
         <p class="text-sm text-text-secondary">
           Select an interactive block to insert into the tutorial page content.
         </p>
-        <div v-if="loadingInteractiveBlocks" class="text-center py-4">
+        <div
+          v-if="loadingInteractiveBlocks"
+          class="text-center py-4"
+        >
           <HIGSpinner />
-          <p class="text-text-secondary mt-2 text-sm">Loading blocks...</p>
+          <p class="text-text-secondary mt-2 text-sm">
+            Loading blocks...
+          </p>
         </div>
-        <div v-else-if="interactiveBlocks.length === 0" class="p-4 bg-bg-secondary border border-border-primary rounded-lg">
+        <div
+          v-else-if="interactiveBlocks.length === 0"
+          class="p-4 bg-bg-secondary border border-border-primary rounded-lg"
+        >
           <p class="text-sm text-text-secondary mb-3">
             No interactive blocks found. Create one first in the "Interactive Blocks" tab.
           </p>
           <HIGButton 
             variant="primary" 
             size="sm"
-            @click="activeTab = 'interactive-blocks'; showInsertInteractiveBlockModal = false"
             class="w-full"
+            @click="activeTab = 'interactive-blocks'; showInsertInteractiveBlockModal = false"
           >
             Go to Interactive Blocks
           </HIGButton>
@@ -1295,7 +1807,9 @@
               v-model="selectedInteractiveBlockId"
               class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
-              <option value="">Choose a block...</option>
+              <option value="">
+                Choose a block...
+              </option>
               <option 
                 v-for="block in interactiveBlocks" 
                 :key="block.id" 
@@ -1306,22 +1820,28 @@
             </select>
           </div>
           <div class="p-3 bg-bg-secondary border border-border-primary rounded-lg">
-            <p class="text-xs text-text-tertiary mb-1">Preview:</p>
+            <p class="text-xs text-text-tertiary mb-1">
+              Preview:
+            </p>
             <code class="text-xs font-mono text-text-primary">
               [interactive id="{{ selectedInteractiveBlockId || 'block-id' }}"]
             </code>
           </div>
         </template>
         <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
-          <HIGButton variant="tertiary" @click="showInsertInteractiveBlockModal = false" class="w-full sm:w-auto">
+          <HIGButton
+            variant="tertiary"
+            class="w-full sm:w-auto"
+            @click="showInsertInteractiveBlockModal = false"
+          >
             Cancel
           </HIGButton>
           <HIGButton 
             v-if="interactiveBlocks.length > 0"
             variant="primary" 
-            @click="insertInteractiveBlockShortcode" 
-            :disabled="!selectedInteractiveBlockId"
+            :disabled="!selectedInteractiveBlockId" 
             class="w-full sm:w-auto"
+            @click="insertInteractiveBlockShortcode"
           >
             Insert
           </HIGButton>

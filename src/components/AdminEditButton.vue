@@ -5,7 +5,10 @@
     :title="title || 'Edit'"
     @click.stop="$emit('click')"
   >
-    <Icon name="edit" :size="16" />
+    <Icon
+      name="edit"
+      :size="16"
+    />
   </button>
 </template>
 

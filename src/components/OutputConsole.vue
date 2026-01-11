@@ -1,18 +1,28 @@
 <template>
-  <div class="output-console" :class="wrapperClass">
+  <div
+    class="output-console"
+    :class="wrapperClass"
+  >
     <div class="output-console-header">
       <div class="flex items-center space-x-2">
-        <Icon name="terminal" :size="16" class="text-text-secondary" />
+        <Icon
+          name="terminal"
+          :size="16"
+          class="text-text-secondary"
+        />
         <span class="text-sm font-medium text-text-primary">Output</span>
-        <span v-if="outputLines.length > 0" class="text-xs text-text-tertiary">
+        <span
+          v-if="outputLines.length > 0"
+          class="text-xs text-text-tertiary"
+        >
           ({{ outputLines.length }} {{ outputLines.length === 1 ? 'line' : 'lines' }})
         </span>
       </div>
       <button
         v-if="outputLines.length > 0"
-        @click="clearOutput"
         class="text-xs text-text-secondary hover:text-text-primary active:opacity-70 transition-colors"
         aria-label="Clear output"
+        @click="clearOutput"
       >
         Clear
       </button>
@@ -22,7 +32,10 @@
       class="output-console-content"
       :class="{ 'output-console-empty': outputLines.length === 0 }"
     >
-      <div v-if="outputLines.length === 0" class="output-console-placeholder">
+      <div
+        v-if="outputLines.length === 0"
+        class="output-console-placeholder"
+      >
         <span class="text-text-tertiary">No output yet. Click "Run" to execute your code.</span>
       </div>
       <div
@@ -31,7 +44,10 @@
         class="output-console-line"
         :class="line.type"
       >
-        <span v-if="line.type === 'error'" class="output-console-label">Error:</span>
+        <span
+          v-if="line.type === 'error'"
+          class="output-console-label"
+        >Error:</span>
         <span class="output-console-text">{{ line.text }}</span>
       </div>
     </div>

@@ -13,10 +13,18 @@
             <!-- collaborate on projects, and --> build innovative solutions together.
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <HIGButton variant="primary" size="lg" @click="scrollToFeatures">
+            <HIGButton
+              variant="primary"
+              size="lg"
+              @click="scrollToFeatures"
+            >
               Explore Features
             </HIGButton>
-            <HIGButton variant="secondary" size="lg" @click="scrollToCommunity">
+            <HIGButton
+              variant="secondary"
+              size="lg"
+              @click="scrollToCommunity"
+            >
               Join Community
             </HIGButton>
           </div>
@@ -25,7 +33,10 @@
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-20 bg-bg-secondary">
+    <section
+      id="features"
+      class="py-20 bg-bg-secondary"
+    >
       <div class="container mx-auto px-4">
         <div class="text-center mb-16">
           <h2 class="text-3xl md:text-4xl font-bold text-text-primary mb-4">
@@ -46,10 +57,18 @@
             <HIGCard class="text-center hover:shadow-hig-lg transition-all cursor-pointer h-full group">
               <div class="p-6">
                 <div class="w-16 h-16 bg-primary-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-600 transition-colors">
-                  <Icon :name="feature.icon.toLowerCase()" :size="32" class="text-white group-hover:text-white" />
+                  <Icon
+                    :name="feature.icon.toLowerCase()"
+                    :size="32"
+                    class="text-white group-hover:text-white"
+                  />
                 </div>
-                <h3 class="text-xl font-semibold text-text-primary mb-3">{{ feature.title }}</h3>
-                <p class="text-text-secondary">{{ feature.description }}</p>
+                <h3 class="text-xl font-semibold text-text-primary mb-3">
+                  {{ feature.title }}
+                </h3>
+                <p class="text-text-secondary">
+                  {{ feature.description }}
+                </p>
               </div>
             </HIGCard>
           </router-link>
@@ -69,10 +88,17 @@
               Stay updated with the latest insights, tutorials, and industry trends.
             </p>
           </div>
-          <router-link to="/blog" class="hidden md:block">
+          <router-link
+            to="/blog"
+            class="hidden md:block"
+          >
             <HIGButton variant="tertiary">
               View All Posts
-              <Icon name="arrow-right" :size="16" class="ml-2" />
+              <Icon
+                name="arrow-right"
+                :size="16"
+                class="ml-2"
+              />
             </HIGButton>
           </router-link>
         </div>
@@ -80,7 +106,11 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <!-- Loading state -->
           <template v-if="loadingBlogPosts">
-            <HIGCard v-for="n in 3" :key="`skeleton-${n}`" class="hover:shadow-hig-lg transition-shadow">
+            <HIGCard
+              v-for="n in 3"
+              :key="`skeleton-${n}`"
+              class="hover:shadow-hig-lg transition-shadow"
+            >
               <div class="p-6">
                 <HIGSkeleton type="blog-card" />
               </div>
@@ -89,7 +119,11 @@
           
           <!-- Blog posts -->
           <template v-else>
-            <HIGCard v-for="post in featuredPosts" :key="post.id" class="hover:shadow-hig-lg transition-shadow">
+            <HIGCard
+              v-for="post in featuredPosts"
+              :key="post.id"
+              class="hover:shadow-hig-lg transition-shadow"
+            >
               <div class="p-6">
                 <!-- Featured Image - Commented out for now -->
                 <!-- <div class="aspect-video bg-bg-tertiary rounded-lg mb-4 flex items-center justify-center">
@@ -112,7 +146,11 @@
                     class="inline-flex items-center text-primary-500 hover:text-primary-600 font-medium transition-colors"
                   >
                     Read More
-                    <Icon name="arrow-right" :size="16" class="ml-1" />
+                    <Icon
+                      name="arrow-right"
+                      :size="16"
+                      class="ml-1"
+                    />
                   </router-link>
                 </div>
               </div>
@@ -122,7 +160,10 @@
 
         <div class="text-center mt-8 md:hidden">
           <router-link to="/blog">
-            <HIGButton variant="tertiary" full-width>
+            <HIGButton
+              variant="tertiary"
+              full-width
+            >
               View All Posts
             </HIGButton>
           </router-link>
@@ -143,7 +184,11 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <HIGCard v-for="tool in featuredTools" :key="tool.id" class="text-center hover:shadow-hig-lg transition-shadow">
+          <HIGCard
+            v-for="tool in featuredTools"
+            :key="tool.id"
+            class="text-center hover:shadow-hig-lg transition-shadow"
+          >
             <div class="p-6">
               <div 
                 class="w-20 h-20 border border-border-primary rounded-xl flex items-center justify-center mx-auto mb-4 p-4 shadow-sm transition-colors"
@@ -156,10 +201,14 @@
                   loading="lazy"
                   @error="handleLogoError"
                   @load="(e) => handleLogoLoad(e, tool.id, tool.name)"
-                />
+                >
               </div>
-              <h3 class="font-semibold text-text-primary mb-2">{{ tool.name }}</h3>
-              <p class="text-sm text-text-secondary mb-4">{{ tool.description }}</p>
+              <h3 class="font-semibold text-text-primary mb-2">
+                {{ tool.name }}
+              </h3>
+              <p class="text-sm text-text-secondary mb-4">
+                {{ tool.description }}
+              </p>
               <div class="flex items-center justify-center space-x-2">
                 <span class="badge badge-secondary text-xs">{{ tool.category }}</span>
                 <a 
@@ -168,7 +217,10 @@
                   rel="noopener noreferrer"
                   class="text-primary-500 hover:text-primary-600 transition-colors"
                 >
-                  <Icon name="external-link" :size="16" />
+                  <Icon
+                    name="external-link"
+                    :size="16"
+                  />
                 </a>
               </div>
             </div>
@@ -186,7 +238,10 @@
     </section>
 
     <!-- Community Section -->
-    <section id="community" class="py-20 bg-bg-primary">
+    <section
+      id="community"
+      class="py-20 bg-bg-primary"
+    >
       <div class="container mx-auto px-4">
         <div class="max-w-4xl mx-auto text-center">
           <h2 class="text-3xl md:text-4xl font-bold text-text-primary mb-6">
@@ -198,24 +253,44 @@
           
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             <div class="text-center">
-              <div class="text-4xl font-bold text-primary-500 mb-2">{{ formatCount(stats.activeMembers) }}</div>
-              <div class="text-text-secondary">Active Members</div>
+              <div class="text-4xl font-bold text-primary-500 mb-2">
+                {{ formatCount(stats.activeMembers) }}
+              </div>
+              <div class="text-text-secondary">
+                Active Members
+              </div>
             </div>
             <div class="text-center">
-              <div class="text-4xl font-bold text-primary-500 mb-2">{{ formatCount(stats.publishedArticles) }}</div>
-              <div class="text-text-secondary">Published Articles</div>
+              <div class="text-4xl font-bold text-primary-500 mb-2">
+                {{ formatCount(stats.publishedArticles) }}
+              </div>
+              <div class="text-text-secondary">
+                Published Articles
+              </div>
             </div>
             <div class="text-center">
-              <div class="text-4xl font-bold text-primary-500 mb-2">{{ formatCount(stats.curatedTools) }}</div>
-              <div class="text-text-secondary">Curated Tools</div>
+              <div class="text-4xl font-bold text-primary-500 mb-2">
+                {{ formatCount(stats.curatedTools) }}
+              </div>
+              <div class="text-text-secondary">
+                Curated Tools
+              </div>
             </div>
           </div>
 
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <HIGButton variant="primary" size="lg" @click="handleGetStarted">
+            <HIGButton
+              variant="primary"
+              size="lg"
+              @click="handleGetStarted"
+            >
               Get Started Today
             </HIGButton>
-            <HIGButton variant="secondary" size="lg" @click="scrollToContact">
+            <HIGButton
+              variant="secondary"
+              size="lg"
+              @click="scrollToContact"
+            >
               Contact Us
             </HIGButton>
           </div>

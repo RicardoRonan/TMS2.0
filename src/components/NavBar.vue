@@ -8,7 +8,11 @@
         class="flex items-center space-x-2 active:opacity-70 transition-opacity"
         @click="closeMenuOverlay"
       >
-        <img src="@/assets/meta-stack-logo.png" alt="MetaStack Logo" class="w-8 h-8" />
+        <img
+          src="@/assets/meta-stack-logo.png"
+          alt="MetaStack Logo"
+          class="w-8 h-8"
+        >
         <span class="text-xl font-semibold text-text-primary">MetaStack</span>
       </router-link>
       
@@ -18,45 +22,61 @@
         <template v-if="isAdminMode && currentUser?.isAdmin">
           <button
             class="p-2 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="handleSave"
             :disabled="!hasPendingChanges || saving"
             title="Save changes"
             aria-label="Save changes"
+            @click="handleSave"
           >
-            <Icon name="save" :size="18" />
+            <Icon
+              name="save"
+              :size="18"
+            />
           </button>
           <button
             class="p-2 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="handleUndo"
             :disabled="!canUndo"
             title="Undo"
             aria-label="Undo"
+            @click="handleUndo"
           >
-            <Icon name="undo" :size="18" />
+            <Icon
+              name="undo"
+              :size="18"
+            />
           </button>
           <button
             class="p-2 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="handleRedo"
             :disabled="!canRedo"
             title="Redo"
             aria-label="Redo"
+            @click="handleRedo"
           >
-            <Icon name="redo" :size="18" />
+            <Icon
+              name="redo"
+              :size="18"
+            />
           </button>
         </template>
         <template v-if="!isAuthenticated">
-          <HIGButton variant="primary" size="sm" @click="showRegisterModal = true">
+          <HIGButton
+            variant="primary"
+            size="sm"
+            @click="showRegisterModal = true"
+          >
             Sign Up
           </HIGButton>
         </template>
         <!-- Three-dot menu on right -->
         <button
-          class="p-2 -mr-2 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-full relative"
-          @click="toggleMenuOverlay"
-          aria-label="Open menu"
           ref="menuButtonRef"
+          class="p-2 -mr-2 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-full relative"
+          aria-label="Open menu"
+          @click="toggleMenuOverlay"
         >
-          <Icon name="ellipsis-vertical" :size="20" />
+          <Icon
+            name="ellipsis-vertical"
+            :size="20"
+          />
         </button>
       </div>
     </div>
@@ -67,8 +87,15 @@
     <div class="container mx-auto px-4">
       <div class="flex items-center justify-between h-16">
         <!-- Logo (Left on desktop) -->
-        <router-link to="/" class="flex items-center space-x-2">
-          <img src="@/assets/meta-stack-logo.png" alt="MetaStack Logo" class="w-8 h-8" />
+        <router-link
+          to="/"
+          class="flex items-center space-x-2"
+        >
+          <img
+            src="@/assets/meta-stack-logo.png"
+            alt="MetaStack Logo"
+            class="w-8 h-8"
+          >
           <span class="text-xl font-bold text-text-primary">MetaStack</span>
         </router-link>
 
@@ -86,8 +113,8 @@
           
           <!-- Resources Dropdown -->
           <div
-            class="relative"
             ref="resourcesMenuRef"
+            class="relative"
             @mouseenter="showResourcesMenu = true"
             @mouseleave="showResourcesMenu = false"
           >
@@ -164,31 +191,43 @@
           
           <template v-if="isAuthenticated">
             <div 
-              class="relative" 
-              ref="userMenuRef"
+              ref="userMenuRef" 
+              class="relative"
               @mouseenter="showUserMenu = true"
               @mouseleave="showUserMenu = false"
             >
               <button
                 class="flex items-center space-x-2 text-text-primary hover:text-primary-500 transition-colors"
               >
-                <div v-if="currentUser?.photoURL" class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-bg-tertiary">
+                <div
+                  v-if="currentUser?.photoURL"
+                  class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-bg-tertiary"
+                >
                   <img 
                     :src="currentUser.photoURL" 
                     :alt="currentUser?.displayName || 'User'"
                     class="w-full h-full object-cover"
-                  />
+                  >
                 </div>
-                <div v-else class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+                <div
+                  v-else
+                  class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center"
+                >
                   <span class="text-white text-sm font-medium">
                     {{ userInitials }}
                   </span>
                 </div>
                 <div class="flex flex-col">
                   <span class="text-sm">{{ currentUser?.displayName || 'User' }}</span>
-                  <span v-if="currentUser?.level !== undefined" class="text-xs text-text-tertiary">
+                  <span
+                    v-if="currentUser?.level !== undefined"
+                    class="text-xs text-text-tertiary"
+                  >
                     Level {{ currentUser.level }}
-                    <span v-if="currentUser?.xpTotal !== undefined" class="text-text-quaternary">
+                    <span
+                      v-if="currentUser?.xpTotal !== undefined"
+                      class="text-text-quaternary"
+                    >
                       ({{ currentUser.xpTotal }} XP)
                     </span>
                   </span>
@@ -205,7 +244,10 @@
 
               <!-- User Dropdown -->
               <Transition name="dropdown">
-                <div v-if="showUserMenu" class="absolute right-0 mt-2 w-48 bg-bg-secondary rounded-lg shadow-hig border border-border-primary py-1">
+                <div
+                  v-if="showUserMenu"
+                  class="absolute right-0 mt-2 w-48 bg-bg-secondary rounded-lg shadow-hig border border-border-primary py-1"
+                >
                   <router-link
                     to="/profile"
                     class="block px-4 py-2 text-sm text-text-primary hover:bg-bg-tertiary transition-colors"
@@ -232,7 +274,7 @@
                       :class="isAdminMode ? 'text-primary-500' : 'text-text-tertiary'"
                     />
                   </button>
-                  <div class="border-t border-border-primary my-1"></div>
+                  <div class="border-t border-border-primary my-1" />
                   <button
                     class="block w-full text-left px-4 py-2 text-sm text-danger hover:bg-bg-tertiary transition-colors"
                     @click="handleLogout"
@@ -244,10 +286,18 @@
             </div>
           </template>
           <template v-else>
-            <HIGButton variant="tertiary" size="sm" @click="showLoginModal = true">
+            <HIGButton
+              variant="tertiary"
+              size="sm"
+              @click="showLoginModal = true"
+            >
               Sign In
             </HIGButton>
-            <HIGButton variant="primary" size="sm" @click="showRegisterModal = true">
+            <HIGButton
+              variant="primary"
+              size="sm"
+              @click="showRegisterModal = true"
+            >
               Sign Up
             </HIGButton>
           </template>
@@ -262,7 +312,7 @@
           v-if="showMobileMenu"
           class="md:hidden fixed inset-0 bg-black/50 z-[60]"
           @click="closeMobileMenu"
-        ></div>
+        />
       </Transition>
 
       <!-- Mobile Sidebar -->
@@ -295,7 +345,10 @@
                 />
               </button>
               <Transition name="mobile-menu">
-                <div v-if="showResourcesMobileMenu" class="pl-4 mt-2 space-y-2">
+                <div
+                  v-if="showResourcesMobileMenu"
+                  class="pl-4 mt-2 space-y-2"
+                >
                   <router-link
                     to="/blog"
                     :class="mobileNavLinkClasses('/blog')"
@@ -331,7 +384,10 @@
             </router-link>
           </div>
           
-          <div v-if="isAuthenticated" class="px-4 mt-4 pt-4 border-t border-border-primary space-y-2">
+          <div
+            v-if="isAuthenticated"
+            class="px-4 mt-4 pt-4 border-t border-border-primary space-y-2"
+          >
             <router-link
               to="/profile"
               :class="mobileNavLinkClasses('/profile')"
@@ -348,7 +404,10 @@
             </router-link>
           </div>
           
-          <div v-if="!isAuthenticated" class="px-4 mt-4 pt-4 border-t border-border-primary space-y-2">
+          <div
+            v-if="!isAuthenticated"
+            class="px-4 mt-4 pt-4 border-t border-border-primary space-y-2"
+          >
             <HIGButton
               variant="tertiary"
               size="sm"
@@ -375,7 +434,7 @@
           v-if="showMenuOverlay"
           class="md:hidden fixed inset-0 bg-black/50 z-[60]"
           @click="closeMenuOverlay"
-        ></div>
+        />
       </Transition>
 
       <!-- Menu Overlay (WhatsApp style) -->
@@ -427,7 +486,10 @@
             >
               About
             </router-link>
-            <div v-if="isAuthenticated" class="border-t border-border-primary my-1"></div>
+            <div
+              v-if="isAuthenticated"
+              class="border-t border-border-primary my-1"
+            />
             <router-link
               to="/blog"
               class="block px-4 py-3.5 text-sm text-text-primary hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
@@ -456,7 +518,10 @@
             >
               Contact
             </router-link>
-            <div v-if="isAuthenticated" class="border-t border-border-primary my-1"></div>
+            <div
+              v-if="isAuthenticated"
+              class="border-t border-border-primary my-1"
+            />
             <button
               v-if="isAuthenticated"
               class="block w-full text-left px-4 py-3.5 text-sm text-danger hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
@@ -465,7 +530,7 @@
               Sign Out
             </button>
             <template v-else>
-              <div class="border-t border-border-primary my-1"></div>
+              <div class="border-t border-border-primary my-1" />
               <button
                 class="block w-full text-left px-4 py-3.5 text-sm text-text-primary hover:bg-bg-tertiary active:bg-bg-tertiary transition-colors"
                 @click="handleMenuSignIn"

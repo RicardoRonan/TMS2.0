@@ -22,7 +22,9 @@
             <!-- Theme Settings Card -->
             <HIGCard class="md:col-span-2">
               <div class="p-6">
-                <h2 class="text-2xl font-bold text-text-primary mb-6">Appearance</h2>
+                <h2 class="text-2xl font-bold text-text-primary mb-6">
+                  Appearance
+                </h2>
                 
                 <div class="space-y-6">
                   <div>
@@ -42,7 +44,10 @@
                         @click="handleThemeChange(themeOption.value)"
                       >
                         <div class="flex flex-col items-center space-y-2">
-                          <Icon :name="themeOption.icon" :size="24" />
+                          <Icon
+                            :name="themeOption.icon"
+                            :size="24"
+                          />
                           <span class="text-sm font-medium">{{ themeOption.label }}</span>
                         </div>
                       </button>
@@ -58,14 +63,23 @@
             <!-- Quick Links -->
             <HIGCard>
               <div class="p-6">
-                <h2 class="text-xl font-bold text-text-primary mb-4">Quick Links</h2>
+                <h2 class="text-xl font-bold text-text-primary mb-4">
+                  Quick Links
+                </h2>
                 <div class="space-y-3">
                   <router-link to="/profile">
-                    <HIGButton variant="secondary" full-width>
+                    <HIGButton
+                      variant="secondary"
+                      full-width
+                    >
                       View Profile
                     </HIGButton>
                   </router-link>
-                  <HIGButton variant="tertiary" full-width @click="handleLogout">
+                  <HIGButton
+                    variant="tertiary"
+                    full-width
+                    @click="handleLogout"
+                  >
                     Sign Out
                   </HIGButton>
                 </div>
@@ -76,25 +90,35 @@
           <!-- Account Management Section -->
           <HIGCard class="mt-8">
             <div class="p-6">
-              <h2 class="text-2xl font-bold text-text-primary mb-6">Account Management</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-6">
+                Account Management
+              </h2>
               
               <div class="space-y-6">
                 <!-- Reset Tutorials -->
                 <div class="border-b border-border-primary pb-6">
                   <div class="flex items-start justify-between">
                     <div class="flex-1">
-                      <h3 class="text-lg font-semibold text-text-primary mb-2">Reset Tutorial Progress</h3>
+                      <h3 class="text-lg font-semibold text-text-primary mb-2">
+                        Reset Tutorial Progress
+                      </h3>
                       <p class="text-sm text-text-tertiary mb-4">
                         Delete all your tutorial progress. This will reset your learning progress across all tutorials.
                       </p>
                     </div>
                     <HIGButton 
                       variant="danger" 
-                      @click="showResetTutorialsModal = true"
                       :disabled="isResettingTutorials"
+                      @click="showResetTutorialsModal = true"
                     >
-                      <span v-if="isResettingTutorials" class="text-red-500">Resetting...</span>
-                      <span v-else class="text-red-500">Reset Tutorials</span>
+                      <span
+                        v-if="isResettingTutorials"
+                        class="text-red-500"
+                      >Resetting...</span>
+                      <span
+                        v-else
+                        class="text-red-500"
+                      >Reset Tutorials</span>
                     </HIGButton>
                   </div>
                 </div>
@@ -103,18 +127,26 @@
                 <div class="border-b border-border-primary pb-6">
                   <div class="flex items-start justify-between">
                     <div class="flex-1">
-                      <h3 class="text-lg font-semibold text-text-primary mb-2">Delete All Comments</h3>
+                      <h3 class="text-lg font-semibold text-text-primary mb-2">
+                        Delete All Comments
+                      </h3>
                       <p class="text-sm text-text-tertiary mb-4">
                         Permanently delete all comments you have posted on blog posts.
                       </p>
                     </div>
                     <HIGButton 
                       variant="danger" 
-                      @click="showDeleteCommentsModal = true"
                       :disabled="isDeletingComments"
+                      @click="showDeleteCommentsModal = true"
                     >
-                      <span v-if="isDeletingComments" class="text-red-500">Deleting...</span>
-                      <span v-else class="text-red-500">Delete Comments</span>
+                      <span
+                        v-if="isDeletingComments"
+                        class="text-red-500"
+                      >Deleting...</span>
+                      <span
+                        v-else
+                        class="text-red-500"
+                      >Delete Comments</span>
                     </HIGButton>
                   </div>
                 </div>
@@ -123,18 +155,26 @@
                 <div class="border-b border-border-primary pb-6">
                   <div class="flex items-start justify-between">
                     <div class="flex-1">
-                      <h3 class="text-lg font-semibold text-text-primary mb-2">Reset Likes</h3>
+                      <h3 class="text-lg font-semibold text-text-primary mb-2">
+                        Reset Likes
+                      </h3>
                       <p class="text-sm text-text-tertiary mb-4">
                         Remove all your likes from blog posts.
                       </p>
                     </div>
                     <HIGButton 
                       variant="danger" 
-                      @click="showResetLikesModal = true"
                       :disabled="isResettingLikes"
+                      @click="showResetLikesModal = true"
                     >
-                      <span v-if="isResettingLikes" class="text-red-500">Resetting...</span>
-                      <span v-else class="text-red-500">Reset Likes</span>
+                      <span
+                        v-if="isResettingLikes"
+                        class="text-red-500"
+                      >Resetting...</span>
+                      <span
+                        v-else
+                        class="text-red-500"
+                      >Reset Likes</span>
                     </HIGButton>
                   </div>
                 </div>
@@ -143,18 +183,26 @@
                 <div class="pt-2">
                   <div class="flex items-start justify-between">
                     <div class="flex-1">
-                      <h3 class="text-lg font-semibold text-text-primary mb-2">Delete Account</h3>
+                      <h3 class="text-lg font-semibold text-text-primary mb-2">
+                        Delete Account
+                      </h3>
                       <p class="text-sm text-text-tertiary mb-4">
                         Permanently delete your account and all associated data. This action cannot be undone.
                       </p>
                     </div>
                     <HIGButton 
                       variant="danger" 
-                      @click="showDeleteAccountModal = true"
                       :disabled="isDeletingAccount"
+                      @click="showDeleteAccountModal = true"
                     >
-                      <span v-if="isDeletingAccount" class="text-red-500">Deleting...</span>
-                      <span v-else class="text-red-500">Delete Account</span>
+                      <span
+                        v-if="isDeletingAccount"
+                        class="text-red-500"
+                      >Deleting...</span>
+                      <span
+                        v-else
+                        class="text-red-500"
+                      >Delete Account</span>
                     </HIGButton>
                   </div>
                 </div>
@@ -174,7 +222,11 @@
     >
       <div class="space-y-4">
         <div class="flex items-start space-x-3">
-          <Icon name="alert-triangle" :size="24" class="text-yellow-500 flex-shrink-0 mt-0.5" />
+          <Icon
+            name="alert-triangle"
+            :size="24"
+            class="text-yellow-500 flex-shrink-0 mt-0.5"
+          />
           <div>
             <p class="text-text-primary mb-2">
               Are you sure you want to reset all your tutorial progress?
@@ -186,13 +238,16 @@
         </div>
       </div>
       <template #footer>
-        <HIGButton variant="tertiary" @click="showResetTutorialsModal = false">
+        <HIGButton
+          variant="tertiary"
+          @click="showResetTutorialsModal = false"
+        >
           Cancel
         </HIGButton>
         <HIGButton 
           variant="danger" 
-          @click="confirmResetTutorials"
           :disabled="isResettingTutorials"
+          @click="confirmResetTutorials"
         >
           <span class="text-red-500">
             {{ isResettingTutorials ? 'Resetting...' : 'Reset Tutorials' }}
@@ -210,7 +265,11 @@
     >
       <div class="space-y-4">
         <div class="flex items-start space-x-3">
-          <Icon name="alert-triangle" :size="24" class="text-yellow-500 flex-shrink-0 mt-0.5" />
+          <Icon
+            name="alert-triangle"
+            :size="24"
+            class="text-yellow-500 flex-shrink-0 mt-0.5"
+          />
           <div>
             <p class="text-text-primary mb-2">
               Are you sure you want to delete all your comments?
@@ -222,13 +281,16 @@
         </div>
       </div>
       <template #footer>
-        <HIGButton variant="tertiary" @click="showDeleteCommentsModal = false">
+        <HIGButton
+          variant="tertiary"
+          @click="showDeleteCommentsModal = false"
+        >
           Cancel
         </HIGButton>
         <HIGButton 
           variant="danger" 
-          @click="confirmDeleteComments"
           :disabled="isDeletingComments"
+          @click="confirmDeleteComments"
         >
           <span class="text-red-500">
             {{ isDeletingComments ? 'Deleting...' : 'Delete Comments' }}
@@ -246,7 +308,11 @@
     >
       <div class="space-y-4">
         <div class="flex items-start space-x-3">
-          <Icon name="alert-triangle" :size="24" class="text-yellow-500 flex-shrink-0 mt-0.5" />
+          <Icon
+            name="alert-triangle"
+            :size="24"
+            class="text-yellow-500 flex-shrink-0 mt-0.5"
+          />
           <div>
             <p class="text-text-primary mb-2">
               Are you sure you want to remove all your likes?
@@ -258,13 +324,16 @@
         </div>
       </div>
       <template #footer>
-        <HIGButton variant="tertiary" @click="showResetLikesModal = false">
+        <HIGButton
+          variant="tertiary"
+          @click="showResetLikesModal = false"
+        >
           Cancel
         </HIGButton>
         <HIGButton 
           variant="danger" 
-          @click="confirmResetLikes"
           :disabled="isResettingLikes"
+          @click="confirmResetLikes"
         >
           <span class="text-red-500">
             {{ isResettingLikes ? 'Resetting...' : 'Reset Likes' }}
@@ -282,7 +351,11 @@
     >
       <div class="space-y-4">
         <div class="flex items-start space-x-3">
-          <Icon name="alert-triangle" :size="24" class="text-red-500 flex-shrink-0 mt-0.5" />
+          <Icon
+            name="alert-triangle"
+            :size="24"
+            class="text-red-500 flex-shrink-0 mt-0.5"
+          />
           <div>
             <p class="text-text-primary font-semibold mb-3 text-lg">
               ⚠️ WARNING: This will permanently delete your account and all associated data.
@@ -303,7 +376,10 @@
         </div>
       </div>
       <template #footer>
-        <HIGButton variant="tertiary" @click="showDeleteAccountModal = false">
+        <HIGButton
+          variant="tertiary"
+          @click="showDeleteAccountModal = false"
+        >
           Cancel
         </HIGButton>
         <HIGButton 
@@ -324,7 +400,11 @@
     >
       <div class="space-y-4">
         <div class="flex items-start space-x-3">
-          <Icon name="alert-triangle" :size="24" class="text-red-500 flex-shrink-0 mt-0.5" />
+          <Icon
+            name="alert-triangle"
+            :size="24"
+            class="text-red-500 flex-shrink-0 mt-0.5"
+          />
           <div>
             <p class="text-text-primary mb-2">
               This is your last chance to cancel.
@@ -336,7 +416,10 @@
         </div>
       </div>
       <template #footer>
-        <HIGButton variant="tertiary" @click="showDeleteAccountConfirmModal = false">
+        <HIGButton
+          variant="tertiary"
+          @click="showDeleteAccountConfirmModal = false"
+        >
           Cancel
         </HIGButton>
         <HIGButton 
@@ -357,7 +440,11 @@
     >
       <div class="space-y-4">
         <div class="flex items-start space-x-3">
-          <Icon name="alert-triangle" :size="24" class="text-red-500 flex-shrink-0 mt-0.5" />
+          <Icon
+            name="alert-triangle"
+            :size="24"
+            class="text-red-500 flex-shrink-0 mt-0.5"
+          />
           <div class="flex-1">
             <p class="text-text-primary mb-4">
               Type <strong class="text-red-500">DELETE</strong> to confirm account deletion:
@@ -372,13 +459,16 @@
         </div>
       </div>
       <template #footer>
-        <HIGButton variant="tertiary" @click="showDeleteAccountFinalModal = false; deleteAccountConfirmation = ''">
+        <HIGButton
+          variant="tertiary"
+          @click="showDeleteAccountFinalModal = false; deleteAccountConfirmation = ''"
+        >
           Cancel
         </HIGButton>
         <HIGButton 
           variant="danger" 
-          @click="confirmDeleteAccount"
           :disabled="deleteAccountConfirmation !== 'DELETE' || isDeletingAccount"
+          @click="confirmDeleteAccount"
         >
           <span class="text-red-500">
             {{ isDeletingAccount ? 'Deleting...' : 'Delete Account' }}

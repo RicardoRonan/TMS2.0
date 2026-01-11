@@ -22,7 +22,11 @@
                 @input="handleSearch"
               >
                 <template #right-icon>
-                  <Icon name="search" :size="20" class="text-text-tertiary" />
+                  <Icon
+                    name="search"
+                    :size="20"
+                    class="text-text-tertiary"
+                  />
                 </template>
               </HIGInput>
             </div>
@@ -45,29 +49,54 @@
     <!-- Tools Grid -->
     <section class="py-16">
       <div class="container mx-auto px-4">
-        <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <HIGCard v-for="n in 8" :key="n">
+        <div
+          v-if="loading"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        >
+          <HIGCard
+            v-for="n in 8"
+            :key="n"
+          >
             <div class="p-6">
               <HIGSkeleton type="tool-card" />
             </div>
           </HIGCard>
         </div>
 
-        <div v-else-if="filteredTools.length === 0" class="text-center py-16">
+        <div
+          v-else-if="filteredTools.length === 0"
+          class="text-center py-16"
+        >
           <div class="w-24 h-24 bg-bg-tertiary rounded-full flex items-center justify-center mx-auto mb-6">
-            <Icon name="settings" :size="48" class="text-text-tertiary" />
+            <Icon
+              name="settings"
+              :size="48"
+              class="text-text-tertiary"
+            />
           </div>
-          <h3 class="text-xl font-semibold text-text-primary mb-2">No tools found</h3>
+          <h3 class="text-xl font-semibold text-text-primary mb-2">
+            No tools found
+          </h3>
           <p class="text-text-secondary mb-6">
             {{ searchQuery ? 'Try adjusting your search terms' : 'No tools match the selected category' }}
           </p>
-          <HIGButton variant="primary" @click="clearFilters">
+          <HIGButton
+            variant="primary"
+            @click="clearFilters"
+          >
             Clear Filters
           </HIGButton>
         </div>
 
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <HIGCard v-for="tool in paginatedTools" :key="tool.id" class="text-center hover:shadow-hig-lg transition-shadow">
+        <div
+          v-else
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        >
+          <HIGCard
+            v-for="tool in paginatedTools"
+            :key="tool.id"
+            class="text-center hover:shadow-hig-lg transition-shadow"
+          >
             <div class="p-6">
               <div 
                 class="w-20 h-20 border border-border-primary rounded-xl flex items-center justify-center mx-auto mb-4 p-4 shadow-sm transition-colors"
@@ -80,13 +109,20 @@
                   loading="lazy"
                   @error="handleLogoError"
                   @load="(e) => handleLogoLoad(e, tool.id, tool.name)"
-                />
+                >
               </div>
-              <h3 class="font-semibold text-text-primary mb-2">{{ tool.name }}</h3>
-              <p class="text-sm text-text-secondary mb-4 line-clamp-2">{{ tool.description }}</p>
+              <h3 class="font-semibold text-text-primary mb-2">
+                {{ tool.name }}
+              </h3>
+              <p class="text-sm text-text-secondary mb-4 line-clamp-2">
+                {{ tool.description }}
+              </p>
               <div class="space-y-2">
                 <div class="flex items-center justify-center">
-                  <HIGBadge :variant="getCategoryVariant(tool.category)" size="sm">
+                  <HIGBadge
+                    :variant="getCategoryVariant(tool.category)"
+                    size="sm"
+                  >
                     {{ tool.category }}
                   </HIGBadge>
                 </div>
@@ -99,7 +135,10 @@
                     :title="`Visit ${tool.name}`"
                     @click.stop
                   >
-                    <Icon name="external-link" :size="16" />
+                    <Icon
+                      name="external-link"
+                      :size="16"
+                    />
                   </a>
                   <button
                     type="button"
@@ -124,7 +163,10 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="totalPages > 1" class="flex justify-center mt-12">
+        <div
+          v-if="totalPages > 1"
+          class="flex justify-center mt-12"
+        >
           <div class="flex items-center space-x-2">
             <HIGButton
               variant="secondary"

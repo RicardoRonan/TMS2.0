@@ -5,7 +5,11 @@
         <!-- Brand -->
         <div class="space-y-4 mt-4">
           <div class="flex items-center space-x-2">
-            <img src="@/assets/meta-stack-logo.png" alt="MetaStack Logo" class="w-8 h-8" />
+            <img
+              src="@/assets/meta-stack-logo.png"
+              alt="MetaStack Logo"
+              class="w-8 h-8"
+            >
             <span class="text-xl font-bold text-text-primary">MetaStack</span>
           </div>
           <p class="text-text-secondary text-sm">
@@ -15,42 +19,125 @@
 
         <!-- Quick Links -->
         <div class="space-y-4">
-          <h3 class="text-sm font-semibold text-text-primary uppercase tracking-wider">Quick Links</h3>
+          <h3 class="text-sm font-semibold text-text-primary uppercase tracking-wider">
+            Quick Links
+          </h3>
           <ul class="space-y-2">
-            <li><router-link to="/blog" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Blog</router-link></li>
-            <li><router-link to="/tools" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Tools</router-link></li>
-            <li><router-link to="/tutorials" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Tutorials</router-link></li>
+            <li>
+              <router-link
+                to="/blog"
+                class="text-text-secondary hover:text-primary-500 transition-colors text-sm"
+              >
+                Blog
+              </router-link>
+            </li>
+            <li>
+              <router-link
+                to="/tools"
+                class="text-text-secondary hover:text-primary-500 transition-colors text-sm"
+              >
+                Tools
+              </router-link>
+            </li>
+            <li>
+              <router-link
+                to="/tutorials"
+                class="text-text-secondary hover:text-primary-500 transition-colors text-sm"
+              >
+                Tutorials
+              </router-link>
+            </li>
             <!-- <li><router-link to="/projects" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Projects</router-link></li> -->
           </ul>
         </div>
 
         <!-- Community -->
         <div class="space-y-4">
-          <h3 class="text-sm font-semibold text-text-primary uppercase tracking-wider">Community</h3>
+          <h3 class="text-sm font-semibold text-text-primary uppercase tracking-wider">
+            Community
+          </h3>
           <ul class="space-y-2">
-            <li><router-link to="/coming-soon" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Discord</router-link></li>
-            <li><router-link to="/coming-soon" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">GitHub</router-link></li>
-            <li><router-link to="/coming-soon" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Newsletter</router-link></li>
-            <li><router-link to="/coming-soon" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Support</router-link></li>
+            <li>
+              <router-link
+                to="/coming-soon"
+                class="text-text-secondary hover:text-primary-500 transition-colors text-sm"
+              >
+                Discord
+              </router-link>
+            </li>
+            <li>
+              <router-link
+                to="/coming-soon"
+                class="text-text-secondary hover:text-primary-500 transition-colors text-sm"
+              >
+                GitHub
+              </router-link>
+            </li>
+            <li>
+              <router-link
+                to="/coming-soon"
+                class="text-text-secondary hover:text-primary-500 transition-colors text-sm"
+              >
+                Newsletter
+              </router-link>
+            </li>
+            <li>
+              <router-link
+                to="/coming-soon"
+                class="text-text-secondary hover:text-primary-500 transition-colors text-sm"
+              >
+                Support
+              </router-link>
+            </li>
           </ul>
         </div>
 
         <!-- Legal -->
         <div class="space-y-4">
-          <h3 class="text-sm font-semibold text-text-primary uppercase tracking-wider">Legal</h3>
+          <h3 class="text-sm font-semibold text-text-primary uppercase tracking-wider">
+            Legal
+          </h3>
           <ul class="space-y-2">
-            <li><router-link to="/legal/privacy-policy" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Privacy Policy</router-link></li>
-            <li><router-link to="/legal/terms-of-service" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Terms of Service</router-link></li>
-            <li><router-link to="/legal/cookie-policy" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">Cookie Policy</router-link></li>
+            <li>
+              <router-link
+                to="/legal/privacy-policy"
+                class="text-text-secondary hover:text-primary-500 transition-colors text-sm"
+              >
+                Privacy Policy
+              </router-link>
+            </li>
+            <li>
+              <router-link
+                to="/legal/terms-of-service"
+                class="text-text-secondary hover:text-primary-500 transition-colors text-sm"
+              >
+                Terms of Service
+              </router-link>
+            </li>
+            <li>
+              <router-link
+                to="/legal/cookie-policy"
+                class="text-text-secondary hover:text-primary-500 transition-colors text-sm"
+              >
+                Cookie Policy
+              </router-link>
+            </li>
             <li>
               <button 
-                @click="openCookiePreferences" 
-                class="text-text-secondary hover:text-primary-500 transition-colors text-sm text-left"
+                class="text-text-secondary hover:text-primary-500 transition-colors text-sm text-left" 
+                @click="openCookiePreferences"
               >
                 Cookie Preferences
               </button>
             </li>
-            <li><router-link to="/legal/dmca" class="text-text-secondary hover:text-primary-500 transition-colors text-sm">DMCA</router-link></li>
+            <li>
+              <router-link
+                to="/legal/dmca"
+                class="text-text-secondary hover:text-primary-500 transition-colors text-sm"
+              >
+                DMCA
+              </router-link>
+            </li>
           </ul>
         </div>
       </div>
@@ -61,7 +148,11 @@
             © {{ currentYear }} MetaStack. All rights reserved.
           </p>
           <div class="flex items-center space-x-4 text-sm text-text-tertiary">
-            <span>Made with <Icon name="heart" :size="14" class="inline-block mx-1 text-red-500" /> for developers</span>
+            <span>Made with <Icon
+              name="heart"
+              :size="14"
+              class="inline-block mx-1 text-red-500"
+            /> for developers</span>
           </div>
         </div>
       </div>

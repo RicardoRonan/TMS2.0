@@ -82,7 +82,7 @@ export async function initializeAuthListener(store: any) {
           }
           break
       
-      case 'TOKEN_REFRESHED':
+      case 'TOKEN_REFRESHED': {
         // Debounce token refresh events to prevent excessive reloads
         const now = Date.now()
         if (now - lastTokenRefreshTime > TOKEN_REFRESH_DEBOUNCE_MS) {
@@ -96,6 +96,7 @@ export async function initializeAuthListener(store: any) {
           }
         }
         break
+      }
       
       case 'SIGNED_OUT':
         // Clear store and localStorage when signed out

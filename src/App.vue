@@ -1,5 +1,9 @@
 <template>
-  <div id="app" class="transition-transform duration-300 ease-in-out md:!transform-none md:!translate-x-0" :class="{ 'translate-x-[280px]': isMobileSidebarOpen }">
+  <div
+    id="app"
+    class="transition-transform duration-300 ease-in-out md:!transform-none md:!translate-x-0"
+    :class="{ 'translate-x-[280px]': isMobileSidebarOpen }"
+  >
     <!-- Navigation -->
     <NavBar />
     
@@ -9,8 +13,14 @@
       :class="mainContentClasses"
     >
       <router-view v-slot="{ Component, route }">
-        <transition name="page" mode="out-in">
-          <component :is="Component" :key="route.path" />
+        <transition
+          name="page"
+          mode="out-in"
+        >
+          <component
+            :is="Component"
+            :key="route.path"
+          />
         </transition>
       </router-view>
     </main>

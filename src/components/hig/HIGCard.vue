@@ -1,14 +1,23 @@
 <template>
   <div :class="cardClasses">
-    <header v-if="$slots.header" class="card-header">
+    <header
+      v-if="$slots.header"
+      class="card-header"
+    >
       <slot name="header" />
     </header>
     
-    <div v-if="$slots.default" class="card-body">
+    <div
+      v-if="$slots.default"
+      class="card-body"
+    >
       <slot />
     </div>
     
-    <footer v-if="$slots.footer" class="card-footer">
+    <footer
+      v-if="$slots.footer"
+      class="card-footer"
+    >
       <slot name="footer" />
     </footer>
   </div>

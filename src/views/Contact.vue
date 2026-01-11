@@ -23,16 +23,47 @@
             <div>
               <HIGCard>
                 <div class="p-4 sm:p-6">
-                  <h2 class="text-xl sm:text-2xl font-bold text-text-primary mb-4 sm:mb-6">Send us a message</h2>
+                  <h2 class="text-xl sm:text-2xl font-bold text-text-primary mb-4 sm:mb-6">
+                    Send us a message
+                  </h2>
                   
-                  <form ref="contactForm" id="contact-form" @submit.prevent="handleSubmit" class="space-y-4 sm:space-y-6">
+                  <form
+                    id="contact-form"
+                    ref="contactForm"
+                    class="space-y-4 sm:space-y-6"
+                    @submit.prevent="handleSubmit"
+                  >
                     <!-- Hidden inputs for EmailJS template variables -->
-                    <input type="hidden" name="name" :value="`${form.firstName} ${form.lastName}`" />
-                    <input type="hidden" name="title" :value="form.subject" />
-                    <input type="hidden" name="email" :value="form.email" />
-                    <input type="hidden" name="from_email" :value="form.email" />
-                    <input type="hidden" name="reply_to" :value="form.email" />
-                    <input type="hidden" name="message" :value="form.message" />
+                    <input
+                      type="hidden"
+                      name="name"
+                      :value="`${form.firstName} ${form.lastName}`"
+                    >
+                    <input
+                      type="hidden"
+                      name="title"
+                      :value="form.subject"
+                    >
+                    <input
+                      type="hidden"
+                      name="email"
+                      :value="form.email"
+                    >
+                    <input
+                      type="hidden"
+                      name="from_email"
+                      :value="form.email"
+                    >
+                    <input
+                      type="hidden"
+                      name="reply_to"
+                      :value="form.email"
+                    >
+                    <input
+                      type="hidden"
+                      name="message"
+                      :value="form.message"
+                    >
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <HIGInput
@@ -105,17 +136,28 @@
             <div class="space-y-6 sm:space-y-8">
               <HIGCard>
                 <div class="p-4 sm:p-6">
-                  <h2 class="text-xl sm:text-2xl font-bold text-text-primary mb-4 sm:mb-6">Contact Information</h2>
+                  <h2 class="text-xl sm:text-2xl font-bold text-text-primary mb-4 sm:mb-6">
+                    Contact Information
+                  </h2>
                   
                   <div class="space-y-4 sm:space-y-6">
                     <div class="flex items-start space-x-3 sm:space-x-4">
                       <div class="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Icon name="mail" :size="22" class="text-white" />
+                        <Icon
+                          name="mail"
+                          :size="22"
+                          class="text-white"
+                        />
                       </div>
                       <div class="min-w-0 flex-1">
-                        <h3 class="font-semibold text-text-primary mb-1 text-sm sm:text-base">Email</h3>
+                        <h3 class="font-semibold text-text-primary mb-1 text-sm sm:text-base">
+                          Email
+                        </h3>
                         <div class="space-y-1">
-                          <a href="mailto:metastackdev@gmail.com" class="block text-text-secondary hover:text-primary-500 transition-colors text-sm sm:text-base break-words">
+                          <a
+                            href="mailto:metastackdev@gmail.com"
+                            class="block text-text-secondary hover:text-primary-500 transition-colors text-sm sm:text-base break-words"
+                          >
                             metastackdev@gmail.com
                           </a>
                         </div>
@@ -124,10 +166,16 @@
                     
                     <div class="flex items-start space-x-3 sm:space-x-4">
                       <div class="w-10 h-10 sm:w-12 sm:h-12 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Icon name="location" :size="22" class="text-white" />
+                        <Icon
+                          name="location"
+                          :size="22"
+                          class="text-white"
+                        />
                       </div>
                       <div class="min-w-0 flex-1">
-                        <h3 class="font-semibold text-text-primary mb-1 text-sm sm:text-base">Address</h3>
+                        <h3 class="font-semibold text-text-primary mb-1 text-sm sm:text-base">
+                          Address
+                        </h3>
                         <p class="text-text-secondary text-sm sm:text-base">
                           Cape Town<br>
                           South Africa
@@ -141,26 +189,49 @@
               <!-- Social Links -->
               <HIGCard>
                 <div class="p-4 sm:p-6">
-                  <h2 class="text-xl sm:text-2xl font-bold text-text-primary mb-4 sm:mb-6">Follow the Creators</h2>
+                  <h2 class="text-xl sm:text-2xl font-bold text-text-primary mb-4 sm:mb-6">
+                    Follow the Creators
+                  </h2>
                   
                   <div class="space-y-3 sm:space-y-4">
                     <div>
-                      <a href="https://www.linkedin.com/in/the-dev-ricardo/" target="_blank" rel="noopener noreferrer" class="font-semibold text-text-primary text-sm sm:text-base block break-words">
+                      <a
+                        href="https://www.linkedin.com/in/the-dev-ricardo/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="font-semibold text-text-primary text-sm sm:text-base block break-words"
+                      >
                         Ricardo Moses
                       </a>
-                      <div class="text-xs sm:text-sm text-text-secondary">Co-Founder and Full-Stack Developer</div>
+                      <div class="text-xs sm:text-sm text-text-secondary">
+                        Co-Founder and Full-Stack Developer
+                      </div>
                     </div>
                     <div>
-                      <a href="https://www.linkedin.com/in/jesse-spence-seo/" target="_blank" rel="noopener noreferrer" class="font-semibold text-text-primary text-sm sm:text-base block break-words">
+                      <a
+                        href="https://www.linkedin.com/in/jesse-spence-seo/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="font-semibold text-text-primary text-sm sm:text-base block break-words"
+                      >
                         Jesse Spence
                       </a>
-                      <div class="text-xs sm:text-sm text-text-secondary">Co-Founder and SEO Specialist</div>
+                      <div class="text-xs sm:text-sm text-text-secondary">
+                        Co-Founder and SEO Specialist
+                      </div>
                     </div>
                     <div>
-                      <a href="https://www.linkedin.com/in/abdus-samad-charles-51bba5227/" target="_blank" rel="noopener noreferrer" class="font-semibold text-text-primary text-sm sm:text-base block break-words">
+                      <a
+                        href="https://www.linkedin.com/in/abdus-samad-charles-51bba5227/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="font-semibold text-text-primary text-sm sm:text-base block break-words"
+                      >
                         Abdus-Samad Charles
                       </a>
-                      <div class="text-xs sm:text-sm text-text-secondary">Co-Founder and SEO Specialist</div>
+                      <div class="text-xs sm:text-sm text-text-secondary">
+                        Co-Founder and SEO Specialist
+                      </div>
                     </div>
                   </div>
                 </div>

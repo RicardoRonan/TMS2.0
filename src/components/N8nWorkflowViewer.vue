@@ -1,35 +1,70 @@
 <template>
-  <div class="n8n-workflow-viewer" ref="containerRef">
+  <div
+    ref="containerRef"
+    class="n8n-workflow-viewer"
+  >
     <!-- Controls -->
     <div class="workflow-controls">
       <button 
-        @click="resetView" 
-        class="control-btn"
+        class="control-btn" 
         title="Reset View"
+        @click="resetView"
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          />
         </svg>
       </button>
       <button 
-        @click="zoomIn" 
-        class="control-btn"
+        class="control-btn" 
         title="Zoom In"
+        @click="zoomIn"
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"
+          />
         </svg>
       </button>
       <button 
-        @click="zoomOut" 
-        class="control-btn"
+        class="control-btn" 
         title="Zoom Out"
+        @click="zoomOut"
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"
+          />
         </svg>
       </button>
-      <div class="zoom-level">{{ Math.round(zoom * 100) }}%</div>
+      <div class="zoom-level">
+        {{ Math.round(zoom * 100) }}%
+      </div>
     </div>
 
     <!-- SVG Container -->
@@ -49,11 +84,26 @@
       >
         <!-- Grid Background -->
         <defs>
-          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="var(--color-border-primary)" stroke-width="0.5" opacity="0.3"/>
+          <pattern
+            id="grid"
+            width="20"
+            height="20"
+            patternUnits="userSpaceOnUse"
+          >
+            <path
+              d="M 20 0 L 0 0 0 20"
+              fill="none"
+              stroke="var(--color-border-primary)"
+              stroke-width="0.5"
+              opacity="0.3"
+            />
           </pattern>
         </defs>
-        <rect width="100%" height="100%" fill="url(#grid)" />
+        <rect
+          width="100%"
+          height="100%"
+          fill="url(#grid)"
+        />
 
         <!-- Connections -->
         <g class="connections">
@@ -159,17 +209,28 @@
     </div>
 
     <!-- Node Details Panel -->
-    <div v-if="selectedNode" class="node-details-panel">
+    <div
+      v-if="selectedNode"
+      class="node-details-panel"
+    >
       <div class="panel-header">
         <h3>{{ selectedNode.name }}</h3>
-        <button @click="selectedNode = null" class="close-btn">×</button>
+        <button
+          class="close-btn"
+          @click="selectedNode = null"
+        >
+          ×
+        </button>
       </div>
       <div class="panel-content">
         <div class="detail-row">
           <span class="detail-label">Type:</span>
           <span class="detail-value">{{ getNodeTypeLabel(selectedNode.type) }}</span>
         </div>
-        <div v-if="selectedNode.parameters" class="detail-row">
+        <div
+          v-if="selectedNode.parameters"
+          class="detail-row"
+        >
           <span class="detail-label">Parameters:</span>
           <pre class="detail-value">{{ JSON.stringify(selectedNode.parameters, null, 2) }}</pre>
         </div>

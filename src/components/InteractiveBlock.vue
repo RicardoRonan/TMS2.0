@@ -1,24 +1,42 @@
 <template>
-  <div class="interactive-block" :class="wrapperClass">
+  <div
+    class="interactive-block"
+    :class="wrapperClass"
+  >
     <!-- Loading State -->
-    <div v-if="loading" class="interactive-block-loading">
+    <div
+      v-if="loading"
+      class="interactive-block-loading"
+    >
       <div class="flex items-center justify-center p-8">
-        <div class="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mr-3"></div>
+        <div class="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mr-3" />
         <span class="text-text-secondary">Loading interactive block...</span>
       </div>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error || !blockDefinition" class="interactive-block-error">
+    <div
+      v-else-if="error || !blockDefinition"
+      class="interactive-block-error"
+    >
       <div class="p-6 bg-bg-secondary border border-danger rounded-lg">
         <div class="flex items-start space-x-3">
-          <Icon name="error" :size="20" class="text-danger flex-shrink-0 mt-0.5" />
+          <Icon
+            name="error"
+            :size="20"
+            class="text-danger flex-shrink-0 mt-0.5"
+          />
           <div class="flex-1">
-            <h3 class="text-text-primary font-semibold mb-1">Interactive Block Error</h3>
+            <h3 class="text-text-primary font-semibold mb-1">
+              Interactive Block Error
+            </h3>
             <p class="text-text-secondary text-sm">
               {{ error || 'Interactive block definition not found' }}
             </p>
-            <p v-if="isAdminMode" class="text-text-tertiary text-xs mt-2">
+            <p
+              v-if="isAdminMode"
+              class="text-text-tertiary text-xs mt-2"
+            >
               Admin: Check that the block ID "{{ blockId }}" exists in the interactive_blocks table.
             </p>
           </div>
@@ -27,34 +45,52 @@
     </div>
 
     <!-- Interactive Block Content -->
-    <div v-else class="interactive-block-content">
+    <div
+      v-else
+      class="interactive-block-content"
+    >
       <!-- Header -->
       <div class="interactive-block-header">
         <div class="flex-1">
           <h3 class="text-lg font-semibold text-text-primary mb-1">
             {{ blockDefinition.title }}
           </h3>
-          <p v-if="blockDefinition.instructions" class="text-sm text-text-secondary">
+          <p
+            v-if="blockDefinition.instructions"
+            class="text-sm text-text-secondary"
+          >
             {{ blockDefinition.instructions }}
           </p>
         </div>
-        <div v-if="isPassed" class="flex items-center space-x-2 text-success">
-          <Icon name="check" :size="18" />
+        <div
+          v-if="isPassed"
+          class="flex items-center space-x-2 text-success"
+        >
+          <Icon
+            name="check"
+            :size="18"
+          />
           <span class="text-sm font-medium">Completed</span>
         </div>
       </div>
 
       <!-- Progress Indicator -->
-      <div v-if="progress" class="interactive-block-progress mb-4">
+      <div
+        v-if="progress"
+        class="interactive-block-progress mb-4"
+      >
         <div class="flex items-center space-x-2 text-xs text-text-tertiary">
           <span>Status:</span>
-          <span class="px-2 py-0.5 rounded bg-bg-secondary" :class="{
-            'text-warning': progress.progress_state === 'in_progress',
-            'text-success': progress.progress_state === 'passed',
-            'text-text-tertiary': progress.progress_state === 'locked'
-          }">
+          <span
+            class="px-2 py-0.5 rounded bg-bg-secondary"
+            :class="{
+              'text-warning': progress.progress_state === 'in_progress',
+              'text-success': progress.progress_state === 'passed',
+              'text-text-tertiary': progress.progress_state === 'locked'
+            }"
+          >
             {{ progress.progress_state === 'in_progress' ? 'In Progress' : 
-               progress.progress_state === 'passed' ? 'Passed' : 'Locked' }}
+              progress.progress_state === 'passed' ? 'Passed' : 'Locked' }}
           </span>
         </div>
       </div>
@@ -79,10 +115,14 @@
             size="md"
             :disabled="isRunning || saving"
             :loading="isRunning"
-            @click="handleRun"
             aria-label="Run code"
+            @click="handleRun"
           >
-            <Icon name="play" :size="16" class="mr-2" />
+            <Icon
+              name="play"
+              :size="16"
+              class="mr-2"
+            />
             Run
           </HIGButton>
           
@@ -90,10 +130,14 @@
             variant="secondary"
             size="md"
             :disabled="isRunning || saving || !hasOutput"
-            @click="handleCheck"
             aria-label="Check solution"
+            @click="handleCheck"
           >
-            <Icon name="check" :size="16" class="mr-2" />
+            <Icon
+              name="check"
+              :size="16"
+              class="mr-2"
+            />
             Check
           </HIGButton>
           
@@ -101,10 +145,14 @@
             variant="tertiary"
             size="md"
             :disabled="isRunning"
-            @click="handleReset"
             aria-label="Reset code and output"
+            @click="handleReset"
           >
-            <Icon name="refresh" :size="16" class="mr-2" />
+            <Icon
+              name="refresh"
+              :size="16"
+              class="mr-2"
+            />
             Reset
           </HIGButton>
         </div>
@@ -120,7 +168,10 @@
       </div>
 
       <!-- Check Results -->
-      <div v-if="checkResult" class="interactive-block-check-results mb-4">
+      <div
+        v-if="checkResult"
+        class="interactive-block-check-results mb-4"
+      >
         <div
           class="p-4 rounded-lg border"
           :class="checkResult.pass 
@@ -137,8 +188,14 @@
               <p class="font-semibold mb-1">
                 {{ checkResult.pass ? 'All checks passed!' : 'Some checks failed' }}
               </p>
-              <ul v-if="checkResult.messages.length > 0" class="text-sm space-y-1">
-                <li v-for="(message, index) in checkResult.messages" :key="index">
+              <ul
+                v-if="checkResult.messages.length > 0"
+                class="text-sm space-y-1"
+              >
+                <li
+                  v-for="(message, index) in checkResult.messages"
+                  :key="index"
+                >
                   {{ message }}
                 </li>
               </ul>
@@ -149,24 +206,38 @@
 
       <!-- Sandbox Preview -->
       <div class="interactive-block-preview mb-4">
-        <div class="mb-2 text-sm text-text-secondary font-medium">Preview</div>
-        <div ref="iframeContainerRef" class="interactive-block-iframe-container">
+        <div class="mb-2 text-sm text-text-secondary font-medium">
+          Preview
+        </div>
+        <div
+          ref="iframeContainerRef"
+          class="interactive-block-iframe-container"
+        >
           <!-- Iframe will be inserted here -->
         </div>
       </div>
 
       <!-- Hints -->
-      <div v-if="blockDefinition.hints && blockDefinition.hints.length > 0" class="interactive-block-hints">
+      <div
+        v-if="blockDefinition.hints && blockDefinition.hints.length > 0"
+        class="interactive-block-hints"
+      >
         <button
-          @click="showHints = !showHints"
           class="flex items-center space-x-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
           aria-label="Toggle hints"
           :aria-expanded="showHints"
+          @click="showHints = !showHints"
         >
-          <Icon :name="showHints ? 'chevron-up' : 'chevron-down'" :size="16" />
+          <Icon
+            :name="showHints ? 'chevron-up' : 'chevron-down'"
+            :size="16"
+          />
           <span>Hints ({{ blockDefinition.hints.length }})</span>
         </button>
-        <div v-if="showHints" class="mt-3 space-y-2">
+        <div
+          v-if="showHints"
+          class="mt-3 space-y-2"
+        >
           <div
             v-for="(hint, index) in blockDefinition.hints"
             :key="index"

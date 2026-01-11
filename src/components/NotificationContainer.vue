@@ -1,6 +1,9 @@
 <template>
   <div class="fixed top-14 left-1/2 -translate-x-1/2 right-4 md:top-16 md:left-auto md:translate-x-0 md:right-4 md:bottom-auto z-toast space-y-2 w-[calc(100%-2rem)] md:w-[384px]">
-    <TransitionGroup name="toast" tag="div">
+    <TransitionGroup
+      name="toast"
+      tag="div"
+    >
       <div
         v-for="notification in notifications"
         :key="notification.id"
@@ -13,23 +16,32 @@
       >
         <div class="flex items-start">
           <div class="flex-shrink-0">
-            <Icon :name="getIconName(notification.type)" :size="20" />
+            <Icon
+              :name="getIconName(notification.type)"
+              :size="20"
+            />
           </div>
           <div class="ml-3 flex-1">
             <p class="text-sm font-medium text-text-primary">
               {{ notification.message }}
             </p>
-            <p v-if="notification.description" class="mt-1 text-sm text-text-secondary">
+            <p
+              v-if="notification.description"
+              class="mt-1 text-sm text-text-secondary"
+            >
               {{ notification.description }}
             </p>
           </div>
           <div class="ml-4 flex-shrink-0">
             <button
               class="text-text-tertiary hover:text-text-primary active:opacity-70 transition-colors p-1"
-              @click="removeNotification(notification.id)"
               aria-label="Close notification"
+              @click="removeNotification(notification.id)"
             >
-              <Icon name="close" :size="16" />
+              <Icon
+                name="close"
+                :size="16"
+              />
             </button>
           </div>
         </div>

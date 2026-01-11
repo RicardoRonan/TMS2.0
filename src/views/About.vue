@@ -20,7 +20,9 @@
         <div class="max-w-4xl mx-auto">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 class="text-3xl font-bold text-text-primary mb-6">Our Mission</h2>
+              <h2 class="text-3xl font-bold text-text-primary mb-6">
+                Our Mission
+              </h2>
               <p class="text-lg text-text-secondary mb-6">
                 MetaStack was born from a simple belief: developers, designers, and creators 
                 are stronger when they work together. We're creating a platform where knowledge 
@@ -37,35 +39,77 @@
               <div class="space-y-6">
                 <div class="flex items-center space-x-4">
                   <div class="w-12 h-12 bg-primary-500 rounded-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    <svg
+                      class="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                      />
                     </svg>
                   </div>
                   <div>
-                    <h3 class="text-lg font-semibold text-text-primary">Innovation</h3>
-                    <p class="text-text-secondary">Pushing boundaries of what's possible</p>
+                    <h3 class="text-lg font-semibold text-text-primary">
+                      Innovation
+                    </h3>
+                    <p class="text-text-secondary">
+                      Pushing boundaries of what's possible
+                    </p>
                   </div>
                 </div>
                 <div class="flex items-center space-x-4">
                   <div class="w-12 h-12 bg-primary-500 rounded-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    <svg
+                      class="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
                     </svg>
                   </div>
                   <div>
-                    <h3 class="text-lg font-semibold text-text-primary">Community</h3>
-                    <p class="text-text-secondary">Building connections that matter</p>
+                    <h3 class="text-lg font-semibold text-text-primary">
+                      Community
+                    </h3>
+                    <p class="text-text-secondary">
+                      Building connections that matter
+                    </p>
                   </div>
                 </div>
                 <div class="flex items-center space-x-4">
                   <div class="w-12 h-12 bg-primary-500 rounded-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    <svg
+                      class="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                      />
                     </svg>
                   </div>
                   <div>
-                    <h3 class="text-lg font-semibold text-text-primary">Learning</h3>
-                    <p class="text-text-secondary">Continuous growth and development</p>
+                    <h3 class="text-lg font-semibold text-text-primary">
+                      Learning
+                    </h3>
+                    <p class="text-text-secondary">
+                      Continuous growth and development
+                    </p>
                   </div>
                 </div>
               </div>
@@ -88,13 +132,24 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <HIGCard v-for="value in values" :key="value.id" class="text-center">
+          <HIGCard
+            v-for="value in values"
+            :key="value.id"
+            class="text-center"
+          >
             <div class="p-6">
               <div class="w-16 h-16 bg-primary-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <FontAwesomeIcon :icon="value.icon" class="w-8 h-8 text-white" />
+                <FontAwesomeIcon
+                  :icon="value.icon"
+                  class="w-8 h-8 text-white"
+                />
               </div>
-              <h3 class="text-xl font-semibold text-text-primary mb-3">{{ value.title }}</h3>
-              <p class="text-text-secondary">{{ value.description }}</p>
+              <h3 class="text-xl font-semibold text-text-primary mb-3">
+                {{ value.title }}
+              </h3>
+              <p class="text-text-secondary">
+                {{ value.description }}
+              </p>
             </div>
           </HIGCard>
         </div>
@@ -114,20 +169,48 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <HIGCard v-for="member in team" :key="member.id" class="text-center">
+          <HIGCard
+            v-for="member in team"
+            :key="member.id"
+            class="text-center"
+          >
             <div class="p-6">
               <div class="w-24 h-24 bg-primary-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span class="text-white text-2xl font-bold">{{ member.name[0] }}</span>
               </div>
-              <h3 class="text-xl font-semibold text-text-primary mb-1">{{ member.name }}</h3>
-              <p class="text-primary-500 mb-3">{{ member.role }}</p>
-              <p class="text-text-secondary text-sm mb-4">{{ member.bio }}</p>
+              <h3 class="text-xl font-semibold text-text-primary mb-1">
+                {{ member.name }}
+              </h3>
+              <p class="text-primary-500 mb-3">
+                {{ member.role }}
+              </p>
+              <p class="text-text-secondary text-sm mb-4">
+                {{ member.bio }}
+              </p>
               <div class="flex justify-center space-x-3">
-                <a v-if="member.linkedin" :href="member.linkedin" target="_blank" rel="noopener noreferrer" class="text-text-tertiary hover:text-primary-500 transition-colors">
-                  <FontAwesomeIcon :icon="['fab', 'linkedin']" class="w-5 h-5" />
+                <a
+                  v-if="member.linkedin"
+                  :href="member.linkedin"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-text-tertiary hover:text-primary-500 transition-colors"
+                >
+                  <FontAwesomeIcon
+                    :icon="['fab', 'linkedin']"
+                    class="w-5 h-5"
+                  />
                 </a>
-                <a v-if="member.github" :href="member.github" target="_blank" rel="noopener noreferrer" class="text-text-tertiary hover:text-primary-500 transition-colors">
-                  <FontAwesomeIcon :icon="['fab', 'github']" class="w-5 h-5" />
+                <a
+                  v-if="member.github"
+                  :href="member.github"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-text-tertiary hover:text-primary-500 transition-colors"
+                >
+                  <FontAwesomeIcon
+                    :icon="['fab', 'github']"
+                    class="w-5 h-5"
+                  />
                 </a>
               </div>
             </div>
@@ -137,7 +220,10 @@
     </section>
 
     <!-- Community Section -->
-    <section id="community" class="py-20 bg-bg-primary">
+    <section
+      id="community"
+      class="py-20 bg-bg-primary"
+    >
       <div class="container mx-auto px-4">
         <div class="max-w-4xl mx-auto text-center">
           <h2 class="text-3xl md:text-4xl font-bold text-text-primary mb-6">
@@ -149,24 +235,44 @@
           
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             <div class="text-center">
-              <div class="text-4xl font-bold text-primary-500 mb-2">{{ formatCount(stats.activeMembers) }}</div>
-              <div class="text-text-secondary">Active Members</div>
+              <div class="text-4xl font-bold text-primary-500 mb-2">
+                {{ formatCount(stats.activeMembers) }}
+              </div>
+              <div class="text-text-secondary">
+                Active Members
+              </div>
             </div>
             <div class="text-center">
-              <div class="text-4xl font-bold text-primary-500 mb-2">{{ formatCount(stats.publishedArticles) }}</div>
-              <div class="text-text-secondary">Published Articles</div>
+              <div class="text-4xl font-bold text-primary-500 mb-2">
+                {{ formatCount(stats.publishedArticles) }}
+              </div>
+              <div class="text-text-secondary">
+                Published Articles
+              </div>
             </div>
             <div class="text-center">
-              <div class="text-4xl font-bold text-primary-500 mb-2">{{ formatCount(stats.curatedTools) }}</div>
-              <div class="text-text-secondary">Curated Tools</div>
+              <div class="text-4xl font-bold text-primary-500 mb-2">
+                {{ formatCount(stats.curatedTools) }}
+              </div>
+              <div class="text-text-secondary">
+                Curated Tools
+              </div>
             </div>
           </div>
 
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <HIGButton variant="primary" size="lg" @click="handleGetStarted">
+            <HIGButton
+              variant="primary"
+              size="lg"
+              @click="handleGetStarted"
+            >
               Get Started Today
             </HIGButton>
-            <HIGButton variant="secondary" size="lg" @click="scrollToContact">
+            <HIGButton
+              variant="secondary"
+              size="lg"
+              @click="scrollToContact"
+            >
               Contact Us
             </HIGButton>
           </div>

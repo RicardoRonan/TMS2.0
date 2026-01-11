@@ -1,11 +1,20 @@
 <template>
-  <div :class="alertClasses" role="alert">
+  <div
+    :class="alertClasses"
+    role="alert"
+  >
     <div class="flex">
       <div class="flex-shrink-0">
-        <Icon :name="iconName" :size="20" />
+        <Icon
+          :name="iconName"
+          :size="20"
+        />
       </div>
       <div class="ml-3">
-        <h3 v-if="title" class="text-sm font-medium">
+        <h3
+          v-if="title"
+          class="text-sm font-medium"
+        >
           {{ title }}
         </h3>
         <div :class="title ? 'mt-2' : ''">
@@ -14,7 +23,10 @@
           </p>
         </div>
       </div>
-      <div v-if="dismissible" class="ml-auto pl-3">
+      <div
+        v-if="dismissible"
+        class="ml-auto pl-3"
+      >
         <div class="-mx-1.5 -my-1.5">
           <button
             type="button"
@@ -23,7 +35,10 @@
             @click="$emit('dismiss')"
           >
             <span class="sr-only">Dismiss</span>
-            <Icon name="close" :size="20" />
+            <Icon
+              name="close"
+              :size="20"
+            />
           </button>
         </div>
       </div>

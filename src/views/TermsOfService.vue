@@ -20,7 +20,9 @@
         <div class="max-w-4xl mx-auto prose prose-invert">
           <div class="space-y-8 text-text-secondary">
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">Agreement to Terms</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                Agreement to Terms
+              </h2>
               <p class="text-lg leading-relaxed">
                 By accessing or using MetaStack, you agree to be bound by these Terms of Service and all 
                 applicable laws and regulations. If you do not agree with any of these terms, you are 
@@ -29,7 +31,9 @@
             </div>
 
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">Use License</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                Use License
+              </h2>
               <p class="text-lg leading-relaxed mb-4">
                 Permission is granted to temporarily access the materials on MetaStack for personal, 
                 non-commercial transitory viewing only. This is the grant of a license, not a transfer 
@@ -44,7 +48,9 @@
             </div>
 
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">User Accounts</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                User Accounts
+              </h2>
               <p class="text-lg leading-relaxed">
                 When you create an account with us, you must provide information that is accurate, 
                 complete, and current at all times. You are responsible for safeguarding the password 
@@ -53,7 +59,9 @@
             </div>
 
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">Prohibited Uses</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                Prohibited Uses
+              </h2>
               <p class="text-lg leading-relaxed mb-4">
                 You may not use our service:
               </p>
@@ -66,7 +74,9 @@
             </div>
 
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">Content</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                Content
+              </h2>
               <p class="text-lg leading-relaxed">
                 Our service allows you to post, link, store, share and otherwise make available certain 
                 information, text, and other content. You are responsible for the content that you post 
@@ -75,7 +85,9 @@
             </div>
 
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">Termination</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                Termination
+              </h2>
               <p class="text-lg leading-relaxed">
                 We may terminate or suspend your account and bar access to the service immediately, 
                 without prior notice or liability, for any reason whatsoever, including without limitation 
@@ -84,10 +96,17 @@
             </div>
 
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">Contact Us</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                Contact Us
+              </h2>
               <p class="text-lg leading-relaxed">
                 If you have any questions about these Terms of Service, please contact us at 
-                <router-link to="/contact" class="text-primary-500 hover:text-primary-600">our contact page</router-link>.
+                <router-link
+                  to="/contact"
+                  class="text-primary-500 hover:text-primary-600"
+                >
+                  our contact page
+                </router-link>.
               </p>
             </div>
           </div>

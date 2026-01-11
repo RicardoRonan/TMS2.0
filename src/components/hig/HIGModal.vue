@@ -1,19 +1,34 @@
 <template>
   <Teleport to="body">
     <Transition name="modal">
-      <div v-if="isOpen" class="modal-overlay" @click="handleOverlayClick">
-        <div :class="modalClasses" @click.stop>
-          <header v-if="$slots.header || showClose" class="flex items-center justify-between p-6 border-b border-border-primary">
+      <div
+        v-if="isOpen"
+        class="modal-overlay"
+        @click="handleOverlayClick"
+      >
+        <div
+          :class="modalClasses"
+          @click.stop
+        >
+          <header
+            v-if="$slots.header || showClose"
+            class="flex items-center justify-between p-6 border-b border-border-primary"
+          >
             <slot name="header">
-              <h3 class="text-lg font-semibold text-text-primary">{{ title }}</h3>
+              <h3 class="text-lg font-semibold text-text-primary">
+                {{ title }}
+              </h3>
             </slot>
             <button
               v-if="showClose"
               class="p-2 text-text-tertiary hover:text-text-primary transition-colors"
-              @click="close"
               aria-label="Close modal"
+              @click="close"
             >
-              <Icon name="close" :size="20" />
+              <Icon
+                name="close"
+                :size="20"
+              />
             </button>
           </header>
           
@@ -21,7 +36,10 @@
             <slot />
           </div>
           
-          <footer v-if="$slots.footer" class="flex items-center justify-end gap-3 p-6 border-t border-border-primary">
+          <footer
+            v-if="$slots.footer"
+            class="flex items-center justify-end gap-3 p-6 border-t border-border-primary"
+          >
             <slot name="footer" />
           </footer>
         </div>

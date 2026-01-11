@@ -4,79 +4,103 @@
     title="Share Article"
     size="md"
     @close="close"
-    @update:isOpen="handleUpdate"
+    @update:is-open="handleUpdate"
   >
     <div class="space-y-6">
       <!-- Social Media Buttons -->
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <!-- LinkedIn -->
         <button
-          @click="shareToLinkedIn"
           class="flex flex-col items-center justify-center p-4 rounded-lg border border-border-primary hover:border-primary-500 hover:bg-bg-tertiary transition-all group"
           title="Share on LinkedIn"
+          @click="shareToLinkedIn"
         >
           <div class="w-12 h-12 rounded-full bg-[#0077b5] flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-            <Icon name="linkedin" :size="24" class="text-white" />
+            <Icon
+              name="linkedin"
+              :size="24"
+              class="text-white"
+            />
           </div>
           <span class="text-sm font-medium text-text-primary">LinkedIn</span>
         </button>
 
         <!-- Twitter/X -->
         <button
-          @click="shareToTwitter"
           class="flex flex-col items-center justify-center p-4 rounded-lg border border-border-primary hover:border-primary-500 hover:bg-bg-tertiary transition-all group"
           title="Share on Twitter/X"
+          @click="shareToTwitter"
         >
           <div class="w-12 h-12 rounded-full bg-[#1DA1F2] flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-            <Icon name="twitter" :size="24" class="text-white" />
+            <Icon
+              name="twitter"
+              :size="24"
+              class="text-white"
+            />
           </div>
           <span class="text-sm font-medium text-text-primary">Twitter</span>
         </button>
 
         <!-- Facebook -->
         <button
-          @click="shareToFacebook"
           class="flex flex-col items-center justify-center p-4 rounded-lg border border-border-primary hover:border-primary-500 hover:bg-bg-tertiary transition-all group"
           title="Share on Facebook"
+          @click="shareToFacebook"
         >
           <div class="w-12 h-12 rounded-full bg-[#1877F2] flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-            <Icon name="facebook" :size="24" class="text-white" />
+            <Icon
+              name="facebook"
+              :size="24"
+              class="text-white"
+            />
           </div>
           <span class="text-sm font-medium text-text-primary">Facebook</span>
         </button>
 
         <!-- Reddit -->
         <button
-          @click="shareToReddit"
           class="flex flex-col items-center justify-center p-4 rounded-lg border border-border-primary hover:border-primary-500 hover:bg-bg-tertiary transition-all group"
           title="Share on Reddit"
+          @click="shareToReddit"
         >
           <div class="w-12 h-12 rounded-full bg-[#FF4500] flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-            <Icon name="reddit" :size="24" class="text-white" />
+            <Icon
+              name="reddit"
+              :size="24"
+              class="text-white"
+            />
           </div>
           <span class="text-sm font-medium text-text-primary">Reddit</span>
         </button>
 
         <!-- Email -->
         <button
-          @click="shareViaEmail"
           class="flex flex-col items-center justify-center p-4 rounded-lg border border-border-primary hover:border-primary-500 hover:bg-bg-tertiary transition-all group"
           title="Share via Email"
+          @click="shareViaEmail"
         >
           <div class="w-12 h-12 rounded-full bg-primary-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-            <Icon name="mail" :size="24" class="text-white" />
+            <Icon
+              name="mail"
+              :size="24"
+              class="text-white"
+            />
           </div>
           <span class="text-sm font-medium text-text-primary">Email</span>
         </button>
 
         <!-- Copy Link -->
         <button
-          @click="copyLink"
           class="flex flex-col items-center justify-center p-4 rounded-lg border border-border-primary hover:border-primary-500 hover:bg-bg-tertiary transition-all group"
           title="Copy Link"
+          @click="copyLink"
         >
           <div class="w-12 h-12 rounded-full bg-bg-tertiary flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-            <Icon name="copy" :size="24" class="text-text-primary" />
+            <Icon
+              name="copy"
+              :size="24"
+              class="text-text-primary"
+            />
           </div>
           <span class="text-sm font-medium text-text-primary">Copy Link</span>
         </button>
@@ -90,13 +114,16 @@
             :value="url"
             readonly
             class="flex-1 px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-          />
+          >
           <button
-            @click="copyLink"
             class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors text-sm font-medium"
             title="Copy URL"
+            @click="copyLink"
           >
-            <Icon name="copy" :size="16" />
+            <Icon
+              name="copy"
+              :size="16"
+            />
           </button>
         </div>
       </div>

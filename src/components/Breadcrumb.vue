@@ -1,7 +1,10 @@
 <template>
   <nav class="mb-6 mt-4">
     <div class="flex items-center space-x-2 text-sm text-text-tertiary">
-      <template v-for="(item, index) in items" :key="index">
+      <template
+        v-for="(item, index) in items"
+        :key="index"
+      >
         <router-link
           v-if="item.to && !item.onClick"
           :to="item.to"
@@ -11,8 +14,8 @@
         </router-link>
         <a
           v-else-if="item.to && item.onClick"
-          @click.prevent="item.onClick()"
           class="hover:text-primary-500 transition-colors cursor-pointer"
+          @click.prevent="item.onClick()"
         >
           {{ item.label }}
         </a>

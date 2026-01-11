@@ -1,9 +1,16 @@
 <template>
   <div class="fullscreen-textarea-wrapper">
     <div class="relative">
-      <label v-if="label" :for="textareaId" class="block text-sm font-medium text-text-primary mb-2">
+      <label
+        v-if="label"
+        :for="textareaId"
+        class="block text-sm font-medium text-text-primary mb-2"
+      >
         {{ label }}
-        <span v-if="required" class="text-danger ml-1">*</span>
+        <span
+          v-if="required"
+          class="text-danger ml-1"
+        >*</span>
       </label>
       
       <div class="relative">
@@ -14,45 +21,70 @@
           :rows="rows"
           :required="required"
           :class="textareaClasses"
+          v-bind="$attrs"
           @input="handleInput"
           @blur="handleBlur"
           @focus="handleFocus"
-          v-bind="$attrs"
-        ></textarea>
+        />
         
         <button
           type="button"
           class="absolute top-2 right-2 p-2 text-text-tertiary hover:text-text-primary transition-colors rounded-md hover:bg-bg-tertiary"
-          @click="openFullscreen"
           :disabled="disabled"
           :aria-label="'Expand ' + (label || 'textarea') + ' to full screen'"
           title="Expand to full screen"
+          @click="openFullscreen"
         >
-          <Icon name="expand" :size="18" />
+          <Icon
+            name="expand"
+            :size="18"
+          />
         </button>
       </div>
       
-      <div v-if="error || hint" class="text-sm mt-2">
-        <p v-if="error" class="text-danger">{{ error }}</p>
-        <p v-else-if="hint" class="text-text-tertiary">{{ hint }}</p>
+      <div
+        v-if="error || hint"
+        class="text-sm mt-2"
+      >
+        <p
+          v-if="error"
+          class="text-danger"
+        >
+          {{ error }}
+        </p>
+        <p
+          v-else-if="hint"
+          class="text-text-tertiary"
+        >
+          {{ hint }}
+        </p>
       </div>
     </div>
 
     <!-- Full Screen Modal -->
     <Teleport to="body">
       <Transition name="fullscreen-modal">
-        <div v-if="isFullscreen" class="fullscreen-overlay" @click.self="closeFullscreen">
+        <div
+          v-if="isFullscreen"
+          class="fullscreen-overlay"
+          @click.self="closeFullscreen"
+        >
           <div class="fullscreen-container">
             <div class="fullscreen-header">
-              <h3 class="text-lg font-semibold text-text-primary">{{ label || 'Edit Content' }}</h3>
+              <h3 class="text-lg font-semibold text-text-primary">
+                {{ label || 'Edit Content' }}
+              </h3>
               <button
                 type="button"
                 class="p-2 text-text-tertiary hover:text-text-primary transition-colors rounded-md hover:bg-bg-tertiary"
-                @click="closeFullscreen"
                 aria-label="Close full screen editor"
                 title="Close (ESC)"
+                @click="closeFullscreen"
               >
-                <Icon name="close" :size="20" />
+                <Icon
+                  name="close"
+                  :size="20"
+                />
               </button>
             </div>
             
@@ -64,9 +96,9 @@
                 :required="required"
                 :disabled="disabled"
                 :class="['fullscreen-textarea', props.class, { 'opacity-50 cursor-not-allowed': disabled }]"
-                @input="handleInput"
                 v-bind="$attrs"
-              ></textarea>
+                @input="handleInput"
+              />
             </div>
             
             <div class="fullscreen-footer">

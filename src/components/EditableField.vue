@@ -1,12 +1,18 @@
 <template>
-  <div class="editable-field relative" :class="wrapperClass">
+  <div
+    class="editable-field relative"
+    :class="wrapperClass"
+  >
     <!-- Edit indicator when in admin mode -->
     <div 
       v-if="isAdminMode && !isEditing" 
       class="absolute -top-1 -right-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
     >
       <div class="px-2 py-1 bg-primary-500 text-white text-xs rounded shadow-lg flex items-center space-x-1">
-        <Icon name="edit" :size="12" />
+        <Icon
+          name="edit"
+          :size="12"
+        />
         <span>Click to edit</span>
       </div>
     </div>
@@ -22,13 +28,23 @@
       @click="startEditing"
     >
       <slot :value="modelValue">
-        <div v-if="as === 'textarea'" class="whitespace-pre-wrap">{{ modelValue || placeholder }}</div>
-        <div v-else>{{ modelValue || placeholder }}</div>
+        <div
+          v-if="as === 'textarea'"
+          class="whitespace-pre-wrap"
+        >
+          {{ modelValue || placeholder }}
+        </div>
+        <div v-else>
+          {{ modelValue || placeholder }}
+        </div>
       </slot>
     </div>
 
     <!-- Input field when editing -->
-    <div v-else-if="isAdminMode && isEditing" class="editable-input-wrapper">
+    <div
+      v-else-if="isAdminMode && isEditing"
+      class="editable-input-wrapper"
+    >
       <input
         v-if="as === 'input'"
         ref="inputRef"
@@ -43,170 +59,218 @@
         @blur="handleBlur"
         @keydown.enter="handleEnter"
         @keydown.esc="handleEscape"
-      />
-      <div v-else-if="as === 'textarea'" class="markdown-editor-inline">
+      >
+      <div
+        v-else-if="as === 'textarea'"
+        class="markdown-editor-inline"
+      >
         <!-- Markdown Toolbar -->
-        <div class="toolbar border border-border-primary rounded-t-lg bg-bg-secondary p-2 flex flex-wrap items-center gap-1" @mousedown.prevent>
+        <div
+          class="toolbar border border-border-primary rounded-t-lg bg-bg-secondary p-2 flex flex-wrap items-center gap-1"
+          @mousedown.prevent
+        >
           <!-- Text Formatting -->
           <button
             type="button"
-            @click.stop="insertMarkdown('**', '**')"
             class="toolbar-btn"
             title="Bold (Ctrl+B)"
+            @click.stop="insertMarkdown('**', '**')"
           >
-            <Icon name="bold" :size="16" />
+            <Icon
+              name="bold"
+              :size="16"
+            />
           </button>
           <button
             type="button"
-            @click.stop="insertMarkdown('*', '*')"
             class="toolbar-btn"
             title="Italic (Ctrl+I)"
+            @click.stop="insertMarkdown('*', '*')"
           >
-            <Icon name="italic" :size="16" />
+            <Icon
+              name="italic"
+              :size="16"
+            />
           </button>
           <button
             type="button"
-            @click.stop="insertMarkdown('~~', '~~')"
             class="toolbar-btn"
             title="Strikethrough"
+            @click.stop="insertMarkdown('~~', '~~')"
           >
-            <Icon name="strikethrough" :size="16" />
+            <Icon
+              name="strikethrough"
+              :size="16"
+            />
           </button>
           
-          <div class="w-px h-6 bg-border-primary mx-1"></div>
+          <div class="w-px h-6 bg-border-primary mx-1" />
           
           <!-- Headers -->
           <button
             type="button"
-            @click.stop="insertHeader(1)"
             class="toolbar-btn"
             title="Heading 1"
+            @click.stop="insertHeader(1)"
           >
             <span class="font-bold text-xs">H1</span>
           </button>
           <button
             type="button"
-            @click.stop="insertHeader(2)"
             class="toolbar-btn"
             title="Heading 2"
+            @click.stop="insertHeader(2)"
           >
             <span class="font-bold text-xs">H2</span>
           </button>
           <button
             type="button"
-            @click.stop="insertHeader(3)"
             class="toolbar-btn"
             title="Heading 3"
+            @click.stop="insertHeader(3)"
           >
             <span class="font-bold text-xs">H3</span>
           </button>
           
-          <div class="w-px h-6 bg-border-primary mx-1"></div>
+          <div class="w-px h-6 bg-border-primary mx-1" />
           
           <!-- Lists -->
           <button
             type="button"
-            @click.stop="insertList('unordered')"
             class="toolbar-btn"
             title="Unordered List"
+            @click.stop="insertList('unordered')"
           >
-            <Icon name="list" :size="16" />
+            <Icon
+              name="list"
+              :size="16"
+            />
           </button>
           <button
             type="button"
-            @click.stop="insertList('ordered')"
             class="toolbar-btn"
             title="Ordered List"
+            @click.stop="insertList('ordered')"
           >
-            <Icon name="list-ordered" :size="16" />
+            <Icon
+              name="list-ordered"
+              :size="16"
+            />
           </button>
           <button
             type="button"
-            @click.stop="insertMarkdown('- ', '')"
             class="toolbar-btn"
             title="Checklist"
+            @click.stop="insertMarkdown('- ', '')"
           >
-            <Icon name="checkbox" :size="16" />
+            <Icon
+              name="checkbox"
+              :size="16"
+            />
           </button>
           
-          <div class="w-px h-6 bg-border-primary mx-1"></div>
+          <div class="w-px h-6 bg-border-primary mx-1" />
           
           <!-- Links & Media -->
           <button
             type="button"
-            @click.stop="insertLink"
             class="toolbar-btn"
             title="Insert Link"
+            @click.stop="insertLink"
           >
-            <Icon name="link" :size="16" />
+            <Icon
+              name="link"
+              :size="16"
+            />
           </button>
           <button
             type="button"
-            @click.stop="insertImage"
             class="toolbar-btn"
             title="Insert Image"
+            @click.stop="insertImage"
           >
-            <Icon name="image" :size="16" />
+            <Icon
+              name="image"
+              :size="16"
+            />
           </button>
           
-          <div class="w-px h-6 bg-border-primary mx-1"></div>
+          <div class="w-px h-6 bg-border-primary mx-1" />
           
           <!-- Code -->
           <button
             type="button"
-            @click.stop="insertMarkdown('`', '`')"
             class="toolbar-btn"
             title="Inline Code"
+            @click.stop="insertMarkdown('`', '`')"
           >
-            <Icon name="code" :size="16" />
+            <Icon
+              name="code"
+              :size="16"
+            />
           </button>
           <button
             type="button"
-            @click.stop="insertCodeBlock"
             class="toolbar-btn"
             title="Code Block"
+            @click.stop="insertCodeBlock"
           >
-            <Icon name="code-block" :size="16" />
+            <Icon
+              name="code-block"
+              :size="16"
+            />
           </button>
           
-          <div class="w-px h-6 bg-border-primary mx-1"></div>
+          <div class="w-px h-6 bg-border-primary mx-1" />
           
           <!-- Other -->
           <button
             type="button"
-            @click.stop="insertMarkdown('> ', '')"
             class="toolbar-btn"
             title="Blockquote"
+            @click.stop="insertMarkdown('> ', '')"
           >
-            <Icon name="quote" :size="16" />
+            <Icon
+              name="quote"
+              :size="16"
+            />
           </button>
           <button
             type="button"
-            @click.stop="insertMarkdown('---\n', '')"
             class="toolbar-btn"
             title="Horizontal Rule"
+            @click.stop="insertMarkdown('---\n', '')"
           >
-            <Icon name="minus" :size="16" />
+            <Icon
+              name="minus"
+              :size="16"
+            />
           </button>
           <button
             type="button"
-            @click.stop="insertTable"
             class="toolbar-btn"
             title="Insert Table"
+            @click.stop="insertTable"
           >
-            <Icon name="table" :size="16" />
+            <Icon
+              name="table"
+              :size="16"
+            />
           </button>
           
-          <div class="w-px h-6 bg-border-primary mx-1"></div>
+          <div class="w-px h-6 bg-border-primary mx-1" />
           
           <!-- Fullscreen Button -->
           <button
             type="button"
-            @click.stop="openFullscreen"
             class="toolbar-btn"
             title="Expand to full screen (F11)"
+            @click.stop="openFullscreen"
           >
-            <Icon name="expand" :size="16" />
+            <Icon
+              name="expand"
+              :size="16"
+            />
           </button>
         </div>
         
@@ -242,28 +306,47 @@
     </div>
 
     <!-- Read-only content when not in admin mode -->
-    <div v-else :class="contentClass">
+    <div
+      v-else
+      :class="contentClass"
+    >
       <slot :value="modelValue">
-        <div v-if="as === 'textarea'" class="whitespace-pre-wrap">{{ modelValue || placeholder }}</div>
-        <div v-else>{{ modelValue || placeholder }}</div>
+        <div
+          v-if="as === 'textarea'"
+          class="whitespace-pre-wrap"
+        >
+          {{ modelValue || placeholder }}
+        </div>
+        <div v-else>
+          {{ modelValue || placeholder }}
+        </div>
       </slot>
     </div>
 
     <!-- Fullscreen Modal for Textarea -->
     <Teleport to="body">
       <Transition name="fullscreen-modal">
-        <div v-if="isFullscreen && as === 'textarea'" class="fullscreen-overlay" @click.self="closeFullscreen">
+        <div
+          v-if="isFullscreen && as === 'textarea'"
+          class="fullscreen-overlay"
+          @click.self="closeFullscreen"
+        >
           <div class="fullscreen-container">
             <div class="fullscreen-header">
-              <h3 class="text-lg font-semibold text-text-primary">Edit {{ field }}</h3>
+              <h3 class="text-lg font-semibold text-text-primary">
+                Edit {{ field }}
+              </h3>
               <button
                 type="button"
                 class="p-2 text-text-tertiary hover:text-text-primary transition-colors rounded-md hover:bg-bg-tertiary"
-                @click="closeFullscreen"
                 aria-label="Close full screen editor"
                 title="Close (ESC)"
+                @click="closeFullscreen"
               >
-                <Icon name="close" :size="20" />
+                <Icon
+                  name="close"
+                  :size="20"
+                />
               </button>
             </div>
             
@@ -272,151 +355,190 @@
               <!-- Text Formatting -->
               <button
                 type="button"
-                @click.stop="insertMarkdownFullscreen('**', '**')"
                 class="toolbar-btn"
                 title="Bold (Ctrl+B)"
+                @click.stop="insertMarkdownFullscreen('**', '**')"
               >
-                <Icon name="bold" :size="16" />
+                <Icon
+                  name="bold"
+                  :size="16"
+                />
               </button>
               <button
                 type="button"
-                @click.stop="insertMarkdownFullscreen('*', '*')"
                 class="toolbar-btn"
                 title="Italic (Ctrl+I)"
+                @click.stop="insertMarkdownFullscreen('*', '*')"
               >
-                <Icon name="italic" :size="16" />
+                <Icon
+                  name="italic"
+                  :size="16"
+                />
               </button>
               <button
                 type="button"
-                @click.stop="insertMarkdownFullscreen('~~', '~~')"
                 class="toolbar-btn"
                 title="Strikethrough"
+                @click.stop="insertMarkdownFullscreen('~~', '~~')"
               >
-                <Icon name="strikethrough" :size="16" />
+                <Icon
+                  name="strikethrough"
+                  :size="16"
+                />
               </button>
               
-              <div class="w-px h-6 bg-border-primary mx-1"></div>
+              <div class="w-px h-6 bg-border-primary mx-1" />
               
               <!-- Headers -->
               <button
                 type="button"
-                @click.stop="insertHeaderFullscreen(1)"
                 class="toolbar-btn"
                 title="Heading 1"
+                @click.stop="insertHeaderFullscreen(1)"
               >
                 <span class="font-bold text-xs">H1</span>
               </button>
               <button
                 type="button"
-                @click.stop="insertHeaderFullscreen(2)"
                 class="toolbar-btn"
                 title="Heading 2"
+                @click.stop="insertHeaderFullscreen(2)"
               >
                 <span class="font-bold text-xs">H2</span>
               </button>
               <button
                 type="button"
-                @click.stop="insertHeaderFullscreen(3)"
                 class="toolbar-btn"
                 title="Heading 3"
+                @click.stop="insertHeaderFullscreen(3)"
               >
                 <span class="font-bold text-xs">H3</span>
               </button>
               
-              <div class="w-px h-6 bg-border-primary mx-1"></div>
+              <div class="w-px h-6 bg-border-primary mx-1" />
               
               <!-- Lists -->
               <button
                 type="button"
-                @click.stop="insertListFullscreen('unordered')"
                 class="toolbar-btn"
                 title="Unordered List"
+                @click.stop="insertListFullscreen('unordered')"
               >
-                <Icon name="list" :size="16" />
+                <Icon
+                  name="list"
+                  :size="16"
+                />
               </button>
               <button
                 type="button"
-                @click.stop="insertListFullscreen('ordered')"
                 class="toolbar-btn"
                 title="Ordered List"
+                @click.stop="insertListFullscreen('ordered')"
               >
-                <Icon name="list-ordered" :size="16" />
+                <Icon
+                  name="list-ordered"
+                  :size="16"
+                />
               </button>
               <button
                 type="button"
-                @click.stop="insertMarkdownFullscreen('- ', '')"
                 class="toolbar-btn"
                 title="Checklist"
+                @click.stop="insertMarkdownFullscreen('- ', '')"
               >
-                <Icon name="checkbox" :size="16" />
+                <Icon
+                  name="checkbox"
+                  :size="16"
+                />
               </button>
               
-              <div class="w-px h-6 bg-border-primary mx-1"></div>
+              <div class="w-px h-6 bg-border-primary mx-1" />
               
               <!-- Links & Media -->
               <button
                 type="button"
-                @click.stop="insertLinkFullscreen"
                 class="toolbar-btn"
                 title="Insert Link"
+                @click.stop="insertLinkFullscreen"
               >
-                <Icon name="link" :size="16" />
+                <Icon
+                  name="link"
+                  :size="16"
+                />
               </button>
               <button
                 type="button"
-                @click.stop="insertImageFullscreen"
                 class="toolbar-btn"
                 title="Insert Image"
+                @click.stop="insertImageFullscreen"
               >
-                <Icon name="image" :size="16" />
+                <Icon
+                  name="image"
+                  :size="16"
+                />
               </button>
               
-              <div class="w-px h-6 bg-border-primary mx-1"></div>
+              <div class="w-px h-6 bg-border-primary mx-1" />
               
               <!-- Code -->
               <button
                 type="button"
-                @click.stop="insertMarkdownFullscreen('`', '`')"
                 class="toolbar-btn"
                 title="Inline Code"
+                @click.stop="insertMarkdownFullscreen('`', '`')"
               >
-                <Icon name="code" :size="16" />
+                <Icon
+                  name="code"
+                  :size="16"
+                />
               </button>
               <button
                 type="button"
-                @click.stop="insertCodeBlockFullscreen"
                 class="toolbar-btn"
                 title="Code Block"
+                @click.stop="insertCodeBlockFullscreen"
               >
-                <Icon name="code-block" :size="16" />
+                <Icon
+                  name="code-block"
+                  :size="16"
+                />
               </button>
               
-              <div class="w-px h-6 bg-border-primary mx-1"></div>
+              <div class="w-px h-6 bg-border-primary mx-1" />
               
               <!-- Other -->
               <button
                 type="button"
-                @click.stop="insertMarkdownFullscreen('> ', '')"
                 class="toolbar-btn"
                 title="Blockquote"
+                @click.stop="insertMarkdownFullscreen('> ', '')"
               >
-                <Icon name="quote" :size="16" />
+                <Icon
+                  name="quote"
+                  :size="16"
+                />
               </button>
               <button
                 type="button"
-                @click.stop="insertMarkdownFullscreen('---\n', '')"
                 class="toolbar-btn"
                 title="Horizontal Rule"
+                @click.stop="insertMarkdownFullscreen('---\n', '')"
               >
-                <Icon name="minus" :size="16" />
+                <Icon
+                  name="minus"
+                  :size="16"
+                />
               </button>
               <button
                 type="button"
-                @click.stop="insertTableFullscreen"
                 class="toolbar-btn"
                 title="Insert Table"
+                @click.stop="insertTableFullscreen"
               >
-                <Icon name="table" :size="16" />
+                <Icon
+                  name="table"
+                  :size="16"
+                />
               </button>
             </div>
             
@@ -426,11 +548,11 @@
                 :value="localValue"
                 :placeholder="placeholder"
                 :class="['fullscreen-textarea', inputClass]"
+                v-bind="$attrs"
                 @input="handleInput"
                 @keydown="handleKeydownFullscreen"
                 @keydown.esc="closeFullscreen"
-                v-bind="$attrs"
-              ></textarea>
+              />
             </div>
             
             <div class="fullscreen-footer">

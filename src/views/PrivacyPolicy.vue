@@ -20,7 +20,9 @@
         <div class="max-w-4xl mx-auto prose prose-invert">
           <div class="space-y-8 text-text-secondary">
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">Introduction</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                Introduction
+              </h2>
               <p class="text-lg leading-relaxed">
                 At MetaStack, we take your privacy seriously. This Privacy Policy explains how we collect, 
                 use, disclose, and safeguard your information when you visit our website and use our services.
@@ -28,7 +30,9 @@
             </div>
 
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">Information We Collect</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                Information We Collect
+              </h2>
               <p class="text-lg leading-relaxed mb-4">
                 We may collect information about you in a variety of ways. The information we may collect 
                 on the Site includes:
@@ -42,7 +46,9 @@
             </div>
 
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">How We Use Your Information</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                How We Use Your Information
+              </h2>
               <p class="text-lg leading-relaxed mb-4">
                 We use the information we collect to:
               </p>
@@ -56,7 +62,9 @@
             </div>
 
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">Data Security</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                Data Security
+              </h2>
               <p class="text-lg leading-relaxed">
                 We use administrative, technical, and physical security measures to help protect your 
                 personal information. While we have taken reasonable steps to secure the personal information 
@@ -66,7 +74,9 @@
             </div>
 
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">Your Rights</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                Your Rights
+              </h2>
               <p class="text-lg leading-relaxed mb-4">
                 You have the right to:
               </p>
@@ -80,10 +90,17 @@
             </div>
 
             <div>
-              <h2 class="text-2xl font-bold text-text-primary mb-4">Contact Us</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-4">
+                Contact Us
+              </h2>
               <p class="text-lg leading-relaxed">
                 If you have questions or concerns about this Privacy Policy, please contact us at 
-                <router-link to="/contact" class="text-primary-500 hover:text-primary-600">our contact page</router-link>.
+                <router-link
+                  to="/contact"
+                  class="text-primary-500 hover:text-primary-600"
+                >
+                  our contact page
+                </router-link>.
               </p>
             </div>
           </div>

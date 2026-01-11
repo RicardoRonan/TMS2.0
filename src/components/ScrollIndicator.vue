@@ -10,7 +10,6 @@
       <!-- Up Arrow -->
       <button
         v-if="needsScrolling"
-        @click="scrollUp"
         :disabled="!canScrollUp"
         :class="[
           'w-6 h-6 flex items-center justify-center transition-colors mb-1',
@@ -18,9 +17,20 @@
             ? 'text-text-tertiary hover:text-primary-500 cursor-pointer' 
             : 'text-text-tertiary/30 cursor-not-allowed'
         ]"
+        @click="scrollUp"
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 15l7-7 7 7"
+          />
         </svg>
       </button>
       
@@ -52,7 +62,6 @@
       <!-- Down Arrow -->
       <button
         v-if="needsScrolling"
-        @click="scrollDown"
         :disabled="!canScrollDown"
         :class="[
           'w-6 h-6 flex items-center justify-center transition-colors mt-1',
@@ -60,9 +69,20 @@
             ? 'text-text-tertiary hover:text-primary-500 cursor-pointer' 
             : 'text-text-tertiary/30 cursor-not-allowed'
         ]"
+        @click="scrollDown"
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
       

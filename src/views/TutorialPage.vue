@@ -1,46 +1,72 @@
 <template>
   <div class="min-h-screen bg-bg-primary">
     <!-- Loading State -->
-    <div v-if="loading" class="container mx-auto px-4 py-16">
+    <div
+      v-if="loading"
+      class="container mx-auto px-4 py-16"
+    >
       <div class="max-w-4xl mx-auto">
         <div class="animate-pulse space-y-6">
-          <div class="h-12 bg-bg-tertiary rounded w-3/4"></div>
-          <div class="h-4 bg-bg-tertiary rounded w-1/4"></div>
+          <div class="h-12 bg-bg-tertiary rounded w-3/4" />
+          <div class="h-4 bg-bg-tertiary rounded w-1/4" />
           <div class="space-y-3">
-            <div class="h-4 bg-bg-tertiary rounded w-full"></div>
-            <div class="h-4 bg-bg-tertiary rounded w-full"></div>
-            <div class="h-4 bg-bg-tertiary rounded w-5/6"></div>
+            <div class="h-4 bg-bg-tertiary rounded w-full" />
+            <div class="h-4 bg-bg-tertiary rounded w-full" />
+            <div class="h-4 bg-bg-tertiary rounded w-5/6" />
           </div>
         </div>
       </div>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="container mx-auto px-4 py-16">
+    <div
+      v-else-if="error"
+      class="container mx-auto px-4 py-16"
+    >
       <div class="max-w-4xl mx-auto text-center">
         <div class="w-24 h-24 bg-bg-tertiary rounded-full flex items-center justify-center mx-auto mb-6">
-          <Icon name="error" :size="48" class="text-text-tertiary" />
+          <Icon
+            name="error"
+            :size="48"
+            class="text-text-tertiary"
+          />
         </div>
-        <h2 class="text-2xl font-bold text-text-primary mb-4">Page Not Found</h2>
-        <p class="text-text-secondary mb-8">{{ error }}</p>
-        <HIGButton variant="primary" @click="$router.push('/tutorials')">
+        <h2 class="text-2xl font-bold text-text-primary mb-4">
+          Page Not Found
+        </h2>
+        <p class="text-text-secondary mb-8">
+          {{ error }}
+        </p>
+        <HIGButton
+          variant="primary"
+          @click="$router.push('/tutorials')"
+        >
           Back to Tutorials
         </HIGButton>
       </div>
     </div>
 
     <!-- Page Content -->
-    <article v-else-if="page" class="container mx-auto px-4 py-16">
+    <article
+      v-else-if="page"
+      class="container mx-auto px-4 py-16"
+    >
       <div class="max-w-4xl mx-auto">
         <!-- Admin Edit Button -->
-        <div v-if="isAdminMode" class="mb-6 flex justify-end">
+        <div
+          v-if="isAdminMode"
+          class="mb-6 flex justify-end"
+        >
           <HIGButton 
             variant="primary" 
             size="sm"
-            @click="navigateToEdit"
             class="flex items-center space-x-2"
+            @click="navigateToEdit"
           >
-            <Icon name="edit" :size="16" />
+            <Icon
+              name="edit"
+              :size="16"
+            />
             <span>Edit Page</span>
           </HIGButton>
         </div>
@@ -50,7 +76,10 @@
 
         <!-- Header -->
         <header class="mb-12">
-          <div v-if="category" class="mb-4">
+          <div
+            v-if="category"
+            class="mb-4"
+          >
             <div class="flex items-center space-x-4 text-sm text-text-secondary">
               <span class="badge badge-secondary">{{ category.level }}</span>
               <span>{{ category.duration }} min</span>
@@ -70,7 +99,10 @@
             input-class="text-4xl md:text-5xl font-bold"
             @update:model-value="handleTitleUpdate"
           />
-          <h1 v-else class="text-4xl md:text-5xl font-bold text-text-primary mb-6">
+          <h1
+            v-else
+            class="text-4xl md:text-5xl font-bold text-text-primary mb-6"
+          >
             {{ page.title }}
           </h1>
           
@@ -84,7 +116,10 @@
         </header>
 
         <!-- Page Content -->
-        <div ref="markdownContentRef" class="markdown-content prose prose-invert max-w-none">
+        <div
+          ref="markdownContentRef"
+          class="markdown-content prose prose-invert max-w-none"
+        >
           <EditableField
             v-if="isAdminMode && page"
             :model-value="page.content || ''"
@@ -103,19 +138,22 @@
               <div 
                 class="text-lg text-text-secondary leading-relaxed"
                 v-html="renderMarkdown(value || '')"
-              ></div>
+              />
             </template>
           </EditableField>
           <div 
             v-else
             class="text-lg text-text-secondary leading-relaxed"
           >
-            <div v-for="(segment, index) in contentSegments" :key="index">
+            <div
+              v-for="(segment, index) in contentSegments"
+              :key="index"
+            >
               <div 
                 v-if="segment.type === 'html'"
-                v-html="segment.content"
                 class="interactive-content-segment"
-              ></div>
+                v-html="segment.content"
+              />
               <InteractiveBlock
                 v-else-if="segment.type === 'interactive'"
                 :block-id="segment.blockId"
@@ -130,15 +168,18 @@
         <ScrollIndicator :content-ref="markdownContentRef" />
 
         <!-- Progress Tracking Toggle -->
-        <div v-if="currentUser" class="mt-8 pt-6 border-t border-border-primary">
+        <div
+          v-if="currentUser"
+          class="mt-8 pt-6 border-t border-border-primary"
+        >
           <label class="flex items-center space-x-3 cursor-pointer group">
             <input
               type="checkbox"
               :checked="isPageComplete"
               :disabled="isTogglingProgress || loading"
-              @change="togglePageProgress"
               class="w-5 h-5 rounded border-border-primary bg-bg-secondary text-primary-500 focus:ring-primary-500 focus:ring-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            />
+              @change="togglePageProgress"
+            >
             <div class="flex-1">
               <span class="text-text-primary font-medium">
                 Mark as complete
@@ -153,8 +194,11 @@
               :size="20" 
               class="text-primary-500"
             />
-            <div v-if="isTogglingProgress" class="w-5 h-5 flex items-center justify-center">
-              <div class="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+            <div
+              v-if="isTogglingProgress"
+              class="w-5 h-5 flex items-center justify-center"
+            >
+              <div class="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
             </div>
           </label>
         </div>
@@ -169,9 +213,12 @@
             >
               ← Previous: {{ previousPage.title }}
             </HIGButton>
-            <div v-else></div>
+            <div v-else />
             
-            <HIGButton variant="tertiary" @click="$router.push('/tutorials')">
+            <HIGButton
+              variant="tertiary"
+              @click="$router.push('/tutorials')"
+            >
               Back to Tutorials
             </HIGButton>
             
@@ -182,7 +229,7 @@
             >
               Next: {{ nextPage.title }} →
             </HIGButton>
-            <div v-else></div>
+            <div v-else />
           </div>
         </div>
       </div>
@@ -1234,6 +1281,7 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
         categoryData = catData
       }
     } catch (err) {
+      // Silently fall back to dummy data
     }
 
     // Fetch page
@@ -1250,6 +1298,7 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
         pageData = pgData
       }
     } catch (err) {
+      // Silently fall back to dummy data
     }
 
     // Use dummy data if fetch fails
@@ -1280,6 +1329,7 @@ const fetchTutorialPage = async (categorySlug: string, pageSlug: string) => {
         allPagesData = pagesData
       }
     } catch (err) {
+      // Silently fall back to dummy data
     }
 
     if (allPagesData.length === 0) {

@@ -11,22 +11,30 @@
             variant="secondary"
             size="sm"
             :disabled="!canUndo"
-            @click="handleUndo"
             title="Undo (Ctrl+Z)"
             class="admin-nav-btn"
+            @click="handleUndo"
           >
-            <Icon name="undo" :size="16" class="md:mr-1" />
+            <Icon
+              name="undo"
+              :size="16"
+              class="md:mr-1"
+            />
             <span class="hidden md:inline">Undo</span>
           </HIGButton>
           <HIGButton
             variant="secondary"
             size="sm"
             :disabled="!canRedo"
-            @click="handleRedo"
             title="Redo (Ctrl+R)"
             class="admin-nav-btn"
+            @click="handleRedo"
           >
-            <Icon name="redo" :size="16" class="md:mr-1" />
+            <Icon
+              name="redo"
+              :size="16"
+              class="md:mr-1"
+            />
             <span class="hidden md:inline">Redo</span>
           </HIGButton>
         </div>
@@ -55,9 +63,9 @@
             variant="tertiary"
             size="sm"
             :disabled="!hasPendingChanges || saving"
-            @click="handleCancel"
             title="Cancel all changes"
             class="admin-nav-btn"
+            @click="handleCancel"
           >
             <span class="hidden sm:inline">Cancel</span>
             <span class="sm:hidden">Cancel</span>
@@ -67,9 +75,9 @@
             size="sm"
             :disabled="!hasPendingChanges || saving"
             :loading="saving"
-            @click="handleSave"
             title="Save all changes"
             class="admin-nav-btn"
+            @click="handleSave"
           >
             {{ saveButtonText }}
           </HIGButton>

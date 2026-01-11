@@ -1,8 +1,13 @@
 <template>
-  <div class="fixed inset-0 bg-bg-overlay flex items-center justify-center z-50" @click.self="handleOverlayClick">
+  <div
+    class="fixed inset-0 bg-bg-overlay flex items-center justify-center z-50"
+    @click.self="handleOverlayClick"
+  >
     <div class="bg-bg-secondary rounded-lg p-8 flex flex-col items-center space-y-4">
       <HIGSpinner size="lg" />
-      <p class="text-text-primary text-sm">Loading...</p>
+      <p class="text-text-primary text-sm">
+        Loading...
+      </p>
       <button 
         class="mt-4 px-4 py-2 text-sm text-text-secondary hover:text-text-primary underline"
         @click="handleCancel"

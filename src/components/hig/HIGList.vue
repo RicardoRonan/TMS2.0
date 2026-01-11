@@ -1,6 +1,9 @@
 <template>
   <div :class="listClasses">
-    <div v-if="title" class="px-4 py-2 text-sm font-medium text-text-secondary border-b border-border-primary">
+    <div
+      v-if="title"
+      class="px-4 py-2 text-sm font-medium text-text-secondary border-b border-border-primary"
+    >
       {{ title }}
     </div>
     
@@ -11,31 +14,56 @@
         :class="getItemClasses(item, index)"
         @click="handleItemClick(item, index)"
       >
-        <div v-if="$slots.item" class="flex items-center w-full">
-          <slot name="item" :item="item" :index="index" />
+        <div
+          v-if="$slots.item"
+          class="flex items-center w-full"
+        >
+          <slot
+            name="item"
+            :item="item"
+            :index="index"
+          />
         </div>
-        <div v-else class="flex items-center justify-between w-full">
+        <div
+          v-else
+          class="flex items-center justify-between w-full"
+        >
           <div class="flex items-center space-x-3">
-            <div v-if="item.icon" class="flex-shrink-0">
-              <component :is="item.icon" class="h-5 w-5 text-text-tertiary" />
+            <div
+              v-if="item.icon"
+              class="flex-shrink-0"
+            >
+              <component
+                :is="item.icon"
+                class="h-5 w-5 text-text-tertiary"
+              />
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium text-text-primary truncate">
                 {{ getItemTitle(item) }}
               </p>
-              <p v-if="getItemSubtitle(item)" class="text-sm text-text-secondary truncate">
+              <p
+                v-if="getItemSubtitle(item)"
+                class="text-sm text-text-secondary truncate"
+              >
                 {{ getItemSubtitle(item) }}
               </p>
             </div>
           </div>
-          <div v-if="item.badge" class="flex-shrink-0">
+          <div
+            v-if="item.badge"
+            class="flex-shrink-0"
+          >
             <span class="badge badge-secondary">{{ item.badge }}</span>
           </div>
         </div>
       </li>
     </ul>
     
-    <div v-if="emptyText && items.length === 0" class="px-4 py-8 text-center text-text-tertiary">
+    <div
+      v-if="emptyText && items.length === 0"
+      class="px-4 py-8 text-center text-text-tertiary"
+    >
       {{ emptyText }}
     </div>
   </div>

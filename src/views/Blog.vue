@@ -22,7 +22,10 @@
                 @input="handleSearch"
               >
                 <template #right-icon>
-                  <Icon name="search" :size="20" />
+                  <Icon
+                    name="search"
+                    :size="20"
+                  />
                 </template>
               </HIGInput>
             </div>
@@ -45,37 +48,67 @@
     <!-- Blog Posts -->
     <section class="py-16">
       <div class="container mx-auto px-4">
-        <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <HIGCard v-for="n in 6" :key="n">
+        <div
+          v-if="loading"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
+          <HIGCard
+            v-for="n in 6"
+            :key="n"
+          >
             <div class="p-6">
               <HIGSkeleton type="blog-card" />
             </div>
           </HIGCard>
         </div>
 
-        <div v-else-if="filteredPosts.length === 0" class="text-center py-16">
+        <div
+          v-else-if="filteredPosts.length === 0"
+          class="text-center py-16"
+        >
           <div class="w-24 h-24 bg-bg-tertiary rounded-full flex items-center justify-center mx-auto mb-6">
-            <Icon name="document" :size="48" class="text-text-tertiary" />
+            <Icon
+              name="document"
+              :size="48"
+              class="text-text-tertiary"
+            />
           </div>
-          <h3 class="text-xl font-semibold text-text-primary mb-2">No articles found</h3>
+          <h3 class="text-xl font-semibold text-text-primary mb-2">
+            No articles found
+          </h3>
           <p class="text-text-secondary mb-6">
             {{ searchQuery ? 'Try adjusting your search terms' : 'No articles match the selected category' }}
           </p>
-          <HIGButton variant="primary" @click="clearFilters">
+          <HIGButton
+            variant="primary"
+            @click="clearFilters"
+          >
             Clear Filters
           </HIGButton>
         </div>
 
         <!-- Grouped by Category -->
-        <div v-else class="space-y-12">
-          <template v-for="category in groupedCategories" :key="category">
+        <div
+          v-else
+          class="space-y-12"
+        >
+          <template
+            v-for="category in groupedCategories"
+            :key="category"
+          >
             <div v-if="getCategoryPosts(category).length > 0">
               <!-- Category Heading -->
-              <h2 class="text-2xl font-bold text-text-primary mb-6">{{ category }}</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-6">
+                {{ category }}
+              </h2>
               
               <!-- Blog Posts Grid for this Category -->
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-                <HIGCard v-for="post in getCategoryPosts(category)" :key="post.id" class="hover:shadow-hig-lg transition-shadow">
+                <HIGCard
+                  v-for="post in getCategoryPosts(category)"
+                  :key="post.id"
+                  class="hover:shadow-hig-lg transition-shadow"
+                >
                   <div class="p-6">
                     <!-- Featured Image - Commented out for now -->
                     <!-- <div v-if="post.featuredImageUrl" class="aspect-video bg-bg-tertiary rounded-lg mb-4 overflow-hidden">
@@ -90,7 +123,10 @@
                     </div> -->
                     <div class="space-y-3">
                       <div class="flex items-center space-x-2 text-sm text-text-tertiary">
-                        <span v-if="post.category" class="badge badge-secondary">{{ post.category }}</span>
+                        <span
+                          v-if="post.category"
+                          class="badge badge-secondary"
+                        >{{ post.category }}</span>
                         <span v-if="post.category">•</span>
                         <span>{{ formatDate(post.createdAt) }}</span>
                       </div>
@@ -109,7 +145,11 @@
                           class="inline-flex items-center text-primary-500 hover:text-primary-600 font-medium transition-colors"
                         >
                           Read More
-                          <Icon name="arrow-right" :size="16" class="ml-1" />
+                          <Icon
+                            name="arrow-right"
+                            :size="16"
+                            class="ml-1"
+                          />
                         </router-link>
                       </div>
                     </div>

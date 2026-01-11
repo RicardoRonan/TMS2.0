@@ -22,68 +22,106 @@
             <!-- Profile Info Card -->
             <HIGCard class="md:col-span-2">
               <div class="p-6">
-                <h2 class="text-2xl font-bold text-text-primary mb-6">Account Information</h2>
+                <h2 class="text-2xl font-bold text-text-primary mb-6">
+                  Account Information
+                </h2>
                 
                 <!-- Profile Picture -->
                 <div class="mb-6 flex items-center space-x-4">
-                  <div v-if="currentUser?.photoURL" class="w-20 h-20 rounded-full overflow-hidden flex-shrink-0 border-2 border-border-primary bg-bg-tertiary">
+                  <div
+                    v-if="currentUser?.photoURL"
+                    class="w-20 h-20 rounded-full overflow-hidden flex-shrink-0 border-2 border-border-primary bg-bg-tertiary"
+                  >
                     <img 
                       :src="currentUser.photoURL" 
                       :alt="currentUser?.displayName || 'User'"
                       class="w-full h-full object-cover"
-                    />
+                    >
                   </div>
-                  <div v-else class="w-20 h-20 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-border-primary">
+                  <div
+                    v-else
+                    class="w-20 h-20 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-border-primary"
+                  >
                     <span class="text-white text-2xl font-medium">
                       {{ userInitials }}
                     </span>
                   </div>
                   <div class="min-w-0 flex-1">
-                    <h3 class="text-xl font-semibold text-text-primary break-words">{{ currentUser?.displayName || 'User' }}</h3>
-                    <p class="text-text-secondary break-words">{{ currentUser?.email }}</p>
+                    <h3 class="text-xl font-semibold text-text-primary break-words">
+                      {{ currentUser?.displayName || 'User' }}
+                    </h3>
+                    <p class="text-text-secondary break-words">
+                      {{ currentUser?.email }}
+                    </p>
                   </div>
                 </div>
                 
                 <div class="space-y-6">
                   <div>
                     <label class="block text-sm font-medium text-text-secondary mb-2">Display Name</label>
-                    <div class="text-text-primary text-lg break-words">{{ currentUser?.displayName || 'Not set' }}</div>
+                    <div class="text-text-primary text-lg break-words">
+                      {{ currentUser?.displayName || 'Not set' }}
+                    </div>
                   </div>
                   
                   <div>
                     <label class="block text-sm font-medium text-text-secondary mb-2">Email</label>
-                    <div class="text-text-primary text-lg break-words">{{ currentUser?.email || 'Not set' }}</div>
+                    <div class="text-text-primary text-lg break-words">
+                      {{ currentUser?.email || 'Not set' }}
+                    </div>
                   </div>
                   
                   <div>
                     <label class="block text-sm font-medium text-text-secondary mb-2">Member Since</label>
-                    <div class="text-text-primary text-lg">{{ formatDate(currentUser?.createdAt) }}</div>
+                    <div class="text-text-primary text-lg">
+                      {{ formatDate(currentUser?.createdAt) }}
+                    </div>
                   </div>
                   
-                  <div v-if="currentUser?.level !== undefined || currentUser?.xpTotal !== undefined" class="pt-4 border-t border-border-primary">
+                  <div
+                    v-if="currentUser?.level !== undefined || currentUser?.xpTotal !== undefined"
+                    class="pt-4 border-t border-border-primary"
+                  >
                     <label class="block text-sm font-medium text-text-secondary mb-2">Progress</label>
                     <div class="flex items-center space-x-4">
                       <div>
-                        <div class="text-2xl font-bold text-primary-500">Level {{ currentUser?.level || 0 }}</div>
-                        <div class="text-sm text-text-tertiary">Level</div>
+                        <div class="text-2xl font-bold text-primary-500">
+                          Level {{ currentUser?.level || 0 }}
+                        </div>
+                        <div class="text-sm text-text-tertiary">
+                          Level
+                        </div>
                       </div>
                       <div>
-                        <div class="text-2xl font-bold text-text-primary">{{ currentUser?.xpTotal || 0 }}</div>
-                        <div class="text-sm text-text-tertiary">Total XP</div>
+                        <div class="text-2xl font-bold text-text-primary">
+                          {{ currentUser?.xpTotal || 0 }}
+                        </div>
+                        <div class="text-sm text-text-tertiary">
+                          Total XP
+                        </div>
                       </div>
                     </div>
                   </div>
                   
-                  <div v-if="currentUser?.isAdmin" class="pt-4 border-t border-border-primary">
+                  <div
+                    v-if="currentUser?.isAdmin"
+                    class="pt-4 border-t border-border-primary"
+                  >
                     <div class="flex items-center space-x-2 mb-4">
                       <span class="badge badge-primary">Admin</span>
-                      <span v-if="isAdminMode" class="badge badge-success">Admin Mode: ON</span>
+                      <span
+                        v-if="isAdminMode"
+                        class="badge badge-success"
+                      >Admin Mode: ON</span>
                     </div>
                     <p class="text-text-secondary text-sm mb-4">
                       You have administrative privileges. Access the admin panel to manage content.
                     </p>
                     <router-link to="/admin">
-                      <HIGButton variant="primary" full-width>
+                      <HIGButton
+                        variant="primary"
+                        full-width
+                      >
                         Go to Admin Panel
                       </HIGButton>
                     </router-link>
@@ -95,9 +133,15 @@
             <!-- Quick Actions -->
             <HIGCard>
               <div class="p-6">
-                <h2 class="text-xl font-bold text-text-primary mb-4">Quick Actions</h2>
+                <h2 class="text-xl font-bold text-text-primary mb-4">
+                  Quick Actions
+                </h2>
                 <div class="space-y-3">
-                  <HIGButton variant="secondary" full-width @click="showEditModal = true">
+                  <HIGButton
+                    variant="secondary"
+                    full-width
+                    @click="showEditModal = true"
+                  >
                     Edit Profile
                   </HIGButton>
                   <HIGButton 
@@ -108,7 +152,11 @@
                   >
                     {{ isAdminMode ? 'Disable Admin Mode' : 'Enable Admin Mode' }}
                   </HIGButton>
-                  <HIGButton variant="tertiary" full-width @click="handleLogout">
+                  <HIGButton
+                    variant="tertiary"
+                    full-width
+                    @click="handleLogout"
+                  >
                     Sign Out
                   </HIGButton>
                 </div>
@@ -120,33 +168,68 @@
     </section>
 
     <!-- Favorited Tools Section -->
-    <section class="py-8" v-if="isAuthenticated">
+    <section
+      v-if="isAuthenticated"
+      class="py-8"
+    >
       <div class="container mx-auto px-4">
         <div class="max-w-4xl mx-auto">
           <HIGCard>
             <div class="p-6">
-              <h2 class="text-2xl font-bold text-text-primary mb-6">Favorited Tools</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-6">
+                Favorited Tools
+              </h2>
               
-              <div v-if="loadingFavoriteTools" class="space-y-4">
-                <div v-for="n in 3" :key="n" class="animate-pulse">
-                  <div class="h-4 bg-bg-tertiary rounded w-3/4 mb-2"></div>
-                  <div class="h-2 bg-bg-tertiary rounded w-full mb-4"></div>
+              <div
+                v-if="loadingFavoriteTools"
+                class="space-y-4"
+              >
+                <div
+                  v-for="n in 3"
+                  :key="n"
+                  class="animate-pulse"
+                >
+                  <div class="h-4 bg-bg-tertiary rounded w-3/4 mb-2" />
+                  <div class="h-2 bg-bg-tertiary rounded w-full mb-4" />
                 </div>
               </div>
               
-              <div v-else-if="favoriteTools.length === 0" class="text-center py-8">
+              <div
+                v-else-if="favoriteTools.length === 0"
+                class="text-center py-8"
+              >
                 <div class="w-16 h-16 bg-bg-tertiary rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Icon name="favorite" :size="32" class="text-text-tertiary" />
+                  <Icon
+                    name="favorite"
+                    :size="32"
+                    class="text-text-tertiary"
+                  />
                 </div>
-                <p class="text-text-secondary mb-2">No favorited tools yet.</p>
-                <p class="text-text-tertiary text-sm mb-4">Start favoriting tools to see them here!</p>
-                <router-link to="/tools" class="inline-block">
-                  <HIGButton variant="primary">Browse Tools</HIGButton>
+                <p class="text-text-secondary mb-2">
+                  No favorited tools yet.
+                </p>
+                <p class="text-text-tertiary text-sm mb-4">
+                  Start favoriting tools to see them here!
+                </p>
+                <router-link
+                  to="/tools"
+                  class="inline-block"
+                >
+                  <HIGButton variant="primary">
+                    Browse Tools
+                  </HIGButton>
                 </router-link>
               </div>
               
-              <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <HIGCard v-for="tool in favoriteTools" :key="tool.id" class="hover:shadow-hig-lg transition-shadow">
+              <div
+                v-else
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+              >
+                <HIGCard
+                  v-for="tool in favoriteTools"
+                  :key="tool.id"
+                  class="hover:shadow-hig-lg transition-shadow"
+                >
                   <div class="p-4">
                     <div 
                       class="w-16 h-16 border border-border-primary rounded-xl flex items-center justify-center mx-auto mb-4 p-3 shadow-sm"
@@ -159,12 +242,19 @@
                         loading="lazy"
                         @error="handleLogoError"
                         @load="(e) => handleLogoLoad(e, tool.id, tool.name)"
-                      />
+                      >
                     </div>
-                    <h3 class="font-semibold text-text-primary mb-2 text-center">{{ tool.name }}</h3>
-                    <p class="text-sm text-text-secondary mb-4 line-clamp-2 text-center">{{ tool.description }}</p>
+                    <h3 class="font-semibold text-text-primary mb-2 text-center">
+                      {{ tool.name }}
+                    </h3>
+                    <p class="text-sm text-text-secondary mb-4 line-clamp-2 text-center">
+                      {{ tool.description }}
+                    </p>
                     <div class="flex items-center justify-center space-x-2">
-                      <HIGBadge :variant="getCategoryVariant(tool.category)" size="sm">
+                      <HIGBadge
+                        :variant="getCategoryVariant(tool.category)"
+                        size="sm"
+                      >
                         {{ tool.category }}
                       </HIGBadge>
                       <a 
@@ -174,7 +264,10 @@
                         class="text-primary-500 hover:text-primary-600 transition-colors"
                         :title="`Visit ${tool.name}`"
                       >
-                        <Icon name="external-link" :size="16" />
+                        <Icon
+                          name="external-link"
+                          :size="16"
+                        />
                       </a>
                     </div>
                   </div>
@@ -192,26 +285,52 @@
         <div class="max-w-4xl mx-auto">
           <HIGCard>
             <div class="p-6">
-              <h2 class="text-2xl font-bold text-text-primary mb-6">Tutorial Progress</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-6">
+                Tutorial Progress
+              </h2>
               
-              <div v-if="loadingTutorialProgress" class="space-y-4">
-                <div v-for="n in 3" :key="n" class="animate-pulse">
-                  <div class="h-4 bg-bg-tertiary rounded w-3/4 mb-2"></div>
-                  <div class="h-2 bg-bg-tertiary rounded w-full mb-4"></div>
+              <div
+                v-if="loadingTutorialProgress"
+                class="space-y-4"
+              >
+                <div
+                  v-for="n in 3"
+                  :key="n"
+                  class="animate-pulse"
+                >
+                  <div class="h-4 bg-bg-tertiary rounded w-3/4 mb-2" />
+                  <div class="h-2 bg-bg-tertiary rounded w-full mb-4" />
                 </div>
               </div>
               
-              <div v-else-if="tutorialProgress.length === 0" class="text-center py-8">
+              <div
+                v-else-if="tutorialProgress.length === 0"
+                class="text-center py-8"
+              >
                 <div class="w-16 h-16 bg-bg-tertiary rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Icon name="tutorial" :size="32" class="text-text-tertiary" />
+                  <Icon
+                    name="tutorial"
+                    :size="32"
+                    class="text-text-tertiary"
+                  />
                 </div>
-                <p class="text-text-secondary">No tutorial progress yet. Start learning!</p>
-                <router-link to="/tutorials" class="mt-4 inline-block">
-                  <HIGButton variant="primary">Browse Tutorials</HIGButton>
+                <p class="text-text-secondary">
+                  No tutorial progress yet. Start learning!
+                </p>
+                <router-link
+                  to="/tutorials"
+                  class="mt-4 inline-block"
+                >
+                  <HIGButton variant="primary">
+                    Browse Tutorials
+                  </HIGButton>
                 </router-link>
               </div>
               
-              <div v-else class="space-y-6">
+              <div
+                v-else
+                class="space-y-6"
+              >
                 <div
                   v-for="progress in tutorialProgress"
                   :key="progress.category_id"
@@ -234,9 +353,11 @@
                       <div
                         class="bg-primary-500 h-2 rounded-full transition-all"
                         :style="{ width: `${progress.percentage}%` }"
-                      ></div>
+                      />
                     </div>
-                    <p class="text-xs text-text-tertiary mt-1">{{ Math.round(progress.percentage) }}% complete</p>
+                    <p class="text-xs text-text-tertiary mt-1">
+                      {{ Math.round(progress.percentage) }}% complete
+                    </p>
                   </div>
                   
                   <router-link
@@ -244,7 +365,11 @@
                     class="inline-flex items-center text-primary-500 hover:text-primary-600 font-medium transition-colors text-sm"
                   >
                     {{ progress.percentage === 100 ? 'Review Tutorial' : 'Continue Learning' }}
-                    <Icon name="arrow-right" :size="16" class="ml-1" />
+                    <Icon
+                      name="arrow-right"
+                      :size="16"
+                      class="ml-1"
+                    />
                   </router-link>
                 </div>
               </div>
@@ -260,27 +385,53 @@
         <div class="max-w-4xl mx-auto">
           <HIGCard>
             <div class="p-6">
-              <h2 class="text-2xl font-bold text-text-primary mb-6">Liked Blog Posts</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-6">
+                Liked Blog Posts
+              </h2>
               
-              <div v-if="loadingLikedPosts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div v-for="n in 6" :key="n" class="animate-pulse">
-                  <div class="aspect-video bg-bg-tertiary rounded-lg mb-2"></div>
-                  <div class="h-4 bg-bg-tertiary rounded w-3/4 mb-2"></div>
-                  <div class="h-4 bg-bg-tertiary rounded w-full"></div>
+              <div
+                v-if="loadingLikedPosts"
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+              >
+                <div
+                  v-for="n in 6"
+                  :key="n"
+                  class="animate-pulse"
+                >
+                  <div class="aspect-video bg-bg-tertiary rounded-lg mb-2" />
+                  <div class="h-4 bg-bg-tertiary rounded w-3/4 mb-2" />
+                  <div class="h-4 bg-bg-tertiary rounded w-full" />
                 </div>
               </div>
               
-              <div v-else-if="likedPosts.length === 0" class="text-center py-8">
+              <div
+                v-else-if="likedPosts.length === 0"
+                class="text-center py-8"
+              >
                 <div class="w-16 h-16 bg-bg-tertiary rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Icon name="heart" :size="32" class="text-text-tertiary" />
+                  <Icon
+                    name="heart"
+                    :size="32"
+                    class="text-text-tertiary"
+                  />
                 </div>
-                <p class="text-text-secondary">No liked posts yet. Start exploring!</p>
-                <router-link to="/blog" class="mt-4 inline-block">
-                  <HIGButton variant="primary">Browse Blog</HIGButton>
+                <p class="text-text-secondary">
+                  No liked posts yet. Start exploring!
+                </p>
+                <router-link
+                  to="/blog"
+                  class="mt-4 inline-block"
+                >
+                  <HIGButton variant="primary">
+                    Browse Blog
+                  </HIGButton>
                 </router-link>
               </div>
               
-              <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div
+                v-else
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              >
                 <div
                   v-for="post in likedPosts"
                   :key="post.id"
@@ -299,7 +450,10 @@
                   </div> -->
                   <div class="p-4">
                     <div class="flex items-center space-x-2 text-sm text-text-tertiary mb-2">
-                      <span v-if="post.category" class="badge badge-secondary">{{ post.category }}</span>
+                      <span
+                        v-if="post.category"
+                        class="badge badge-secondary"
+                      >{{ post.category }}</span>
                       <span v-if="post.category">•</span>
                       <span>{{ formatDate(post.created_at) }}</span>
                     </div>
@@ -314,7 +468,11 @@
                       class="inline-flex items-center text-primary-500 hover:text-primary-600 font-medium transition-colors text-sm"
                     >
                       Read More
-                      <Icon name="arrow-right" :size="16" class="ml-1" />
+                      <Icon
+                        name="arrow-right"
+                        :size="16"
+                        class="ml-1"
+                      />
                     </router-link>
                   </div>
                 </div>
@@ -331,27 +489,53 @@
         <div class="max-w-4xl mx-auto">
           <HIGCard>
             <div class="p-6">
-              <h2 class="text-2xl font-bold text-text-primary mb-6">My Comments</h2>
+              <h2 class="text-2xl font-bold text-text-primary mb-6">
+                My Comments
+              </h2>
               
-              <div v-if="loadingUserComments" class="space-y-4">
-                <div v-for="n in 5" :key="n" class="animate-pulse">
-                  <div class="h-4 bg-bg-tertiary rounded w-3/4 mb-2"></div>
-                  <div class="h-4 bg-bg-tertiary rounded w-full mb-2"></div>
-                  <div class="h-4 bg-bg-tertiary rounded w-1/2"></div>
+              <div
+                v-if="loadingUserComments"
+                class="space-y-4"
+              >
+                <div
+                  v-for="n in 5"
+                  :key="n"
+                  class="animate-pulse"
+                >
+                  <div class="h-4 bg-bg-tertiary rounded w-3/4 mb-2" />
+                  <div class="h-4 bg-bg-tertiary rounded w-full mb-2" />
+                  <div class="h-4 bg-bg-tertiary rounded w-1/2" />
                 </div>
               </div>
               
-              <div v-else-if="userComments.length === 0" class="text-center py-8">
+              <div
+                v-else-if="userComments.length === 0"
+                class="text-center py-8"
+              >
                 <div class="w-16 h-16 bg-bg-tertiary rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Icon name="chat" :size="32" class="text-text-tertiary" />
+                  <Icon
+                    name="chat"
+                    :size="32"
+                    class="text-text-tertiary"
+                  />
                 </div>
-                <p class="text-text-secondary">No comments yet. Join the conversation!</p>
-                <router-link to="/blog" class="mt-4 inline-block">
-                  <HIGButton variant="primary">Browse Blog</HIGButton>
+                <p class="text-text-secondary">
+                  No comments yet. Join the conversation!
+                </p>
+                <router-link
+                  to="/blog"
+                  class="mt-4 inline-block"
+                >
+                  <HIGButton variant="primary">
+                    Browse Blog
+                  </HIGButton>
                 </router-link>
               </div>
               
-              <div v-else class="space-y-4">
+              <div
+                v-else
+                class="space-y-4"
+              >
                 <div
                   v-for="comment in userComments"
                   :key="comment.id"
@@ -380,7 +564,11 @@
                     class="inline-flex items-center text-primary-500 hover:text-primary-600 font-medium transition-colors text-sm"
                   >
                     View Post
-                    <Icon name="arrow-right" :size="16" class="ml-1" />
+                    <Icon
+                      name="arrow-right"
+                      :size="16"
+                      class="ml-1"
+                    />
                   </router-link>
                 </div>
               </div>
@@ -404,21 +592,26 @@
           </label>
           <div class="space-y-3">
             <!-- Current/Preview Image -->
-            <div v-if="editForm.photoURL" class="flex items-center space-x-4">
+            <div
+              v-if="editForm.photoURL"
+              class="flex items-center space-x-4"
+            >
               <div class="w-20 h-20 rounded-full overflow-hidden flex-shrink-0 border-2 border-border-primary bg-bg-tertiary">
                 <img 
                   :src="editForm.photoURL" 
                   alt="Profile Preview" 
                   class="w-full h-full object-cover"
                   @error="editForm.photoURL = ''"
-                />
+                >
               </div>
               <div class="flex-1">
-                <p class="text-sm text-text-secondary mb-2">Current profile picture</p>
+                <p class="text-sm text-text-secondary mb-2">
+                  Current profile picture
+                </p>
                 <button
                   type="button"
-                  @click="editForm.photoURL = ''"
                   class="text-sm text-red-500 hover:text-red-600 transition-colors"
+                  @click="editForm.photoURL = ''"
                 >
                   Remove
                 </button>
@@ -430,14 +623,17 @@
               <input
                 type="file"
                 accept="image/*"
-                @change="handleImageUpload"
                 :disabled="uploadingImage"
                 class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-500 file:text-white hover:file:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              />
+                @change="handleImageUpload"
+              >
               <p class="text-xs text-text-tertiary mt-2">
                 Upload a profile picture (JPG, PNG, GIF - max 32MB)
               </p>
-              <p v-if="uploadingImage" class="text-xs text-primary-500 mt-1">
+              <p
+                v-if="uploadingImage"
+                class="text-xs text-primary-500 mt-1"
+              >
                 Uploading image...
               </p>
             </div>
@@ -460,10 +656,17 @@
           placeholder="Enter your display name"
         />
         <div class="flex justify-end space-x-3 pt-4">
-          <HIGButton variant="tertiary" @click="showEditModal = false">
+          <HIGButton
+            variant="tertiary"
+            @click="showEditModal = false"
+          >
             Cancel
           </HIGButton>
-          <HIGButton variant="primary" @click="handleUpdateProfile" :disabled="updating || uploadingImage">
+          <HIGButton
+            variant="primary"
+            :disabled="updating || uploadingImage"
+            @click="handleUpdateProfile"
+          >
             {{ updating ? 'Updating...' : 'Update' }}
           </HIGButton>
         </div>

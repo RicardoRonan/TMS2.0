@@ -59,7 +59,9 @@
       <div class="border border-border-primary rounded-lg p-4 bg-bg-secondary">
         <div class="flex items-start justify-between mb-2">
           <div class="flex-1">
-            <h4 class="font-semibold text-text-primary mb-1">Essential Cookies</h4>
+            <h4 class="font-semibold text-text-primary mb-1">
+              Essential Cookies
+            </h4>
             <p class="text-sm text-text-tertiary">
               These cookies are necessary for the website to function properly. They cannot be disabled.
             </p>
@@ -76,7 +78,9 @@
       <div class="border border-border-primary rounded-lg p-4 bg-bg-secondary">
         <div class="flex items-start justify-between mb-2">
           <div class="flex-1">
-            <h4 class="font-semibold text-text-primary mb-1">Analytics Cookies</h4>
+            <h4 class="font-semibold text-text-primary mb-1">
+              Analytics Cookies
+            </h4>
             <p class="text-sm text-text-tertiary">
               These cookies help us understand how visitors interact with our website by collecting and reporting information anonymously.
             </p>
@@ -84,11 +88,11 @@
           <div class="ml-4">
             <label class="relative inline-flex items-center cursor-pointer">
               <input
-                type="checkbox"
                 v-model="preferences.analytics"
+                type="checkbox"
                 class="sr-only peer"
-              />
-              <div class="w-12 h-6 bg-bg-tertiary peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border-primary after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"></div>
+              >
+              <div class="w-12 h-6 bg-bg-tertiary peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border-primary after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500" />
             </label>
           </div>
         </div>
@@ -98,7 +102,9 @@
       <div class="border border-border-primary rounded-lg p-4 bg-bg-secondary">
         <div class="flex items-start justify-between mb-2">
           <div class="flex-1">
-            <h4 class="font-semibold text-text-primary mb-1">Functional Cookies</h4>
+            <h4 class="font-semibold text-text-primary mb-1">
+              Functional Cookies
+            </h4>
             <p class="text-sm text-text-tertiary">
               These cookies allow the website to remember choices you make and provide enhanced, more personal features.
             </p>
@@ -106,11 +112,11 @@
           <div class="ml-4">
             <label class="relative inline-flex items-center cursor-pointer">
               <input
-                type="checkbox"
                 v-model="preferences.functional"
+                type="checkbox"
                 class="sr-only peer"
-              />
-              <div class="w-12 h-6 bg-bg-tertiary peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border-primary after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"></div>
+              >
+              <div class="w-12 h-6 bg-bg-tertiary peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border-primary after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500" />
             </label>
           </div>
         </div>
@@ -120,7 +126,9 @@
       <div class="border border-border-primary rounded-lg p-4 bg-bg-secondary">
         <div class="flex items-start justify-between mb-2">
           <div class="flex-1">
-            <h4 class="font-semibold text-text-primary mb-1">Marketing Cookies</h4>
+            <h4 class="font-semibold text-text-primary mb-1">
+              Marketing Cookies
+            </h4>
             <p class="text-sm text-text-tertiary">
               These cookies are used to deliver advertisements and track campaign effectiveness.
             </p>
@@ -128,11 +136,11 @@
           <div class="ml-4">
             <label class="relative inline-flex items-center cursor-pointer">
               <input
-                type="checkbox"
                 v-model="preferences.marketing"
+                type="checkbox"
                 class="sr-only peer"
-              />
-              <div class="w-12 h-6 bg-bg-tertiary peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border-primary after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"></div>
+              >
+              <div class="w-12 h-6 bg-bg-tertiary peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border-primary after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500" />
             </label>
           </div>
         </div>

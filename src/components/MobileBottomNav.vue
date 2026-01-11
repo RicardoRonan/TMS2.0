@@ -8,7 +8,10 @@
         class="flex flex-col items-center justify-center flex-1 min-w-0 px-2 py-1 transition-colors relative pt-2"
         :class="bottomNavLinkClasses(item.href)"
       >
-        <Icon :name="item.icon" :size="22" />
+        <Icon
+          :name="item.icon"
+          :size="22"
+        />
         <span class="text-xs mt-0.5 font-medium">{{ item.name }}</span>
       </router-link>
     </div>

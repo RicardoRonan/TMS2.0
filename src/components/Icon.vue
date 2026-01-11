@@ -5,7 +5,11 @@
     :class="iconClasses"
     :style="iconStyle"
   />
-  <span v-else class="icon-placeholder" :style="{ width: size, height: size }"></span>
+  <span
+    v-else
+    class="icon-placeholder"
+    :style="{ width: size, height: size }"
+  />
 </template>
 
 <script setup lang="ts">
