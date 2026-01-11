@@ -196,7 +196,9 @@ async function loadUserDataForStore(supabaseUser: User, store: any) {
       photoURL: userData?.photo_url || supabaseUser.user_metadata?.avatar_url,
       isAdmin: userData?.is_admin || false,
       createdAt: userData?.created_at || supabaseUser.created_at || new Date().toISOString(),
-      lastLoginAt: userData?.last_login_at || new Date().toISOString()
+      lastLoginAt: userData?.last_login_at || new Date().toISOString(),
+      xpTotal: userData?.xp_total || 0,
+      level: userData?.level || 0
     })
   } catch (err: any) {
     // If anything fails, fallback to basic auth user data
@@ -332,7 +334,9 @@ export function useAuth() {
                     photoURL: newUserData.photo_url || data.user.user_metadata?.avatar_url,
                     isAdmin: newUserData.is_admin || false,
                     createdAt: newUserData.created_at || data.user.created_at || new Date().toISOString(),
-                    lastLoginAt: new Date().toISOString()
+                    lastLoginAt: new Date().toISOString(),
+                    xpTotal: newUserData.xp_total || 0,
+                    level: newUserData.level || 0
                   })
                 }
               }
@@ -348,7 +352,9 @@ export function useAuth() {
               photoURL: userData.photo_url || data.user.user_metadata?.avatar_url,
               isAdmin: userData.is_admin || false,
               createdAt: userData.created_at || data.user.created_at || new Date().toISOString(),
-              lastLoginAt: new Date().toISOString()
+              lastLoginAt: new Date().toISOString(),
+              xpTotal: userData.xp_total || 0,
+              level: userData.level || 0
             })
 
             // Update last login time

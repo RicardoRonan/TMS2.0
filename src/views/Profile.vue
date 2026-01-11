@@ -60,6 +60,20 @@
                     <div class="text-text-primary text-lg">{{ formatDate(currentUser?.createdAt) }}</div>
                   </div>
                   
+                  <div v-if="currentUser?.level !== undefined || currentUser?.xpTotal !== undefined" class="pt-4 border-t border-border-primary">
+                    <label class="block text-sm font-medium text-text-secondary mb-2">Progress</label>
+                    <div class="flex items-center space-x-4">
+                      <div>
+                        <div class="text-2xl font-bold text-primary-500">Level {{ currentUser?.level || 0 }}</div>
+                        <div class="text-sm text-text-tertiary">Level</div>
+                      </div>
+                      <div>
+                        <div class="text-2xl font-bold text-text-primary">{{ currentUser?.xpTotal || 0 }}</div>
+                        <div class="text-sm text-text-tertiary">Total XP</div>
+                      </div>
+                    </div>
+                  </div>
+                  
                   <div v-if="currentUser?.isAdmin" class="pt-4 border-t border-border-primary">
                     <div class="flex items-center space-x-2 mb-4">
                       <span class="badge badge-primary">Admin</span>

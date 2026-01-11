@@ -448,6 +448,72 @@
               </HIGCard>
             </div>
 
+              <!-- Interactive Blocks Management -->
+            <div v-if="activeTab === 'interactive-blocks'" class="space-y-6">
+              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                <h2 class="text-xl sm:text-2xl font-bold text-text-primary">Interactive Blocks</h2>
+                <HIGButton variant="primary" @click="openCreateInteractiveBlockModal" class="w-full sm:w-auto">
+                  + New Block
+                </HIGButton>
+              </div>
+
+              <div class="mb-4 p-4 bg-bg-secondary border border-border-primary rounded-lg">
+                <p class="text-sm text-text-secondary">
+                  <strong class="text-text-primary">How to use:</strong> Create interactive blocks here, then add them to tutorial pages using:
+                  <code class="px-2 py-1 bg-bg-tertiary rounded text-xs font-mono">[interactive id="block-id"]</code>
+                  or
+                  <code class="px-2 py-1 bg-bg-tertiary rounded text-xs font-mono">&lt;div data-interactive="true" data-id="block-id"&gt;&lt;/div&gt;</code>
+                </p>
+              </div>
+
+              <div v-if="loadingInteractiveBlocks" class="text-center py-12">
+                <HIGSpinner />
+                <p class="text-text-secondary mt-4">Loading interactive blocks...</p>
+              </div>
+
+              <div v-else-if="interactiveBlocks.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <HIGCard v-for="block in interactiveBlocks" :key="block.id" class="hover:shadow-hig-lg transition-shadow">
+                  <div class="p-4">
+                    <div class="flex items-start justify-between mb-2">
+                      <div class="flex-1">
+                        <h4 class="text-base font-semibold text-text-primary mb-1">{{ block.title }}</h4>
+                        <p class="text-text-secondary text-sm mb-2 line-clamp-2">{{ block.instructions || 'No instructions' }}</p>
+                        <div class="flex items-center space-x-2 text-xs text-text-tertiary">
+                          <span>ID: {{ block.id }}</span>
+                          <span>•</span>
+                          <span>{{ block.xp_award }} XP</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex items-center justify-end space-x-1 mt-3 pt-3 border-t border-border-primary">
+                      <button
+                        class="p-1.5 text-text-primary hover:text-primary-500 active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
+                        @click="editInteractiveBlock(block)"
+                        title="Edit block"
+                        aria-label="Edit block"
+                      >
+                        <Icon name="edit" :size="16" />
+                      </button>
+                      <button
+                        class="p-1.5 text-text-primary hover:text-danger active:opacity-70 transition-colors rounded-lg hover:bg-bg-tertiary"
+                        @click="confirmDeleteInteractiveBlock(block)"
+                        title="Delete block"
+                        aria-label="Delete block"
+                      >
+                        <Icon name="delete" :size="16" />
+                      </button>
+                    </div>
+                  </div>
+                </HIGCard>
+              </div>
+
+              <HIGCard v-else>
+                <div class="p-6 text-center py-12 text-text-secondary">
+                  <p>No interactive blocks yet. Create your first block!</p>
+                </div>
+              </HIGCard>
+            </div>
+
               <!-- Users Management -->
             <div v-if="activeTab === 'users'" class="space-y-6">
               <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
@@ -749,13 +815,27 @@
           placeholder="page-slug"
           required
         />
-        <MarkdownEditor
-          v-model="pageForm.content"
-          label="Content"
-          :rows="10"
-          placeholder="Write page content here..."
-          required
-        />
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label class="block text-sm font-medium text-text-primary">Content</label>
+            <HIGButton 
+              variant="tertiary" 
+              size="sm" 
+              type="button"
+              @click="openInsertInteractiveBlockModal"
+              class="text-xs"
+            >
+              <Icon name="code" :size="14" class="mr-1" />
+              Insert Interactive Block
+            </HIGButton>
+          </div>
+          <MarkdownEditor
+            v-model="pageForm.content"
+            :rows="10"
+            placeholder="Write page content here... Use [interactive id='block-id'] to add interactive blocks."
+            required
+          />
+        </div>
         <HIGInput
           v-model.number="pageForm.page_order"
           label="Order"
@@ -1062,6 +1142,192 @@
         </div>
       </div>
     </HIGModal>
+
+    <!-- Interactive Block Modal -->
+    <HIGModal
+      v-model:is-open="showInteractiveBlockModal"
+      :title="editingInteractiveBlock ? 'Edit Interactive Block' : 'Create New Interactive Block'"
+      size="lg"
+    >
+      <form @submit.prevent="handleSubmitInteractiveBlock" class="space-y-4">
+        <HIGInput
+          v-model="interactiveBlockForm.id"
+          label="Block ID"
+          placeholder="js-variables-01"
+          hint="Unique identifier for this block (used in shortcodes)"
+          required
+          :disabled="!!editingInteractiveBlock"
+        />
+        <HIGInput
+          v-model="interactiveBlockForm.title"
+          label="Title"
+          placeholder="JavaScript Variables"
+          required
+        />
+        <HIGInput
+          v-model="interactiveBlockForm.instructions"
+          label="Instructions"
+          placeholder="Optional instructions shown above the editor"
+          as="textarea"
+          :rows="3"
+        />
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">
+            Starter Code
+          </label>
+          <textarea
+            v-model="interactiveBlockForm.starter_code"
+            placeholder='// Your code here or {"files": [{"name": "index.html", "language": "html", "content": "..."}]}'
+            rows="8"
+            class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-y"
+          />
+          <p class="text-xs text-text-tertiary mt-1">
+            Enter code as a string, or JSON for multi-file format
+          </p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Run Mode</label>
+          <select
+            v-model="interactiveBlockForm.run_mode"
+            class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+          >
+            <option value="web">Web (HTML/CSS/JS)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">
+            Checks (JSON Array)
+          </label>
+          <textarea
+            v-model="interactiveBlockForm.checks"
+            placeholder='[{"type": "stdout_includes", "value": "Hello", "message": "Output should include Hello"}]'
+            rows="6"
+            class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-y"
+          />
+          <p class="text-xs text-text-tertiary mt-1">
+            Array of check objects. Types: stdout_includes, stdout_regex, dom_exists, dom_text_includes, no_runtime_errors
+          </p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">
+            Hints (JSON Array)
+          </label>
+          <textarea
+            v-model="interactiveBlockForm.hints"
+            placeholder='["Hint 1", "Hint 2"]'
+            rows="4"
+            class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-y"
+          />
+          <p class="text-xs text-text-tertiary mt-1">
+            Array of hint strings shown to users
+          </p>
+        </div>
+        <HIGInput
+          v-model.number="interactiveBlockForm.xp_award"
+          label="XP Award"
+          type="number"
+          placeholder="10"
+        />
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
+          <HIGButton variant="tertiary" type="button" @click="closeInteractiveBlockModal" class="w-full sm:w-auto">
+            Cancel
+          </HIGButton>
+          <HIGButton variant="primary" type="submit" :disabled="submitting" class="w-full sm:w-auto">
+            {{ submitting ? 'Saving...' : (editingInteractiveBlock ? 'Update' : 'Create') }}
+          </HIGButton>
+        </div>
+      </form>
+    </HIGModal>
+
+    <!-- Delete Interactive Block Modal -->
+    <HIGModal
+      v-model:is-open="showDeleteInteractiveBlockModal"
+      title="Delete Interactive Block"
+      size="sm"
+    >
+      <div class="space-y-4">
+        <p class="text-text-primary">
+          Are you sure you want to delete "<strong>{{ interactiveBlockToDelete?.title }}</strong>"? 
+          This will also delete all user progress for this block. This action cannot be undone.
+        </p>
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
+          <HIGButton variant="tertiary" @click="showDeleteInteractiveBlockModal = false" class="w-full sm:w-auto">
+            Cancel
+          </HIGButton>
+          <HIGButton variant="danger" @click="handleDeleteInteractiveBlock" :disabled="deleting" class="w-full sm:w-auto">
+            {{ deleting ? 'Deleting...' : 'Delete' }}
+          </HIGButton>
+        </div>
+      </div>
+    </HIGModal>
+
+    <!-- Insert Interactive Block Modal -->
+    <HIGModal
+      v-model:is-open="showInsertInteractiveBlockModal"
+      title="Insert Interactive Block"
+      size="sm"
+    >
+      <div class="space-y-4">
+        <p class="text-sm text-text-secondary">
+          Select an interactive block to insert into the tutorial page content.
+        </p>
+        <div v-if="loadingInteractiveBlocks" class="text-center py-4">
+          <HIGSpinner />
+          <p class="text-text-secondary mt-2 text-sm">Loading blocks...</p>
+        </div>
+        <div v-else-if="interactiveBlocks.length === 0" class="p-4 bg-bg-secondary border border-border-primary rounded-lg">
+          <p class="text-sm text-text-secondary mb-3">
+            No interactive blocks found. Create one first in the "Interactive Blocks" tab.
+          </p>
+          <HIGButton 
+            variant="primary" 
+            size="sm"
+            @click="activeTab = 'interactive-blocks'; showInsertInteractiveBlockModal = false"
+            class="w-full"
+          >
+            Go to Interactive Blocks
+          </HIGButton>
+        </div>
+        <template v-else>
+          <div>
+            <label class="block text-sm font-medium text-text-primary mb-2">Select Block</label>
+            <select
+              v-model="selectedInteractiveBlockId"
+              class="w-full px-4 py-2 bg-bg-secondary border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="">Choose a block...</option>
+              <option 
+                v-for="block in interactiveBlocks" 
+                :key="block.id" 
+                :value="block.id"
+              >
+                {{ block.title }} ({{ block.id }})
+              </option>
+            </select>
+          </div>
+          <div class="p-3 bg-bg-secondary border border-border-primary rounded-lg">
+            <p class="text-xs text-text-tertiary mb-1">Preview:</p>
+            <code class="text-xs font-mono text-text-primary">
+              [interactive id="{{ selectedInteractiveBlockId || 'block-id' }}"]
+            </code>
+          </div>
+        </template>
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-border-primary">
+          <HIGButton variant="tertiary" @click="showInsertInteractiveBlockModal = false" class="w-full sm:w-auto">
+            Cancel
+          </HIGButton>
+          <HIGButton 
+            v-if="interactiveBlocks.length > 0"
+            variant="primary" 
+            @click="insertInteractiveBlockShortcode" 
+            :disabled="!selectedInteractiveBlockId"
+            class="w-full sm:w-auto"
+          >
+            Insert
+          </HIGButton>
+        </div>
+      </div>
+    </HIGModal>
   </div>
 </template>
 
@@ -1093,6 +1359,7 @@ const loadingPages = ref(false)
 const loadingTools = ref(false)
 const loadingUsers = ref(false)
 const loadingBlogCategories = ref(false)
+const loadingInteractiveBlocks = ref(false)
 const submitting = ref(false)
 const deleting = ref(false)
 
@@ -1103,6 +1370,7 @@ const pages = ref<any[]>([])
 const tools = ref<any[]>([])
 const users = ref<any[]>([])
 const blogCategoriesList = ref<any[]>([])
+const interactiveBlocks = ref<any[]>([])
 const expandedCategories = ref<Record<string, boolean>>({})
 const expandedCategorySections = ref<Record<string, boolean>>({
   tutorial: true, // Default to expanded
@@ -1130,6 +1398,9 @@ const showDeletePageModal = ref(false)
 const showDeleteToolModal = ref(false)
 const showBlogCategoryModal = ref(false)
 const showDeleteBlogCategoryModal = ref(false)
+const showInteractiveBlockModal = ref(false)
+const showDeleteInteractiveBlockModal = ref(false)
+const showInsertInteractiveBlockModal = ref(false)
 
 // Editing states
 const editingBlog = ref<any>(null)
@@ -1138,6 +1409,7 @@ const editingPage = ref<any>(null)
 const editingTool = ref<any>(null)
 const editingUser = ref<any>(null)
 const editingBlogCategory = ref<any>(null)
+const editingInteractiveBlock = ref<any>(null)
 
 // Delete targets
 const blogToDelete = ref<any>(null)
@@ -1145,6 +1417,8 @@ const categoryToDelete = ref<any>(null)
 const pageToDelete = ref<any>(null)
 const toolToDelete = ref<any>(null)
 const blogCategoryToDelete = ref<any>(null)
+const interactiveBlockToDelete = ref<any>(null)
+const selectedInteractiveBlockId = ref<string>('')
 
 // Forms
 const blogForm = ref({
@@ -1198,10 +1472,22 @@ const blogCategoryForm = ref({
   description: ''
 })
 
+const interactiveBlockForm = ref({
+  id: '',
+  title: '',
+  instructions: '',
+  starter_code: '',
+  run_mode: 'web',
+  checks: '[]',
+  hints: '[]',
+  xp_award: 10
+})
+
 const tabs = [
   { id: 'tutorials', label: 'Tutorials' },
   { id: 'blog', label: 'Blog Posts' },
   { id: 'tools', label: 'Tools' },
+  { id: 'interactive-blocks', label: 'Interactive Blocks' },
   { id: 'users', label: 'Users' }
 ]
 
@@ -1455,6 +1741,28 @@ const fetchUsers = async () => {
   }
 }
 
+const fetchInteractiveBlocks = async () => {
+  try {
+    loadingInteractiveBlocks.value = true
+    const { data, error } = await supabase
+      .from('interactive_blocks')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    interactiveBlocks.value = data || []
+  } catch (error: any) {
+    console.error('Error fetching interactive blocks:', error)
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: 'Failed to load interactive blocks'
+    })
+    interactiveBlocks.value = []
+  } finally {
+    loadingInteractiveBlocks.value = false
+  }
+}
+
 const fetchBlogCategories = async () => {
   try {
     loadingBlogCategories.value = true
@@ -1500,7 +1808,8 @@ const reloadAllData = async () => {
       fetchPages(),
       fetchTools(),
       fetchUsers(),
-      fetchBlogCategories()
+      fetchBlogCategories(),
+      fetchInteractiveBlocks()
     ])
     console.log('All data reloaded successfully')
   } catch (error) {
@@ -2505,6 +2814,203 @@ const checkAdminStatus = async () => {
   }
 }
 
+// Interactive Block functions
+const openCreateInteractiveBlockModal = () => {
+  editingInteractiveBlock.value = null
+  interactiveBlockForm.value = {
+    id: '',
+    title: '',
+    instructions: '',
+    starter_code: '',
+    run_mode: 'web',
+    checks: '[]',
+    hints: '[]',
+    xp_award: 10
+  }
+  showInteractiveBlockModal.value = true
+}
+
+const editInteractiveBlock = (block: any) => {
+  editingInteractiveBlock.value = block
+  interactiveBlockForm.value = {
+    id: block.id,
+    title: block.title,
+    instructions: block.instructions || '',
+    starter_code: typeof block.starter_code === 'string' 
+      ? block.starter_code 
+      : JSON.stringify(block.starter_code, null, 2),
+    run_mode: block.run_mode || 'web',
+    checks: JSON.stringify(block.checks || [], null, 2),
+    hints: JSON.stringify(block.hints || [], null, 2),
+    xp_award: block.xp_award || 10
+  }
+  showInteractiveBlockModal.value = true
+}
+
+const closeInteractiveBlockModal = () => {
+  showInteractiveBlockModal.value = false
+  editingInteractiveBlock.value = null
+}
+
+const handleSubmitInteractiveBlock = async () => {
+  try {
+    submitting.value = true
+
+    if (!interactiveBlockForm.value.id || !interactiveBlockForm.value.id.trim()) {
+      throw new Error('Block ID is required')
+    }
+    if (!interactiveBlockForm.value.title || !interactiveBlockForm.value.title.trim()) {
+      throw new Error('Title is required')
+    }
+
+    // Parse JSON fields
+    let starterCode: any
+    let checks: any[]
+    let hints: string[]
+
+    try {
+      starterCode = interactiveBlockForm.value.starter_code.trim() || ''
+      // Try to parse as JSON, if it fails, treat as string
+      try {
+        starterCode = JSON.parse(starterCode)
+      } catch {
+        // Keep as string
+      }
+    } catch {
+      starterCode = interactiveBlockForm.value.starter_code
+    }
+
+    try {
+      checks = JSON.parse(interactiveBlockForm.value.checks)
+      if (!Array.isArray(checks)) throw new Error('Checks must be an array')
+    } catch (e: any) {
+      throw new Error(`Invalid checks JSON: ${e.message}`)
+    }
+
+    try {
+      hints = JSON.parse(interactiveBlockForm.value.hints)
+      if (!Array.isArray(hints)) throw new Error('Hints must be an array')
+    } catch (e: any) {
+      throw new Error(`Invalid hints JSON: ${e.message}`)
+    }
+
+    const blockData = {
+      id: interactiveBlockForm.value.id.trim(),
+      title: interactiveBlockForm.value.title.trim(),
+      instructions: interactiveBlockForm.value.instructions?.trim() || null,
+      starter_code: starterCode,
+      run_mode: interactiveBlockForm.value.run_mode,
+      checks: checks,
+      hints: hints,
+      xp_award: interactiveBlockForm.value.xp_award || 10
+    }
+
+    if (editingInteractiveBlock.value) {
+      const { error } = await supabase
+        .from('interactive_blocks')
+        .update(blockData)
+        .eq('id', editingInteractiveBlock.value.id)
+
+      if (error) throw error
+      store.dispatch('addNotification', {
+        type: 'success',
+        message: 'Interactive block updated successfully'
+      })
+    } else {
+      const { error } = await supabase
+        .from('interactive_blocks')
+        .insert(blockData)
+
+      if (error) throw error
+      store.dispatch('addNotification', {
+        type: 'success',
+        message: 'Interactive block created successfully'
+      })
+    }
+
+    closeInteractiveBlockModal()
+    await fetchInteractiveBlocks()
+  } catch (error: any) {
+    console.error('Error saving interactive block:', error)
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: error.message || 'Failed to save interactive block'
+    })
+  } finally {
+    submitting.value = false
+  }
+}
+
+const confirmDeleteInteractiveBlock = (block: any) => {
+  interactiveBlockToDelete.value = block
+  showDeleteInteractiveBlockModal.value = true
+}
+
+const handleDeleteInteractiveBlock = async () => {
+  if (!interactiveBlockToDelete.value) return
+
+  try {
+    deleting.value = true
+    const { error } = await supabase
+      .from('interactive_blocks')
+      .delete()
+      .eq('id', interactiveBlockToDelete.value.id)
+
+    if (error) throw error
+
+    store.dispatch('addNotification', {
+      type: 'success',
+      message: 'Interactive block deleted successfully'
+    })
+
+    showDeleteInteractiveBlockModal.value = false
+    interactiveBlockToDelete.value = null
+    await fetchInteractiveBlocks()
+  } catch (error: any) {
+    console.error('Error deleting interactive block:', error)
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: 'Failed to delete interactive block'
+    })
+  } finally {
+    deleting.value = false
+  }
+}
+
+const openInsertInteractiveBlockModal = async () => {
+  // Ensure blocks are loaded
+  if (interactiveBlocks.value.length === 0) {
+    await fetchInteractiveBlocks()
+  }
+  selectedInteractiveBlockId.value = ''
+  showInsertInteractiveBlockModal.value = true
+}
+
+const insertInteractiveBlockShortcode = () => {
+  if (!selectedInteractiveBlockId.value) {
+    store.dispatch('addNotification', {
+      type: 'error',
+      message: 'Please select an interactive block'
+    })
+    return
+  }
+
+  const shortcode = `[interactive id="${selectedInteractiveBlockId.value}"]`
+  
+  // Insert into the content field
+  const currentContent = pageForm.value.content || ''
+  const newContent = currentContent + '\n\n' + shortcode + '\n\n'
+  pageForm.value.content = newContent
+
+  showInsertInteractiveBlockModal.value = false
+  selectedInteractiveBlockId.value = ''
+  
+  store.dispatch('addNotification', {
+    type: 'success',
+    message: 'Interactive block shortcode inserted'
+  })
+}
+
 onMounted(async () => {
   // Check admin status first
   await checkAdminStatus()
@@ -2542,7 +3048,8 @@ onMounted(async () => {
         fetchPages()
       }
       if (tabParam === 'tools') fetchTools()
-      if (tabParam === 'users') fetchUsers()
+      if (tabParam === 'users')       fetchUsers()
+      if (tabParam === 'interactive-blocks') fetchInteractiveBlocks()
     }
   } else {
     // Default: fetch all data
@@ -2552,6 +3059,7 @@ onMounted(async () => {
     fetchPages()
     fetchTools()
     fetchUsers()
+    fetchInteractiveBlocks()
   }
 })
 </script>

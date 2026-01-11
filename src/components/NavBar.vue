@@ -184,7 +184,15 @@
                     {{ userInitials }}
                   </span>
                 </div>
-                <span class="text-sm">{{ currentUser?.displayName || 'User' }}</span>
+                <div class="flex flex-col">
+                  <span class="text-sm">{{ currentUser?.displayName || 'User' }}</span>
+                  <span v-if="currentUser?.level !== undefined" class="text-xs text-text-tertiary">
+                    Level {{ currentUser.level }}
+                    <span v-if="currentUser?.xpTotal !== undefined" class="text-text-quaternary">
+                      ({{ currentUser.xpTotal }} XP)
+                    </span>
+                  </span>
+                </div>
                 <Icon 
                   name="chevron-down" 
                   :size="16" 

@@ -109,8 +109,21 @@
           <div 
             v-else
             class="text-lg text-text-secondary leading-relaxed"
-            v-html="renderedContent"
-          ></div>
+          >
+            <div v-for="(segment, index) in contentSegments" :key="index">
+              <div 
+                v-if="segment.type === 'html'"
+                v-html="segment.content"
+                class="interactive-content-segment"
+              ></div>
+              <InteractiveBlock
+                v-else-if="segment.type === 'interactive'"
+                :block-id="segment.blockId"
+                :tutorial-slug="tutorialSlug"
+                class="interactive-content-segment"
+              />
+            </div>
+          </div>
         </div>
         
         <!-- Scroll Indicator -->
@@ -186,7 +199,8 @@ import Icon from '../components/Icon.vue'
 import EditableField from '../components/EditableField.vue'
 import Breadcrumb from '../components/Breadcrumb.vue'
 import ScrollIndicator from '../components/ScrollIndicator.vue'
-import { renderMarkdown } from '../utils/markdown'
+import { renderMarkdown, parseInteractiveBlockTokens, type InteractiveBlockToken } from '../utils/markdown'
+import InteractiveBlock from '../components/InteractiveBlock.vue'
 import { useAdminMode } from '../composables/useAdminMode'
 import { useStore } from 'vuex'
 import { useAuth } from '../composables/useAuth'
@@ -219,9 +233,68 @@ const formatDate = (dateString: string) => {
   })
 }
 
-const renderedContent = computed(() => {
-  if (!page.value?.content) return '<p>Content coming soon...</p>'
-  return renderMarkdown(page.value.content)
+interface ContentSegment {
+  type: 'html' | 'interactive'
+  content?: string
+  blockId?: string
+}
+
+const tutorialSlug = computed(() => {
+  const categorySlug = route.params.categorySlug as string
+  const pageSlug = route.params.pageSlug as string
+  return categorySlug && pageSlug ? `${categorySlug}/${pageSlug}` : undefined
+})
+
+const contentSegments = computed<ContentSegment[]>(() => {
+  if (!page.value?.content) {
+    return [{ type: 'html', content: '<p>Content coming soon...</p>' }]
+  }
+
+  const markdown = page.value.content
+  const tokens = parseInteractiveBlockTokens(markdown)
+  
+  if (tokens.length === 0) {
+    // No interactive blocks, just render markdown
+    return [{ type: 'html', content: renderMarkdown(markdown) }]
+  }
+
+  // Split markdown into segments
+  const segments: ContentSegment[] = []
+  let lastIndex = 0
+
+  for (const token of tokens) {
+    // Add HTML content before token
+    if (token.startIndex > lastIndex) {
+      const beforeContent = markdown.substring(lastIndex, token.startIndex)
+      if (beforeContent.trim()) {
+        segments.push({
+          type: 'html',
+          content: renderMarkdown(beforeContent)
+        })
+      }
+    }
+
+    // Add interactive block
+    segments.push({
+      type: 'interactive',
+      blockId: token.id
+    })
+
+    lastIndex = token.endIndex
+  }
+
+  // Add remaining content after last token
+  if (lastIndex < markdown.length) {
+    const afterContent = markdown.substring(lastIndex)
+    if (afterContent.trim()) {
+      segments.push({
+        type: 'html',
+        content: renderMarkdown(afterContent)
+      })
+    }
+  }
+
+  return segments
 })
 
 const breadcrumbItems = computed(() => {
