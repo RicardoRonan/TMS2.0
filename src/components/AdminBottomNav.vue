@@ -89,13 +89,11 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
-import { useStore } from 'vuex'
 import { useAdminMode } from '../composables/useAdminMode'
 import { useAuth } from '../composables/useAuth'
 import HIGButton from './hig/HIGButton.vue'
 import Icon from './Icon.vue'
 
-const store = useStore()
 const { user } = useAuth()
 const {
   isAdminMode,

@@ -477,9 +477,6 @@ const scrollToContact = () => {
   window.location.href = '/contact'
 }
 
-const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
 
 const handleGetStarted = () => {
   // Navigate to home with signup query parameter

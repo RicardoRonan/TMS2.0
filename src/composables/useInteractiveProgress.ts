@@ -1,7 +1,6 @@
 import { ref, computed, type Ref, type ComputedRef } from 'vue'
 import { useStore } from 'vuex'
 import { supabase } from '../supabase'
-import { calculateLevel } from '../utils/xpCalculator'
 
 export type ProgressState = 'locked' | 'in_progress' | 'passed'
 

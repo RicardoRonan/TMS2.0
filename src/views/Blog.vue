@@ -232,25 +232,6 @@ const getCategoryPosts = (category: string) => {
   return filteredPosts.value.filter(post => post.category === category)
 }
 
-const totalPages = computed(() => Math.ceil(filteredPosts.value.length / postsPerPage))
-
-const paginatedPosts = computed(() => {
-  const start = (currentPage.value - 1) * postsPerPage
-  const end = start + postsPerPage
-  return filteredPosts.value.slice(start, end)
-})
-
-const visiblePages = computed(() => {
-  const pages = []
-  const start = Math.max(1, currentPage.value - 2)
-  const end = Math.min(totalPages.value, currentPage.value + 2)
-  
-  for (let i = start; i <= end; i++) {
-    pages.push(i)
-  }
-  
-  return pages
-})
 
 // Methods
 const handleSearch = () => {
@@ -268,26 +249,11 @@ const clearFilters = () => {
   currentPage.value = 1
 }
 
-const goToPage = (page: number) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-}
-
 const categoryButtonClasses = (category: string) => [
-  'px-4 py-2 rounded-full text-sm font-medium transition-colors',
+  'px-3 py-2 rounded-md text-sm font-medium transition-colors',
   {
     'bg-primary-500 text-white': selectedCategory.value === category,
     'bg-bg-secondary text-text-secondary hover:bg-bg-tertiary': selectedCategory.value !== category
-  }
-]
-
-const pageButtonClasses = (page: number) => [
-  'px-3 py-2 rounded-md text-sm font-medium transition-colors',
-  {
-    'bg-primary-500 text-white': currentPage.value === page,
-    'bg-bg-secondary text-text-secondary hover:bg-bg-tertiary': currentPage.value !== page
   }
 ]
 

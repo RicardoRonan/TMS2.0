@@ -16,7 +16,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useAdminMode } from '../composables/useAdminMode'
 import AdminEditButton from './AdminEditButton.vue'
 

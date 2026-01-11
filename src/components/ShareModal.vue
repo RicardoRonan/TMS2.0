@@ -162,7 +162,6 @@ const close = () => {
 
 const encodedUrl = computed(() => encodeURIComponent(props.url))
 const encodedTitle = computed(() => encodeURIComponent(props.title))
-const encodedDescription = computed(() => encodeURIComponent(props.description || props.title))
 
 const shareToLinkedIn = () => {
   const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl.value}`

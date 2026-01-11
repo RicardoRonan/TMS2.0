@@ -189,7 +189,7 @@ const store = createStore({
         commit('REDO_EDIT')
       }
     },
-    saveChanges({ commit, state }) {
+    saveChanges({ commit }) {
       // This will be implemented in the composable with actual DB operations
       // For now, just clear pending changes
       commit('CLEAR_PENDING_CHANGES')
@@ -209,7 +209,7 @@ const store = createStore({
       }
       return data
     },
-    clearCache({ commit, state }, type) {
+    clearCache({ commit: _commit }, type) {
       clearCacheUtil(type)
       if (type) {
         delete state.cache.lastUpdated[type]
@@ -256,7 +256,6 @@ async function initializeApp() {
   // This ensures user appears logged in immediately on page reload
   try {
     const savedUser = localStorage.getItem('user')
-    const supabaseSession = localStorage.getItem('supabase.auth.token')
     
     if (savedUser) {
       try {

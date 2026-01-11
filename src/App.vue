@@ -48,7 +48,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, inject, type Ref } from 'vue'
 import { useStore } from 'vuex'
-import { supabase } from './supabase'
 import NavBar from './components/NavBar.vue'
 import Footer from './components/Footer.vue'
 import NotificationContainer from './components/NotificationContainer.vue'

@@ -5,7 +5,6 @@ import type { User, AuthError } from '@supabase/supabase-js'
 
 // Singleton pattern to ensure only one auth listener exists
 let authListener: { data: { subscription: any } } | null = null
-let isListenerInitialized = false
 let lastTokenRefreshTime = 0
 const TOKEN_REFRESH_DEBOUNCE_MS = 60000 // Only reload user data once per minute for token refreshes
 
@@ -180,7 +179,7 @@ async function loadUserDataForStore(supabaseUser: User, store: any) {
       setTimeout(() => resolve({ data: null, error: { code: 'TIMEOUT', message: 'Profile fetch timeout' } }), 5000)
     )
     
-    const { data: userData, error: profileError } = await Promise.race([
+    const { data: userData } = await Promise.race([
       profilePromise,
       timeoutPromise
     ]) as any

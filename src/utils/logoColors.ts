@@ -86,7 +86,7 @@ export function extractBackgroundColor(imageUrl: string): Promise<string> {
       }
     }
     
-    img.onerror = (error) => {
+    img.onerror = () => {
       reject(new Error('Failed to load image for color extraction'))
     }
     

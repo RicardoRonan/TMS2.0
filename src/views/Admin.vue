@@ -820,20 +820,20 @@
                 class="space-y-4"
               >
                 <HIGCard
-                  v-for="user in filteredUsers"
-                  :key="user.id"
+                  v-for="filteredUser in filteredUsers"
+                  :key="filteredUser.id"
                   class="hover:shadow-hig-lg transition-shadow"
                 >
                   <div class="p-4 md:p-6">
                     <div class="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4">
                       <div class="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
                         <div
-                          v-if="user.photo_url"
+                          v-if="filteredUser.photo_url"
                           class="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-bg-tertiary flex-shrink-0"
                         >
                           <img
-                            :src="user.photo_url"
-                            :alt="user.display_name"
+                            :src="filteredUser.photo_url"
+                            :alt="filteredUser.display_name"
                             class="w-full h-full object-cover"
                           >
                         </div>
@@ -841,27 +841,27 @@
                           v-else
                           class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-bg-tertiary flex items-center justify-center text-text-tertiary flex-shrink-0"
                         >
-                          {{ (user.display_name || user.email || 'U')[0].toUpperCase() }}
+                          {{ (filteredUser.display_name || filteredUser.email || 'U')[0].toUpperCase() }}
                         </div>
                         <div class="flex-1 min-w-0">
                           <div class="flex flex-wrap items-center gap-2 mb-1">
                             <h4 class="text-base sm:text-lg font-semibold text-text-primary break-words">
-                              {{ user.display_name || 'No name' }}
+                              {{ filteredUser.display_name || 'No name' }}
                             </h4>
                             <span
-                              v-if="user.is_admin"
+                              v-if="filteredUser.is_admin"
                               class="px-2 py-1 rounded text-xs font-medium bg-primary-500/20 text-primary-500 whitespace-nowrap"
                             >
                               Admin
                             </span>
                           </div>
                           <p class="text-text-secondary text-sm mb-2 break-words">
-                            {{ user.email }}
+                            {{ filteredUser.email }}
                           </p>
                           <div class="flex flex-wrap items-center gap-2 text-xs text-text-tertiary">
-                            <span>Joined: {{ formatDate(user.created_at) }}</span>
-                            <span v-if="user.last_login_at">•</span>
-                            <span v-if="user.last_login_at">Last login: {{ formatDate(user.last_login_at) }}</span>
+                            <span>Joined: {{ formatDate(filteredUser.created_at) }}</span>
+                            <span v-if="filteredUser.last_login_at">•</span>
+                            <span v-if="filteredUser.last_login_at">Last login: {{ formatDate(filteredUser.last_login_at) }}</span>
                           </div>
                         </div>
                       </div>
@@ -2114,10 +2114,6 @@ const formatDate = (dateString: string) => {
   })
 }
 
-const getCategoryName = (categoryId: string) => {
-  const category = categories.value.find(c => c.category_id === categoryId)
-  return category ? category.title : 'Unknown'
-}
 
 const getCategoryPages = (categoryId: string) => {
   return pages.value

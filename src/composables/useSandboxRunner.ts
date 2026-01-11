@@ -42,7 +42,6 @@ export function useSandboxRunner(): SandboxRunner {
   const isRunning = ref(false)
   const errorCount = ref(0)
   let timeoutId: number | null = null
-  const iframeWindow: Window | null = null
 
   // Create sandboxed iframe
   const createIframe = (): HTMLIFrameElement => {

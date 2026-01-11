@@ -61,7 +61,7 @@ const props = withDefaults(defineProps<Props>(), {
   dismissible: false
 })
 
-const emit = defineEmits<{
+defineEmits<{
   dismiss: []
 }>()
 

@@ -124,7 +124,7 @@ const getItemSubtitle = (item: ListItem): string => {
   return item[props.subtitleField] || ''
 }
 
-const getItemClasses = (item: ListItem, index: number) => [
+const getItemClasses = (item: ListItem, _index: number) => [
   'list-item',
   {
     'list-item-active': item.active,

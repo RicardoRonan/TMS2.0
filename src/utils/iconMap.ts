@@ -165,7 +165,7 @@ export async function getIconAsync(iconName: string): Promise<IconDefinition | n
  * Gets the icon mapping for a given icon name (synchronous, deprecated)
  * @deprecated Use getIconAsync instead
  */
-export function getIconMapping(iconName: string): IconMapping | null {
+export function getIconMapping(_iconName: string): IconMapping | null {
   // This is kept for backward compatibility but will return null
   // Components should use getIconAsync instead
   return null

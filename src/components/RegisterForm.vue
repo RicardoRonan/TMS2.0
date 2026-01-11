@@ -197,7 +197,7 @@ const emit = defineEmits<{
 }>()
 
 const store = useStore()
-const { signUp, signInWithGoogle, error: authError, loading: authLoading } = useAuth()
+const { signUp, signInWithGoogle, error: authError } = useAuth()
 
 // Form state
 const form = ref({
@@ -281,7 +281,7 @@ const handleSubmit = async () => {
   
   try {
     // Call actual signup function
-    const user = await signUp(form.value.email, form.value.password, form.value.displayName)
+    await signUp(form.value.email, form.value.password, form.value.displayName)
     
     // Check if we have a session (email confirmation might be required)
     // Add timeout to prevent hanging

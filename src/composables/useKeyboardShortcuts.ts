@@ -1,10 +1,8 @@
 import { onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
 
 export function useKeyboardShortcuts() {
   const store = useStore()
-  const router = useRouter()
 
   const handleKeyDown = (event: KeyboardEvent) => {
     // Check if user is typing in an input field

@@ -568,7 +568,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, watch, onMounted, onUnmounted } from 'vue'
+import { ref, nextTick, watch, onMounted, onUnmounted } from 'vue'
 import { useAdminMode } from '../composables/useAdminMode'
 import Icon from './Icon.vue'
 

@@ -254,7 +254,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
-import { useStore } from 'vuex'
 import { useAdminMode } from '../composables/useAdminMode'
 import { useSandboxRunner } from '../composables/useSandboxRunner'
 import { useInteractiveProgress } from '../composables/useInteractiveProgress'
@@ -272,7 +271,6 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const store = useStore()
 const { isAdminMode } = useAdminMode()
 
 // Progress and block definition
@@ -286,8 +284,7 @@ const {
   loadBlockDefinition,
   saveCode,
   markPassed,
-  isPassed,
-  isInProgress
+  isPassed
 } = useInteractiveProgress(props.blockId, props.tutorialSlug)
 
 // Sandbox runner

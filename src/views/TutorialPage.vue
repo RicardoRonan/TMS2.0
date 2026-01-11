@@ -246,18 +246,16 @@ import Icon from '../components/Icon.vue'
 import EditableField from '../components/EditableField.vue'
 import Breadcrumb from '../components/Breadcrumb.vue'
 import ScrollIndicator from '../components/ScrollIndicator.vue'
-import { renderMarkdown, parseInteractiveBlockTokens, type InteractiveBlockToken } from '../utils/markdown'
+import { renderMarkdown, parseInteractiveBlockTokens } from '../utils/markdown'
 import InteractiveBlock from '../components/InteractiveBlock.vue'
 import { useAdminMode } from '../composables/useAdminMode'
 import { useStore } from 'vuex'
-import { useAuth } from '../composables/useAuth'
 import 'highlight.js/styles/vs2015.css'
 
 const route = useRoute()
 const router = useRouter()
 const { isAdminMode } = useAdminMode()
 const store = useStore()
-const { user } = useAuth()
 
 const loading = ref(true)
 const error = ref<string | null>(null)

@@ -3,7 +3,6 @@ import { useStore } from 'vuex'
 import { useAuth } from './useAuth'
 import { supabase } from '../supabase'
 import { groupChangesByEntity, createUpdatePayload, getTableName, getIdField } from '../utils/changeTracker'
-import type { PendingChange } from '../utils/changeTracker'
 
 export function useAdminMode() {
   const store = useStore()

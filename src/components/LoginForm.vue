@@ -145,7 +145,7 @@ const emit = defineEmits<{
 }>()
 
 const store = useStore()
-const { signIn, signInWithGoogle, error: authError, loading: authLoading } = useAuth()
+const { signIn, signInWithGoogle, error: authError } = useAuth()
 
 // Form state
 const form = ref({

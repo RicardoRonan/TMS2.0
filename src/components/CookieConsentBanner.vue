@@ -168,7 +168,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, provide } from 'vue'
+import { ref, onMounted, provide } from 'vue'
 import { 
   hasCookieConsent, 
   acceptAllCookies, 

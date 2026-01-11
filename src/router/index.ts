@@ -202,7 +202,7 @@ router.beforeEach(async (to, from, next) => {
   if (to.name === 'Blog' || to.name === 'Tutorials' || to.name === 'Tools') {
     // Cache is checked in components, but we can verify it's available
     // This is a non-blocking check - components handle their own cache logic
-    const hasCache = store.getters.hasValidCache(
+    store.getters.hasValidCache(
       to.name === 'Blog' ? 'blogs' : 
       to.name === 'Tutorials' ? 'categories' : 
       'tools'

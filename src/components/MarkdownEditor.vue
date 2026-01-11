@@ -601,14 +601,14 @@ const insertMarkdown = (before: string, after: string) => {
 }
 
 const insertHeader = (level: number) => {
-  const { start, text } = getSelection()
+  const { text } = getSelection()
   const hashes = '#'.repeat(level)
   const replacement = text || 'Heading'
   insertText(`${hashes} `, '', replacement)
 }
 
 const insertList = (type: 'ordered' | 'unordered') => {
-  const { start, text } = getSelection()
+  const { text } = getSelection()
   const lines = text.split('\n').filter(l => l.trim())
   
   if (lines.length === 0) {

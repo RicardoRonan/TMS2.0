@@ -13,7 +13,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useAdminMode } from '../composables/useAdminMode'
 import Icon from './Icon.vue'
 
